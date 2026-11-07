@@ -1,0 +1,286 @@
+[
+  {
+    "id": "BSPT-001",
+    "file": "content/nuggets/cards/BSPT-001.md",
+    "title": "Make AI teach it again, not repeat itself",
+    "category": "learn",
+    "audiences": [
+      "all"
+    ],
+    "level": "starter",
+    "duration_minutes": 6,
+    "showcase_score": 5,
+    "human_driver": "confidence",
+    "tags": [
+      "learning",
+      "explanation",
+      "teach-back"
+    ],
+    "connects_to": [
+      "BSPT-005",
+      "BSPT-016"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-002",
+    "file": "content/nuggets/cards/BSPT-002.md",
+    "title": "Let AI interview you before it works",
+    "category": "learn",
+    "audiences": [
+      "all"
+    ],
+    "level": "starter",
+    "duration_minutes": 6,
+    "showcase_score": 5,
+    "human_driver": "relief",
+    "tags": [
+      "clarification",
+      "prompting",
+      "requirements"
+    ],
+    "connects_to": [
+      "BSPT-007",
+      "BSPT-019"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-003",
+    "file": "content/nuggets/cards/BSPT-003.md",
+    "title": "Ask for the answer first, then the why",
+    "category": "learn",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 5,
+    "showcase_score": 4,
+    "human_driver": "control",
+    "tags": [
+      "synthesis",
+      "executive",
+      "clarity"
+    ],
+    "connects_to": [
+      "BSPT-014",
+      "BSPT-018"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-004",
+    "file": "content/nuggets/cards/BSPT-004.md",
+    "title": "Translate jargon into human consequences",
+    "category": "learn",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 5,
+    "showcase_score": 4,
+    "human_driver": "belonging",
+    "tags": [
+      "communication",
+      "audience",
+      "empathy"
+    ],
+    "connects_to": [
+      "BSPT-009",
+      "BSPT-024"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-005",
+    "file": "content/nuggets/cards/BSPT-005.md",
+    "title": "Stop watching. Learn by doing.",
+    "category": "learn",
+    "audiences": [
+      "all"
+    ],
+    "level": "starter",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "mastery",
+    "tags": [
+      "practice",
+      "learning",
+      "retrieval"
+    ],
+    "connects_to": [
+      "BSPT-001",
+      "BSPT-021"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-006",
+    "file": "content/nuggets/cards/BSPT-006.md",
+    "title": "Turn a foggy topic into the right questions",
+    "category": "learn",
+    "audiences": [
+      "all"
+    ],
+    "level": "starter",
+    "duration_minutes": 5,
+    "showcase_score": 4,
+    "human_driver": "curiosity",
+    "tags": [
+      "research",
+      "exploration",
+      "scoping"
+    ],
+    "connects_to": [
+      "BSPT-002",
+      "BSPT-016"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-007",
+    "file": "content/nuggets/cards/BSPT-007.md",
+    "title": "Turn your brain dump into an executable plan",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 5,
+    "human_driver": "relief",
+    "tags": [
+      "planning",
+      "notes",
+      "priority"
+    ],
+    "connects_to": [
+      "BSPT-002",
+      "BSPT-018"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-008",
+    "file": "content/nuggets/cards/BSPT-008.md",
+    "title": "Write the message you've been avoiding",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 5,
+    "human_driver": "courage",
+    "tags": [
+      "writing",
+      "feedback",
+      "empathy"
+    ],
+    "connects_to": [
+      "BSPT-009",
+      "BSPT-010"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-009",
+    "file": "content/nuggets/cards/BSPT-009.md",
+    "title": "One idea. Three people. Three versions.",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 6,
+    "showcase_score": 5,
+    "human_driver": "connection",
+    "tags": [
+      "stakeholders",
+      "communication",
+      "adaptation"
+    ],
+    "connects_to": [
+      "BSPT-004",
+      "BSPT-024"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-010",
+    "file": "content/nuggets/cards/BSPT-010.md",
+    "title": "Don't produce minutes. Produce decisions.",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "control",
+    "tags": [
+      "meetings",
+      "execution",
+      "accountability"
+    ],
+    "connects_to": [
+      "BSPT-007",
+      "BSPT-011"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-011",
+    "file": "content/nuggets/cards/BSPT-011.md",
+    "title": "Turn a wall of policy into a usable checklist",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 8,
+    "showcase_score": 4,
+    "human_driver": "confidence",
+    "tags": [
+      "sop",
+      "process",
+      "compliance"
+    ],
+    "connects_to": [
+      "BSPT-010",
+      "BSPT-020"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-012",
+    "file": "content/nuggets/cards/BSPT-012.md",
+    "title": "Find the change, not a fictional difference",
+    "category": "work",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "builder",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "certainty",
+    "tags": [
+      "comparison",
+      "contracts",
+      "revision"
+    ],
+    "connects_to": [
+      "BSPT-016",
+      "BSPT-018"
+    ],
+    "status": "hypothesis"
+  }
+]
