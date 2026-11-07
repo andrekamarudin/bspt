@@ -57,3 +57,7 @@ This repo intentionally avoids Git LFS. Store large GIF, PNG, MP4, and editable 
 ## Training content: bite-size ProTip nugget vault
 
 The content-first, survey-independent [GenAI nugget vault](content/nuggets/README.md) contains 24 modular human problems paired with teachable AI solutions, copy/paste safe demos, hands-on exercises, verification gates and mix-and-match metadata. **No slides or final story flow yet.** Validate with `node scripts/verify-nuggets.mjs`. Avoid assuming audience preferences before survey/pilot evidence exists.
+
+## Paid training: AI Mental OS
+
+The [AI Mental OS paid curriculum](content/paid-training/README.md) teaches two transferable principles: **human above the loop** and **well-defined outcomes with built-in proof**. It turns the free 24-nugget catalog into the ability to invent new, checkable AI workflows. Includes 120/150/180-minute plans, technical essentials, capstone rubric and first PPTX story outline. Content remains provisional until real audience testing. Validate via `node scripts/verify-paid-training.mjs`.
