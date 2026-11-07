@@ -45,3 +45,7 @@ body.bspt-survey .shell{position:relative}
 body.bspt-survey .bspt-survey-margin-note{display:none;position:absolute;left:calc(100% + 12px);top:270px;width:220px;pointer-events:none;font:700 29px/1 "Caveat",cursive;color:#FFD65A;transform:rotate(-7deg);text-shadow:0 2px 8px #00190F55}
 body.bspt-survey .bspt-survey-margin-note img{display:block;filter:brightness(1.3);width:100px;height:52px;transform:rotate(14deg);margin-left:48px;opacity:.95}
 @media(min-width:1250px){body.bspt-survey:has(#main > h1:first-child) .bspt-survey-margin-note{display:block}}
+
+/* Hero feature-strip readability: the customer remains visible, but real content wins. */
+.hero .micro-proof{position:relative;z-index:6;background:linear-gradient(90deg,rgba(2,31,24,.90),rgba(2,31,24,.78));padding:21px 17px 12px;border-top:1px solid rgba(247,242,232,.25);border-radius:3px;backdrop-filter:blur(3px)}
+@media(max-width:700px){.hero .micro-proof{padding:19px 11px 12px}}
