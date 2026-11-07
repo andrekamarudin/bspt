@@ -1,0 +1,289 @@
+[
+  {
+    "id": "BSPT-013",
+    "file": "content/nuggets/cards/BSPT-013.md",
+    "title": "Expose the assumptions hiding in plain sight",
+    "category": "decide",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 5,
+    "human_driver": "control",
+    "tags": [
+      "assumptions",
+      "reasoning",
+      "decisions"
+    ],
+    "connects_to": [
+      "BSPT-015",
+      "BSPT-018"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-014",
+    "file": "content/nuggets/cards/BSPT-014.md",
+    "title": "Hire a polite critic who never gets tired",
+    "category": "decide",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 5,
+    "human_driver": "confidence",
+    "tags": [
+      "red-team",
+      "critical-thinking",
+      "bias"
+    ],
+    "connects_to": [
+      "BSPT-013",
+      "BSPT-015"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-015",
+    "file": "content/nuggets/cards/BSPT-015.md",
+    "title": "Ask what would change your mind",
+    "category": "decide",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "builder",
+    "duration_minutes": 6,
+    "showcase_score": 4,
+    "human_driver": "humility",
+    "tags": [
+      "reversal",
+      "uncertainty",
+      "experiments"
+    ],
+    "connects_to": [
+      "BSPT-013",
+      "BSPT-014"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-016",
+    "file": "content/nuggets/cards/BSPT-016.md",
+    "title": "A confident AI answer is not a verified answer",
+    "category": "decide",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "safety",
+    "tags": [
+      "fact-checking",
+      "sources",
+      "hallucinations"
+    ],
+    "connects_to": [
+      "BSPT-012",
+      "BSPT-017"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-017",
+    "file": "content/nuggets/cards/BSPT-017.md",
+    "title": "Fix the denominator before the chart",
+    "category": "decide",
+    "audiences": [
+      "managers",
+      "analysts"
+    ],
+    "level": "builder",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "surprise",
+    "tags": [
+      "data",
+      "metrics",
+      "denominators"
+    ],
+    "connects_to": [
+      "BSPT-013",
+      "BSPT-016"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-018",
+    "file": "content/nuggets/cards/BSPT-018.md",
+    "title": "Three options beat a fake yes-or-no",
+    "category": "decide",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 4,
+    "human_driver": "agency",
+    "tags": [
+      "options",
+      "tradeoffs",
+      "decision"
+    ],
+    "connects_to": [
+      "BSPT-003",
+      "BSPT-015"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-019",
+    "file": "content/nuggets/cards/BSPT-019.md",
+    "title": "Clean pasted transactions without losing a cent",
+    "category": "build",
+    "audiences": [
+      "all",
+      "analysts"
+    ],
+    "level": "builder",
+    "duration_minutes": 9,
+    "showcase_score": 5,
+    "human_driver": "relief",
+    "tags": [
+      "data-cleaning",
+      "structured-output",
+      "duplicates"
+    ],
+    "connects_to": [
+      "BSPT-017",
+      "BSPT-020"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-020",
+    "file": "content/nuggets/cards/BSPT-020.md",
+    "title": "Generate a formula, then challenge it with test cases",
+    "category": "build",
+    "audiences": [
+      "all",
+      "analysts"
+    ],
+    "level": "builder",
+    "duration_minutes": 8,
+    "showcase_score": 5,
+    "human_driver": "confidence",
+    "tags": [
+      "spreadsheets",
+      "formula",
+      "testing"
+    ],
+    "connects_to": [
+      "BSPT-017",
+      "BSPT-019"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-021",
+    "file": "content/nuggets/cards/BSPT-021.md",
+    "title": "Build a tiny tool, then prove it works",
+    "category": "build",
+    "audiences": [
+      "all"
+    ],
+    "level": "builder",
+    "duration_minutes": 12,
+    "showcase_score": 5,
+    "human_driver": "pride",
+    "tags": [
+      "prototype",
+      "coding",
+      "testing"
+    ],
+    "connects_to": [
+      "BSPT-005",
+      "BSPT-023"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-022",
+    "file": "content/nuggets/cards/BSPT-022.md",
+    "title": "Turn your best prompt into a reusable mini-system",
+    "category": "build",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 8,
+    "showcase_score": 4,
+    "human_driver": "mastery",
+    "tags": [
+      "reusability",
+      "prompt-template",
+      "standards"
+    ],
+    "connects_to": [
+      "BSPT-002",
+      "BSPT-023"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-023",
+    "file": "content/nuggets/cards/BSPT-023.md",
+    "title": "Design an agent with brakes, not just a brain",
+    "category": "build",
+    "audiences": [
+      "managers",
+      "analysts"
+    ],
+    "level": "advanced",
+    "duration_minutes": 11,
+    "showcase_score": 5,
+    "human_driver": "safety",
+    "tags": [
+      "agents",
+      "workflow",
+      "human-approval"
+    ],
+    "connects_to": [
+      "BSPT-011",
+      "BSPT-014"
+    ],
+    "status": "hypothesis"
+  },
+  {
+    "id": "BSPT-024",
+    "file": "content/nuggets/cards/BSPT-024.md",
+    "title": "Sell the change in three human sentences",
+    "category": "build",
+    "audiences": [
+      "all",
+      "managers"
+    ],
+    "level": "starter",
+    "duration_minutes": 7,
+    "showcase_score": 5,
+    "human_driver": "hope",
+    "tags": [
+      "storytelling",
+      "persuasion",
+      "3ps"
+    ],
+    "connects_to": [
+      "BSPT-004",
+      "BSPT-009"
+    ],
+    "status": "hypothesis"
+  }
+]
