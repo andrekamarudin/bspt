@@ -1,0 +1,14 @@
+/* BSPT brand geometry is the SVG. Only presentation is defined here. */
+:root{--bspt-forest:#082E24;--bspt-orange:#FF6433;--bspt-cream:#F7F2E8;--bspt-yellow:#FFD65A}
+.bspt-brush-overlay{position:relative;isolation:isolate}
+.bspt-brush-overlay::after{
+ content:"";position:absolute;z-index:-1;right:1%;top:6%;width:min(49vw,670px);height:80%;
+ background:linear-gradient(180deg,rgba(255,100,51,.91),rgba(255,100,51,.40));
+ -webkit-mask-image:url("/brand-mark.svg");mask-image:url("/brand-mark.svg");
+ -webkit-mask-position:center;mask-position:center;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-size:contain;mask-size:contain;
+ pointer-events:none;
+}
+@media(max-width:640px){.bspt-brush-overlay::after{right:-24%;top:12%;width:85vw;height:55%;opacity:.45}}
+@media(prefers-reduced-motion:reduce){.bspt-brush-overlay::after{animation:none}}
