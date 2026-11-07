@@ -1,0 +1,41 @@
+/* BSPT field-notes system v1. One canonical composition grammar across marketing, articles and surveys.
+   Motion only on header brand mark. Never substitute generated raster with baked UI. */
+:root{--bspt-forest:#082E24;--bspt-orange:#FF6433;--bspt-cream:#F7F2E8;--bspt-yellow:#FFD65A;--bspt-ink:#17372C;--bspt-paper:#FFFCF4;--bspt-pencil:#BB4928}
+.bspt-handnote{font-family:"Caveat",cursive;color:var(--bspt-orange);font-size:clamp(23px,2.3vw,34px);font-weight:700;line-height:.98;transform:rotate(-7deg);letter-spacing:.01em}
+.bspt-handnote img{display:block;width:112px;height:46px;margin:0 0 0 34px;transform:rotate(16deg);object-fit:contain}
+.bspt-hero-handnote{position:absolute;z-index:5;left:55%;top:11%;pointer-events:none;text-shadow:0 2px 10px #082E24A8;color:#FFE4AD}
+.bspt-hero-handnote img{filter:brightness(1.6) saturate(.65);opacity:.85}
+.bspt-notebook-brief{background-color:var(--bspt-paper)!important;background-image:repeating-linear-gradient(0deg,transparent 0,transparent 32px,rgba(151,131,105,.045) 33px,transparent 34px);border:1px solid #D6C5AD!important;border-radius:4px!important;box-shadow:8px 9px 0 #C5B6A266,0 16px 31px #66533E18!important;position:relative}
+.bspt-notebook-brief::before{content:"";position:absolute;z-index:2;width:95px;height:23px;top:-11px;left:43%;transform:rotate(-4deg);background:#FAD09FCA;box-shadow:0 1px 2px #7C5D3A28}
+.bspt-notebook-brief::after{content:"";position:absolute;z-index:3;top:-25px;right:22px;width:39px;height:66px;background-image:url('/motifs/paperclip.svg');background-position:center;background-size:contain;background-repeat:no-repeat;pointer-events:none;transform:rotate(15deg)}
+.bspt-notebook-brief .brief-top{letter-spacing:.1em}
+.bspt-notebook-brief .marker,.bspt-marker{background-image:url('/motifs/marker-swash.svg')!important;background-color:transparent!important;background-repeat:repeat-x!important;background-position:center 77%!important;background-size:auto 93%!important;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 .045em}
+.bspt-notebook-brief .note{font-family:"Caveat",cursive!important;font-size:27px!important;line-height:1!important;border-width:2px!important;transform:rotate(-5deg)!important}
+.bspt-note-label{display:inline-block;position:relative;padding:6px 11px;background:#FAD3A0;transform:rotate(-2deg);font-family:"Caveat",cursive;font-size:25px;line-height:1;color:#17372C;box-shadow:1px 3px 0 #DDBB8F}
+.bspt-note-label:after{content:"";position:absolute;width:2px;height:19px;right:-14px;top:19px;background:var(--bspt-orange);transform:rotate(-30deg)}
+.bspt-margin-note{display:flex;gap:3px;align-items:center;margin:20px 0 0 15%;transform:rotate(-4deg)}
+.bspt-margin-note .bspt-handnote{font-size:29px}
+.bspt-margin-note img{width:99px;transform:rotate(13deg);opacity:.82}
+.bspt-paper-section{background-color:var(--bspt-cream);background-image:radial-gradient(#A98D6712 .7px,transparent .7px);background-size:7px 7px}
+.bspt-paper-section .insight-list .icon{border-radius:3px;background:#F9D9A8;box-shadow:2px 3px 0 #DDC49B}
+.bspt-paper-section .insight-list h3{font-family:"Playfair Display",Georgia,serif}
+.bspt-offer-note{position:relative;background:var(--bspt-paper)!important;box-shadow:6px 7px 0 #CBBBA46B!important;border-radius:4px!important}
+.bspt-offer-note:before{content:"";position:absolute;left:39%;width:62px;height:15px;top:-7px;background:#FFBF807A;transform:rotate(-6deg)}
+.bspt-offer-note h3{background:linear-gradient(transparent 76%,#FFD65A 76%,#FFD65A 93%,transparent 93%);display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.bspt-brand-footer-note{font-family:"Caveat",cursive;color:#FFD65A;font-size:22px;margin:9px 0 0}
+@media(max-width:990px){.bspt-hero-handnote{left:57%;top:8%;font-size:26px}.bspt-margin-note{margin-left:0}}
+@media(max-width:700px){.bspt-hero-handnote{display:none}.bspt-notebook-brief::after{width:30px;height:48px;top:-18px;right:9px}.bspt-margin-note{margin:15px 0 15px;justify-content:center}.bspt-note-label{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.bspt-hero-handnote,.bspt-notebook-brief::before{animation:none!important}}
+/* Survey: actual functional form remains intact, while every step is an editorial notebook leaf. */
+body.bspt-survey #main{background-color:var(--bspt-cream);background-image:radial-gradient(#A18B6912 .7px,transparent .7px),repeating-linear-gradient(0deg,transparent 0,transparent 38px,rgba(157,138,103,.04) 39px,transparent 40px);background-size:8px 8px,auto;border:1px solid #D8C6AC;border-radius:4px;box-shadow:12px 14px 0 #B8875840,0 22px 45px #031C1669;padding-left:clamp(34px,5vw,62px);position:relative}
+body.bspt-survey #main:before{content:"EXPERT FIELD NOTES  /  BSPT";right:22px;top:16px;color:#9A8D79;font:700 9px "Inter",sans-serif;letter-spacing:.14em;position:absolute;left:auto}
+body.bspt-survey #main:after{content:"";position:absolute;pointer-events:none;top:17px;left:10px;width:11px;height:calc(100% - 34px);background-image:radial-gradient(circle,#C6BBA7 3px,transparent 4px);background-size:11px 44px;background-repeat:repeat-y;opacity:.92}
+body.bspt-survey #main h1{font-family:"Playfair Display",Georgia,serif;font-weight:700;letter-spacing:-.045em;line-height:1.11}
+body.bspt-survey #main h2{font-family:"Playfair Display",Georgia,serif;letter-spacing:-.028em}
+body.bspt-survey #main .intro h1{background-image:url('/motifs/marker-swash.svg');background-repeat:no-repeat;background-size:46% 19px;background-position:left bottom;padding-bottom:12px}
+body.bspt-survey #main .notice{background:#F3E4CC;border:0;border-left:4px solid #D8C6AA;box-shadow:2px 3px 0 #DBCDB845}
+body.bspt-survey #main .choice{box-shadow:3px 4px 0 #CBBCA55C;background:#FFFDF7}
+body.bspt-survey #main .swipe{background-color:#FFFDF6;background-image:repeating-linear-gradient(0deg,transparent 0,transparent 37px,rgba(110,100,80,.055) 38px,transparent 39px);box-shadow:6px 7px 0 #C7BBA4}
+body.bspt-survey #nav .btn.primary{background-color:var(--bspt-orange)}
+body.bspt-survey .bspt-survey-header-note{font:700 21px "Caveat",cursive;color:#FFD65A;transform:rotate(-4deg);margin-left:auto;margin-right:8px}
+@media(max-width:610px){body.bspt-survey #main{padding-left:30px;padding-right:20px}body.bspt-survey #main:before{font-size:8px;top:9px;right:13px}body.bspt-survey #main .intro h1{background-size:63% 13px}body.bspt-survey .bspt-survey-header-note{display:none}}
