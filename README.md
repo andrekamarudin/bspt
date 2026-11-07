@@ -53,3 +53,7 @@ For hero backgrounds:
 On a site, copy `logos/brush-slash.svg` unchanged to `/brand-mark.svg` or publish it under a versioned asset URL.
 
 This repo intentionally avoids Git LFS. Store large GIF, PNG, MP4, and editable proprietary files in R2 or backup storage, with a manifest here.
+
+## Training content: bite-size ProTip nugget vault
+
+The content-first, survey-independent [GenAI nugget vault](content/nuggets/README.md) contains 24 modular human problems paired with teachable AI solutions, copy/paste safe demos, hands-on exercises, verification gates and mix-and-match metadata. **No slides or final story flow yet.** Validate with `node scripts/verify-nuggets.mjs`. Avoid assuming audience preferences before survey/pilot evidence exists.
