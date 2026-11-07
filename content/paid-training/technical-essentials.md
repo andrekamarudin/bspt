@@ -1,74 +1,53 @@
-# Minimal Technical Literacy: 15 minutes, not an LLM engineering course
+# The minimum technical understanding | 12–15 minutes
 
-**Purpose:** Equip non-technical adults with only the concepts that make the five mental upgrades intelligible and transferable. Teach with one visual metaphor and a live test. Details are optional if the audience already understands them.
+**Learning goal:** Explain why clear contracts and independent checks work better than repeated exhortations to an AI model. No transformer math or API coding required.
 
-## The simplest useful model
+1. **LLMs are capable generators, not guaranteed truth engines.** They produce plausible content based on learned patterns and current context; modern models can reason usefully but still invent facts. Fluent does not mean verified.
+2. **Context is bounded and product-dependent.** The model can only use information it actually receives or retrieves through available features/tools. Missing owner/date/cost must stay unknown or trigger a relevant question.
+3. **Prompt = work brief.** Goals, input facts, examples, constraints and acceptance criteria matter more than magic role words. More text isn't always better.
+4. **Tools, retrieval, memory and agents are distinct.** Retrieval supplies external content; tools may calculate, read or act according to permissions; memory depends on product configuration; agents coordinate steps. Drafting an email is not sending it.
+5. **Verification is external to style.** Asking the model "are you sure?" may reveal doubts but does not independently establish truth. A known-answer calculation, source quote, test run, rendered slide or logged action supplies stronger evidence.
 
-**AI response = model capability + available context + instructions + (optional) retrieval/tools + checks.**
+## The mental model
 
-This is a *conceptual teaching model*, not a quantitative formula. Products differ substantially. Never imply that every chat has browsing, your company's data, durable memory or permission to act.
+```text
+ HUMAN ABOVE THE LOOP
+ outcome + proof + permission boundaries
+             |
+   model + available context
+             |
+      permitted work
+             |
+ independent / observable check
+       /             \
+    PASS             FAIL
+   deliver      repair within limits
+                     |
+              escalate if blocked
+```
 
-### 1. Model: powerful generator, not a truth database
+**Human-in-the-loop remains necessary** for approval of sensitive, high-risk or irreversible actions. Human-above-the-loop is the normal design stance for safe, bounded execution, not a universal risk exemption.
 
-An LLM is trained to model patterns in data and generates responses token by token; modern systems can reason and work through nontrivial tasks. That does not automatically make every claim true, complete or current. Fluency, confidence and citation-shaped text are **not** evidence.
+## Three misconceptions to dismantle
 
-**Micro-demonstration:** Show a compelling but unsupported fictional cost-saving claim. Ask what external evidence would be needed to trust it.
+- "Better prompts guarantee no hallucinations." They do not; stronger **verification design** reduces unnoticed errors.
+- "AI must ask me questions every step." A good contract provides enough context and permits bounded low-risk correction; ask only on genuine decision-changing ambiguity.
+- "An agent is automatically better than a prompt." Fixed workflows and deterministic software may be cheaper, safer and more reliable. Prefer the simplest viable approach.
 
-**Do not teach:** "AI just predicts the next word, so it cannot reason." Equally wrong is "AI thinks like a trusted human subject matter expert." Keep both capability and limitations.
+## Instructor's mini demo
 
-### 2. Context: the model cannot read minds or invisible files
+Show two fictional instructions:
+- "Summarize this meeting, check your answer."
+- "From these five numbered note lines, classify confirmed/proposed/unknown; quote the line for every confirmed decision; stop if the ownership isn't explicit."
 
-A chat has a bounded working context. A product may add saved preferences, conversation history, enterprise documents or retrieved snippets **only when configured, available and permitted**. A missing fact should result in a question or a marked assumption.
+Ask: **Which result would be easier to verify, and why?** The answer is that the second task makes evidence part of the output specification, not merely an aspiration.
 
-**Micro-demonstration:** Ask for a project update with no project facts; then supply two factual statements and explicit missing fields. Compare.
+### Five oral checks
 
-**Do not teach:** fixed universal context-window sizes or that every conversation forgets everything after a turn. Product behavior varies.
+1. Can a confident AI claim still be false? **Yes.**
+2. Can it use files it has never been given access to? **No, not by default.**
+3. Is the model grading its own response independent evidence? **No.**
+4. Can it send a message merely because it drafted one? **No; sending requires an authorized action.**
+5. Who owns the quality bar and permission boundary? **The human delegator, supported by real controls.**
 
-### 3. Prompts: write a brief, not an incantation
-
-Give the **goal, relevant source information, constraints, examples and success criterion**. Ask the system to clarify decision-changing gaps and make uncertainty visible. More words are not automatically better.
-
-**Micro-demonstration:** Vague request vs. clear result contract; let learners explain which new information did the work.
-
-**Do not teach:** magic role prompts, compulsory XML, or one fixed prompt structure for all models.
-
-### 4. Tools, retrieval, memory and agency: four different things
-
-- **Retrieval** can bring external documents/snippets into working context; it doesn't certify truth or freshness by itself.
-- **Memory** is product-dependent retention/reuse of relevant information, not a universal mind reading your life.
-- **Tools** can search, calculate, read files or perform actions **only when the product is configured with access and permissions**.
-- **Agents** coordinate dynamic steps and tool use; they require boundaries, checks and sometimes human approval. A workflow with explicit steps may be a safer starting point.
-
-**Micro-demonstration:** Contrast "Draft an email" (generating text) with "Actually send it" (external action with a permission boundary). This distinction can prevent real mistakes.
-
-**Do not teach:** databases, OAuth, APIs, embedding dimensions, MCP internals or vector indexes unless specialist follow-up demands them.
-
-### 5. Variation and evaluation: rerunning is not proof
-
-Generative responses can vary across runs and model versions. A well-phrased prompt improves *likelihood*, not certainty. Test known-answer cases, edge cases, actual sources and errors before using a result. Self-critique may help identify problems but is not independent confirmation.
-
-**Micro-demonstration:** Ask for a formula with known boundaries; test negative, boundary and positive inputs (BSPT-020).
-
-**Do not teach:** sampling temperature/top-p defaults or model-specific settings to all beginners. Those are specialist tuning concepts.
-
-## What 70/30 deliberately excludes
-
-| Exclude from the core | Why |
-|---|---|
-| Transformer layers, attention algebra and training objective math | Does not materially help a beginner choose or evaluate a workplace use case |
-| Model rankings and subscription tier tours | Become outdated; not a transferable mindset |
-| Prompt syntax trivia or magic strings | Memorization has weak transfer compared with clear briefs and checks |
-| Large-agent frameworks, APIs, embeddings, vector databases | Useful in implementation tracks, not necessary to invent a safe manual workflow |
-| Unverified productivity percentages | Would create false expectations before pilot measurement |
-
-## Minimum correct understanding: five oral checks
-
-A learner should answer these without reciting jargon:
-
-1. **Why can a fluent AI answer still be wrong?** Because generated plausibility is not the same as sourced, verified facts.
-2. **What if AI lacks essential context?** Supply permitted facts, ask it to clarify, or mark the conclusion conditional.
-3. **Can asking a model to 'be careful' replace a test?** No; test actual cases or sources.
-4. **Can AI send a message because it drafted one?** Not unless an authorized connected tool has permission and a real send action occurs.
-5. **What makes an agent different from a one-off prompt?** More dynamic multi-step/tool-use orchestration, which requires boundaries and checks.
-
-**Facilitator note:** These principles are supported by AI-literacy and model/tool documentation; specific product abilities must be checked on the actual day. See [evidence](evidence.md).
+This is sufficient foundation for the [hands-on workshop](session-plans.md). Recheck product-specific functionality before the event.

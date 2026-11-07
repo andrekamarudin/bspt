@@ -1,75 +1,70 @@
-# AI Mental OS | Paid BSPT Training Curriculum
+# AI Mental OS | Outcome-First Paid Training
 
-> **Promise:** Stop collecting other people's AI prompts. Learn to **invent, test and safely reuse your own AI-assisted solutions**.
+> **Promise:** Stop babysitting AI. Learn to define outcomes so clearly that AI can do more of the work, check more of its work, and bring you only the decisions that matter.
 
-**Status:** content architecture v1, not a final syllabus for any surveyed audience. As of inception there were **no survey responses**. No prices, testimonials, participant outcomes or measured effectiveness are implied. **No slides, assets or MP4 production in this release.**
+**Status:** first 2–3-hour paid training design, not survey-validated. No participant results, efficiency gains or ROI claims. **Target:** transferable judgment, not a list of copyable prompts. The [free Nugget Vault](../nuggets/README.md) has 24 use cases; this curriculum teaches the mental operating system behind them.
 
-## Why a separate paid tier?
+## The 70/30 upgrade: two principles
 
-The [free Nugget Vault](../nuggets/README.md) shows **what** is possible using 24 ready-to-try problem/solution pairs. Paid training teaches the **transferable thinking that generated those pairs**, so learners can design their own solution to an unfamiliar task.
+### A. Human ABOVE the loop, not routinely IN it
 
-- **Freemium:** "Try this prompt. It solved this example problem."
-- **Paid:** "Understand the mechanism. Find your own problem. Design the brief, feedback, evidence and workflow. Show that your solution actually works."
-- **Learner's emotional shift:** from fear of not keeping up / overwhelm / uncertainty to competence, independent judgment and agency. Don't assume everyone has the same fear; let the learner select their own stakes.
+Humans choose desired outcomes, priorities, constraints, permissions and what is worth doing. AI can handle safe execution, generate drafts, run checkable tests, diagnose failures and repair within limits. Humans review **exceptions and consequential decisions**, not every intermediate sentence.
 
-**Outcome to assess:** With a task that was *not* in the demonstrations, the learner can frame an AI opportunity, design an input/context brief, collaborate iteratively, verify an outcome, and identify an appropriate human control point. Merely remembering prompt templates or enjoying demonstrations is not passing.
+**Important distinction:** Being above the loop is oversight, not unrestricted autonomy. Publishing, sending, money movement, protected data, destructive commands and other sensitive or irreversible actions need the appropriate exact approval and qualified review. Use the least autonomous approach that works.
 
-## The 70/30 answer: five mental upgrades
+### B. Success must be provable by design
 
-| Mental upgrade | Old habit | New habit | Technical understanding that unlocks it |
-|---|---|---|---|
-| 1. **Design the job** | Ask "What can AI do?" | Identify the human outcome, friction and success criterion | Models work on tasks/information; the user supplies the purpose and judges value |
-| 2. **Brief the work** | Hunt for magic words | Provide task, evidence, examples, constraints and output check | The model's accessible context is bounded; it cannot read minds or unseen systems |
-| 3. **Think in loops** | Treat first output as final | Ask, inspect, challenge, revise; shift roles when useful | Output can vary; conversational feedback changes the next input |
-| 4. **Demand proof** | Believe confident prose | Check sources, test cases, exceptions and uncertainty | Generated fluency is not grounding; connected retrieval/tools and external tests may be required |
-| 5. **Build a system** | Collect clever chats | Design trigger → input → transform → check → approval → output | Chat, tools, retrieval, memory and autonomous agents are separate capabilities with different authority |
+A desired output is not enough. Build the **proof into the definition of done**. A high-quality outcome brief describes:
+1. The **human result** and concrete deliverable.
+2. The **inputs, sources and boundaries**.
+3. The **acceptance criteria**, including errors that must *not* happen.
+4. The **test/receipt** proving each criterion, preferably a deterministic or independent check.
+5. The **stop, retry, escalate and approval** rules.
 
-The five names are **BSPT teaching synthesis**, not an externally certified framework. Practical details: [Five upgrades](five-mental-upgrades.md) | [15-minute technical model](technical-essentials.md).
+**Memory hook:** **Outcome + Proof + Boundaries.**
 
-## The transferable equation
+The objective is fewer clarification loops and less routine vetting, **not** pretending hallucinations disappear. A model's self-critique is helpful for identifying mistakes, but it is not independent proof. Test with observable artifacts, real source checks, arithmetic, code tests or rendered previews whenever possible.
 
-**Human friction × AI cognitive move × grounded context × verification/authority = candidate solution.**
+## Five supporting habits (subordinate, not five separate philosophies)
 
-The "×" means all four must be considered, **not** a numerical formula.
+| Habit | What shifts | Why it's part of the two principles |
+|---|---|---|
+| **Start from the human job** | Features → real desired change | Sets direction from above the loop |
+| **Brief the work once** | Magic wording → relevant inputs and constraints | Avoids missing-context back-and-forth |
+| **Design the receipt** | "Looks good" → checkable definition of done | Allows cheap verification |
+| **Delegate bounded repair** | Manual review of every attempt → observe/test/correct | Moves routine work inside the system |
+| **Govern exceptions** | Blind autonomy → risk-based approval and escalation | Keeps humans accountable without micromanaging |
 
-AI cognitive moves: **Clarify, Explain, Structure, Transform/Create, Critique/Test, Orchestrate/Act.**
+See [Five supporting habits](five-mental-upgrades.md), [minimal technical understanding](technical-essentials.md), [session plans](session-plans.md) and [transfer assessment](transfer-assessment.md).
 
-A single capability can generate many nuggets. E.g., **Structure** + messy meeting = decision register (BSPT-010); **Structure** + pasted transactions = flagged import rows (BSPT-019); **Structure** + dense policy = verified checklist (BSPT-011). The skill is the generalization, not the isolated prompts.
+## One coherent example: a colleague's messy meeting notes
 
-See the [24-nugget back-mapping](nugget-genealogy.md), and the [machine-readable map](nugget-map.json).
+**Old instruction:** "Please summarize these notes." Then inspect the entire output, correct fabricated owners, ask for revisions, and repeat.
 
-## Training options
+**Outcome contract:** "From the supplied fictional notes, produce a decision register with (a) confirmed decisions, (b) actions with an owner only when explicit, (c) unresolved questions. Cite the line that supports each confirmed decision, mark missing fields 'unknown', and run a check that every declared owner exists in the notes. Return a compact exceptions list. Do not send the record."
 
-- **120 minutes:** condensed core for mixed beginners, with one bounded capstone; no optional advanced tooling.
-- **150 minutes (default):** the full five-upgrade mental OS, guided practice and a novel-use-case transfer test.
-- **180 minutes:** more rehearsal, edge-case testing and meaningful feedback, not 30 extra minutes of lecture.
+**Difference:** We set the goal **and its checks**. AI can draft, check, fix and return what remains unverified, while the responsible person still approves what becomes an official record.
 
-Exact time allocation and facilitation mechanics: [Session plans](session-plans.md).
+## Technical understanding: just enough
 
-## What a paying learner actually receives
+Know what **model, context, retrieval, tools, workflow, agent, evaluation** mean in practice. Know the boundary between "draft a message" and "send a message". Know how to distinguish an AI-generated claim from its actual source. Skip the transformer math and vendor feature tours.
 
-1. A usable **Opportunity Blueprint** for their own safe, low-risk task, not a certificate as a substitute for competence.
-2. A **reusable briefing pattern** rather than a long library of magic prompts.
-3. A **test/verification habit**, including a rule for when not to use AI.
-4. A **workflow blueprint** they can repeat manually before considering automation.
-5. Evidence of transfer from an **unseen problem** using the [assessment rubric](transfer-assessment.md).
+## The paid outcome
 
-The instructor must model mistakes and correction, not present a flawless AI magic show. Activity should dominate novelty and production polish. As in the existing [storytelling skill](https://github.com/andrekamarudin/skills/blob/master/howto-tell-stories/SKILL.md), the learner is the hero and agency is the payoff.
+At the end, the learner handles a **new problem not featured in the 24-nugget library**. They produce an **Outcome Contract** and a safe AI-assisted workflow with a built-in receipt (checkable output), exception route and approval boundary. An observer should be able to determine whether the contract succeeded without inspecting every intermediate answer.
 
-## Quality and product boundaries
+The learner should feel **competent, not dependent**; the training should instill the capability to invent the next useful use case.
 
-- **Tool-independent by default.** No coding, premium subscriptions, connectors or private company data are required to complete the core.
-- **Never promise time savings or business ROI without measurement.** These are teaching propositions, not validated results.
-- **Teach no elaborate prompt incantations.** Technical literacy is enough to explain why context, evidence, tools and iteration matter.
-- **Emphasize judgment.** Prefer not using AI when the task is trivial, risks are unacceptable, evidence cannot be checked, or human empathy/personal accountability is essential.
-- **No fake agency.** Tools need permissions and controls; a chat suggestion is not authorization to send, delete, publish or transfer.
-- **Keep freemium cards as examples/marketing.** They should not become the paid session's curriculum spine; use one or two as illustrative demonstrations only.
-- **Survey/pilot first for specialization.** Customize examples by actual learner friction and capability, not assumed job title.
+## Timing and materials
 
-### Sources and verification
+- **120 min:** essentials and one bounded exercise.
+- **150 min (first-deck assumption):** two principles, practical exercise and capstone.
+- **180 min:** deeper peer critique and testing, not more jargon.
+- **No survey responses yet:** examples and sequence are hypotheses; adjust after observed feedback.
+- **Slide design:** six-P storytelling for a human problem, credible demonstration, participation, payoff. The slide deck is an editable first draft, not a final sales asset.
 
-Research-derived ideas are linked in [evidence and rationale](evidence.md). Relevant published frameworks emphasize human-centered agency, evaluation and creation, not just prompting. The product's five-upgrade taxonomy and timings are original instructional design choices requiring pilot testing.
+## Things we explicitly do NOT promise
 
-## Next stage, deliberately not done
+Universal hallucination elimination, zero human review, a guaranteed 30% time saving, autonomous authority to act, immediate expertise in building software agents, or that an LLM grader independently validates its own output.
 
-After observing survey responses and at least a facilitator rehearsal: decide the central emotional story, opening demonstration, which 1–2 nuggets to illustrate concepts, duration, interactive materials and only then the final slides. Do not hard-code slide count before the story and learning path are chosen.
+**Source and risk notes:** [evidence](evidence.md). **Training source-of-truth:** this content folder. **Reusable cross-repo skill:** [howto-delegate-by-outcomes](https://github.com/andrekamarudin/skills/blob/master/howto-delegate-by-outcomes/SKILL.md).
