@@ -124,3 +124,27 @@ body.bspt-survey #main .check,
 body.bspt-survey #main .field-label,
 body.bspt-survey #main .hurdles h3,
 body.bspt-survey #main .thoughts > strong { color: var(--bspt-text-primary); }
+
+
+/* Course topic voting contrast correction.
+   The original dark-theme swipe labels and neutral ✕ icon were still pastel
+   on cream paper. Keep their semantic grey / blue / pink categories, but use
+   saturated ink that passes WCAG AA for normal text. */
+body.bspt-survey #main .swipe-directions { gap: 8px 12px; font-size: 13px; font-weight: 800; line-height: 1.45; }
+body.bspt-survey #main .swipe-directions .dir-no { color: #455563; }
+body.bspt-survey #main .swipe-directions .dir-yes { color: #185B7C; }
+body.bspt-survey #main .swipe-directions .dir-love { color: #902950; }
+body.bspt-survey #main .vote.no b { color: #455563; }
+body.bspt-survey #main .vote.yes b { color: #185B7C; }
+body.bspt-survey #main .vote.love b { color: #902950; }
+body.bspt-survey #main .vote small { color: #435A50; opacity: 1; }
+body.bspt-survey #main .vote.no { background: #F0F1ED; border-color: #A1AAA7; }
+body.bspt-survey #main .vote.yes { background: #EAF5FA; border-color: #70A7BE; }
+body.bspt-survey #main .vote.love { background: #FFF0F5; border-color: #BE6686; }
+body.bspt-survey #main .swipe[data-direction="nope"] { background: #F0F1ED; border-color: #455563; color: #082E24; }
+body.bspt-survey #main .swipe[data-direction="like"] { background: #EAF5FA; border-color: #185B7C; color: #082E24; }
+body.bspt-survey #main .swipe[data-direction="love"] { background: #FFF0F5; border-color: #902950; color: #082E24; }
+@media (max-width:610px) {
+ body.bspt-survey #main .swipe-directions { font-size: 12px; gap: 8px; }
+ body.bspt-survey #main .swipe-directions span { white-space: normal; }
+}
