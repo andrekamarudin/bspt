@@ -10,8 +10,8 @@ function start(){
      {id:'hero-leverage',kind:'note',target:'.hero h1',text:'Less to learn.\nMore to gain.',
       color:'cream',size:31,rotation:-6,placement:'above-right',
       fallback:['above-left','left-top'],gap:23,
-      avoid:['.hero .hero-person','.hero .lead','.hero .buttons'],
-      minWidth:850,motion:'reveal'}
+      avoid:['.hero .eyebrow','.hero .lead','.hero .buttons'],
+      minWidth:1250,motion:'reveal'}
    ]});
  }
  if(document.querySelector('[data-bspt-ink="about-leverage"]')){
