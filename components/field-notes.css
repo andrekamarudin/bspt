@@ -30,13 +30,13 @@ body.bspt-survey #main:before{content:"EXPERT FIELD NOTES  /  BSPT";right:22px;t
 body.bspt-survey #main:after{content:"";position:absolute;pointer-events:none;top:17px;left:10px;width:11px;height:calc(100% - 34px);background-image:radial-gradient(circle,#C6BBA7 3px,transparent 4px);background-size:11px 44px;background-repeat:repeat-y;opacity:.92}
 body.bspt-survey #main h1{font-family:"Playfair Display",Georgia,serif;font-weight:700;letter-spacing:-.045em;line-height:1.11}
 body.bspt-survey #main h2{font-family:"Playfair Display",Georgia,serif;letter-spacing:-.028em}
-body.bspt-survey #main > h1:first-child{background-image:url('/motifs/marker-swash.svg');background-repeat:no-repeat;background-size:46% 19px;background-position:left bottom;padding-bottom:12px}
+body.bspt-survey #main > h1:first-child{padding-bottom:12px} /* Dynamic ink underline replaces fixed background swash. */
 body.bspt-survey #main .notice{background:#F3E4CC;border:0;border-left:4px solid #D8C6AA;box-shadow:2px 3px 0 #DBCDB845}
 body.bspt-survey #main .choice{box-shadow:3px 4px 0 #CBBCA55C;background:#FFFDF7}
 body.bspt-survey #main .swipe{background-color:#FFFDF6;background-image:repeating-linear-gradient(0deg,transparent 0,transparent 37px,rgba(110,100,80,.055) 38px,transparent 39px);box-shadow:6px 7px 0 #C7BBA4}
 body.bspt-survey #nav .btn.primary{background-color:var(--bspt-orange)}
 body.bspt-survey .bspt-survey-header-note{font:700 21px "Caveat",cursive;color:#FFD65A;transform:rotate(-4deg);margin-left:auto;margin-right:8px}
-@media(max-width:610px){body.bspt-survey #main{padding-left:30px;padding-right:20px}body.bspt-survey #main:before{font-size:8px;top:9px;right:13px}body.bspt-survey #main .intro h1{background-size:63% 13px}body.bspt-survey .bspt-survey-header-note{display:none}}
+@media(max-width:610px){body.bspt-survey #main{padding-left:30px;padding-right:20px}body.bspt-survey #main:before{font-size:8px;top:9px;right:13px}body.bspt-survey .bspt-survey-header-note{display:none}}
 
 /* Deliberately no floating survey arrow or detached marginalia. The Caveat header and paper notebook carry the personality without implying a false direction. */
 /* Hero feature-strip readability: the customer remains visible, but real content wins. */
