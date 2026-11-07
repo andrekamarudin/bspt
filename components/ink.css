@@ -1,0 +1,20 @@
+/* BSPT Ink: real handwritten text + SVG geometry. Never a baked screenshot. */
+.bspt-ink-stage{position:relative}
+.bspt-ink-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:visible}
+.bspt-ink-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.bspt-ink-note{position:absolute;display:block;pointer-events:none;white-space:pre-line;font:700 30px/1.05 "Caveat",cursive;letter-spacing:.01em;color:#FFD65A;text-shadow:0 2px 9px #082E2499;transform-origin:50% 50%;width:max-content;max-width:260px;transition:opacity .12s}
+.bspt-ink-note.is-orange{color:#FF6433;text-shadow:0 1px 2px #F7F2E8AA}
+.bspt-ink-note.is-forest{color:#082E24;text-shadow:none}
+.bspt-ink-note.is-yellow{color:#FFD65A}
+.bspt-ink-note.is-cream{color:#FFE7BC}
+.bspt-ink-pointer,.bspt-ink-circle{fill:none;stroke:#FF6433;stroke-width:3.2px;stroke-linecap:round;stroke-linejoin:round}
+.bspt-ink-pointer{stroke-width:2.5px}
+.bspt-ink-underline{fill:none;stroke:#FFD65A;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.bspt-ink-underline.is-orange{stroke:#FF6433}
+.bspt-ink-underline.is-forest{stroke:#082E24}
+.bspt-ink-circle.is-yellow{stroke:#FFD65A}
+@media(prefers-reduced-motion:reduce){.bspt-ink-note{transition:none}}
+
+@keyframes bspt-ink-reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.bspt-ink-once{animation:bspt-ink-reveal .9s cubic-bezier(.3,.6,.2,1) both}
+@media(prefers-reduced-motion:reduce){.bspt-ink-once{animation:none}}
