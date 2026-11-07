@@ -96,6 +96,14 @@ body.bspt-survey #main .hurdle.selected {
   border: 2px solid #C64B24;
   color: var(--bspt-text-primary);
 }
+/* Brand-orange accents are brighter than AA white-on-orange text allows.
+   Use the deeper BSPT shade for action buttons (4.74:1 white text). */
+body.bspt-survey #nav .btn.primary {
+  background: #C64B24;
+  color: #FFFDF7;
+  box-shadow: 0 4px 0 #873018;
+}
+body.bspt-survey #nav .btn.primary:hover { background: #B64220; }
 body.bspt-survey #nav .registration-cta:not(.submit-ready) {
   background: #153E33;
   color: #FFFDF7;
