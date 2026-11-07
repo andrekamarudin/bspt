@@ -37,6 +37,29 @@
     return { x: r.left - stageRect.left, y: r.top - stageRect.top, w: r.width, h: r.height,
       get left(){return this.x},get right(){return this.x+this.w},get top(){return this.y},get bottom(){return this.y+this.h}};
   }
+  function tightObstacleRects(node, stageRect) {
+    // A block's CSS box can be 1,180px wide even if its visible text is 225px.
+    // Use the painted content bounds, not all the empty whitespace around it.
+    const controls=Array.from(node.querySelectorAll('a,button,input,textarea,select'));
+    if(controls.length)return controls.map(n=>relRect(n,stageRect));
+    const text=(node.textContent||'').trim();
+    if(text && node.childNodes.length){
+      try{
+        const range=document.createRange();
+        range.selectNodeContents(node);
+        const rects=Array.from(range.getClientRects()).filter(r=>r.width>0&&r.height>0);
+        range.detach?.();
+        if(rects.length){
+          const left=Math.min(...rects.map(r=>r.left)),right=Math.max(...rects.map(r=>r.right));
+          const top=Math.min(...rects.map(r=>r.top)),bottom=Math.max(...rects.map(r=>r.bottom));
+          const pad=6;
+          const x=left-stageRect.left-pad,y=top-stageRect.top-pad,w=right-left+2*pad,h=bottom-top+2*pad;
+          return [{x,y,w,h,left:x,right:x+w,top:y,bottom:y+h}];
+        }
+      }catch(_e){/* Fall back to element bounds for non-text content. */}
+    }
+    return [relRect(node,stageRect)];
+  }
   function intersect(a, b) {
     const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
     const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
@@ -157,7 +180,7 @@
         // The rendered font metrics decide the box, not a guessed preset size.
         const w=label.offsetWidth, h=label.offsetHeight;
         const placements=[a.placement,...(a.fallback||['above-left','above-right','left-top','right-top','below-left','below-right'])];
-        const extra=a.avoid.map(s=>resolve(this.stage,s)).filter(Boolean).map(n=>relRect(n,sr));
+        const extra=a.avoid.map(s=>resolve(this.stage,s)).filter(Boolean).flatMap(n=>tightObstacleRects(n,sr));
         if(!a.allowOverlap)extra.push(r);
         const obstacles=[...extra,...occupied];let chosen=null;
         for(const mode of [...new Set(placements)]){
