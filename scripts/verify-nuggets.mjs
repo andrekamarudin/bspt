@@ -12,11 +12,11 @@ function field(front, key) {
   requireThat(match, 'missing frontmatter field ' + key);
   return match[1].trim();
 }
-function listField(v) { requireThat(/^\\[.*\\]$/.test(v), 'expected YAML inline list: '+v);return v.slice(1,-1).split(',').map(x=>x.trim()).filter(Boolean); }
+function listField(v) { requireThat(/^\[.*\]$/.test(v), 'expected YAML inline list: '+v);return v.slice(1,-1).split(',').map(x=>x.trim()).filter(Boolean); }
 requireThat(Array.isArray(list) && list.length === 24, 'Expected 24 launch nuggets');
 const ids = new Set(), files = new Set(), cats = {learn:0,work:0,decide:0,build:0};
 for (const n of list) {
-  requireThat(/^BSPT-\\d{3}$/.test(n.id), 'Bad ID ' + n.id);
+  requireThat(/^BSPT-\d{3}$/.test(n.id), 'Bad ID ' + n.id);
   requireThat(!ids.has(n.id), 'Duplicate ID ' + n.id); ids.add(n.id);
   requireThat(['learn','work','decide','build'].includes(n.category), 'Unknown category ' + n.category);
   cats[n.category]++;
@@ -24,7 +24,7 @@ for (const n of list) {
   requireThat(!files.has(n.file), 'Duplicate file ' + n.file); files.add(n.file);
   const full = join(root, n.file); requireThat(existsSync(full), 'Missing card ' + n.file);
   const txt=readFileSync(full,'utf8');
-  const m=txt.match(/^---\\r?\\n([\\s\\S]*?)\\r?\\n---\\r?\\n/);
+  const m=txt.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   requireThat(m, 'Missing YAML front matter ' + n.id);
   const f=m[1];
   for (const key of ['id','title','category','audiences','level','duration_minutes','showcase_score','human_driver','status','access','tags','connects_to'])field(f,key);
@@ -42,7 +42,7 @@ for (const n of list) {
     '## The before → after moment','**Safe fictional setup:**','**Copy/paste demo prompt**',
     '## Now let them try','**Evidence of learning:**','**Integrity guardrail:**','**LEGO links:**'];
   for(const item of mandatory)requireThat(txt.includes(item),'Missing '+item+' in '+n.id);
-  requireThat(txt.includes('```text\\n'),'No runnable text prompt in '+n.id);
+  requireThat(txt.includes('```text\n'),'No runnable text prompt in '+n.id);
   requireThat(txt.length>1450,'Too thin for live delivery: '+n.id);
 }
 for (const n of list) for(const id of n.connects_to) {
