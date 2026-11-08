@@ -1,0 +1,12 @@
+{
+  "name": "@bspt/ai-mental-os-v4",
+  "private": true,
+  "version": "4.0.0",
+  "description": "Reproducible 30-slide AI Mental OS paid-workshop deck",
+  "scripts": {
+    "build": "node generate.js",
+    "verify": "python verify_build.py",
+    "test:fixture:pass": "python demo/check_register.py demo/candidate_corrected.json"
+  },
+  "dependencies": {"pptxgenjs": "4.0.0"}
+}

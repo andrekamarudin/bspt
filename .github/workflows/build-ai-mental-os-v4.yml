@@ -1,0 +1,41 @@
+name: Rebuild AI Mental OS v4 presentation
+on:
+  push:
+    paths:
+      - 'training/ai-mental-os/v4/**'
+      - '.github/workflows/build-ai-mental-os-v4.yml'
+  pull_request:
+    paths:
+      - 'training/ai-mental-os/v4/**'
+      - '.github/workflows/build-ai-mental-os-v4.yml'
+  workflow_dispatch:
+jobs:
+  rebuild-and-verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: training/ai-mental-os/v4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install fonts and OS dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-dejavu-core fonts-liberation
+      - name: Install runtime dependencies
+        run: |
+          npm install --no-audit --no-fund
+          python -m pip install -r requirements.txt
+      - name: Build, test and verify editable PPTX
+        run: bash build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BSPT_AI_Mental_OS_Training_v4
+          path: training/ai-mental-os/v4/BSPT_AI_Mental_OS_Training_v4.pptx
+          if-no-files-found: error
+          retention-days: 90

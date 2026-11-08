@@ -1,0 +1,8 @@
+{
+  "case": "Fictional meeting, training only",
+  "lines": [
+    {"id": 1, "text": "Maya: Let's test with 10 users.", "expected": "proposal"},
+    {"id": 2, "text": "Dan: I can draft the invitation.", "expected": "offer"},
+    {"id": 3, "text": "Alex: I need to check my schedule.", "expected": "unknown"}
+  ]
+}

@@ -1,0 +1,10 @@
+# Deterministic-ish build products: regenerate from tracked code/assets.
+/human-value-knowledge-frontier-rebuilt.gif
+/frontier_first.png
+/frontier_last.png
+/slides_meta.json
+/BSPT_AI_Mental_OS_Training_v4.pptx
+/node_modules/
+/__pycache__/
+/render/
+/qa-report.json

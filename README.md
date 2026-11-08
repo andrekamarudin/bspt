@@ -61,3 +61,9 @@ The content-first, survey-independent [GenAI nugget vault](content/nuggets/READM
 ## Paid training: AI Mental OS
 
 The [AI Mental OS paid curriculum](content/paid-training/README.md) teaches two transferable principles: **human above the loop** and **well-defined outcomes with built-in proof**. It turns the free 24-nugget catalog into the ability to invent new, checkable AI workflows. Includes 120/150/180-minute plans, technical essentials, capstone rubric and first PPTX story outline. Content remains provisional until real audience testing. Validate via `node scripts/verify-paid-training.mjs`.
+
+## Mandatory reproducible artifact delivery
+
+**Every deliverable requires a GitHub commit before distribution.** Keep the owning generator/source, unique source assets, dependency versions, an exact build command, automated checks and enough context to rebuild. Do not leave the only source in ChatGPT's temporary `/mnt/data`, OneDrive, a ZIP download, Figma, or an unversioned computer folder.
+
+For decks, the complete [AI Mental OS v4 source](training/ai-mental-os/v4/README.md) is the example. Build it from a clean checkout using `cd training/ai-mental-os/v4 && bash build.sh`. CI independently generates a downloadable PPTX. Generated caches and rebuildable outputs may be excluded; unique unrecoverable assets may not. If a binary exceeds a sensible Git size, track a checksum, immutable approved asset-store URL, and an automated retrieval step. Report the pushed SHA and test evidence.
