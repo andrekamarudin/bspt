@@ -1,0 +1,34 @@
+name: Build human value knowledge-frontier GIF
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out BSPT
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install animation dependencies
+        run: python -m pip install "Pillow>=11,<13" "CairoSVG>=2.7,<3"
+      - name: Render branded GIF from official assets
+        run: python scripts/render_knowledge_frontier.py
+      - name: Commit binary motion asset
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add motion/human-value-knowledge-frontier.gif
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(motion): render human value knowledge frontier GIF"
+            git push origin HEAD:main
+          fi
