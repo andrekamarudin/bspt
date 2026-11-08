@@ -1,127 +1,202 @@
 #!/usr/bin/env python3
-"""Rebuildable BSPT one-shot GIF: the frontier of human knowledge."""
+"""Build the one-shot BSPT left/right knowledge-frontier explainer.
+
+The concentric circles are conceptual and do not represent measured AI knowledge.
+The animation's final frame holds for seven seconds to allow presenter narration.
+"""
 from __future__ import annotations
 from pathlib import Path
 from io import BytesIO
 import math
+import os
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT=Path(__file__).resolve().parents[1]
-OUT=ROOT/'motion'/'human-value-knowledge-frontier.gif'
-OUT.parent.mkdir(parents=True,exist_ok=True)
-W,H=1200,675
-FOREST='#082E24';DEEP='#051C17';CORAL='#FF6433';CREAM='#F7F2E8'
-YELLOW='#FFD65A';SAGE='#8DAB99';STONE='#E8DED0'
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / 'motion' / 'human-value-knowledge-frontier.gif'
+OUT.parent.mkdir(parents=True, exist_ok=True)
+W, H = 1280, 720
+FOREST = '#082E24'; DEEP = '#051C17'; ORANGE = '#FF6433'
+CREAM = '#F7F2E8'; YELLOW = '#FFD65A'; SAGE = '#8DAB99'; STONE = '#E8DED0'; INK = '#17372C'
 
-def font(size,serif=False,bold=False):
-    if serif:
-        paths=['/usr/share/fonts/truetype/msttcorefonts/Georgia.ttf',
-               '/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf']
-    else:
-        name='Bold' if bold else 'Regular'
-        paths=[f'/usr/share/fonts/opentype/inter/Inter-{name}.otf',
-               '/usr/share/fonts/truetype/dejavu/DejaVuSans'+('-Bold' if bold else '')+'.ttf']
-    for p in paths:
-        if Path(p).exists():return ImageFont.truetype(p,size)
+
+def font(n: int, *, serif=False, bold=False, note=False):
+    files = (["/usr/share/fonts/truetype/msttcorefonts/Georgia.ttf",
+              "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"] if serif else
+             ["/usr/share/fonts/truetype/lato/Lato-Italic.ttf"] if note else
+             [f"/usr/share/fonts/opentype/inter/Inter-{'Bold' if bold else 'Regular'}.otf",
+              f"/usr/share/fonts/truetype/dejavu/DejaVuSans{'-Bold' if bold else ''}.ttf"])
+    for path in files:
+        if Path(path).exists():
+            return ImageFont.truetype(path, n)
     return ImageFont.load_default()
 
-TITLE=font(44,True);HERO=font(43,True);BODY=font(24)
-SMALL=font(18);LABEL=font(21,bold=True);TINY=font(16)
-def ease(v):
-    v=max(0,min(1,v));return v*v*(3-2*v)
+F_TITLE = font(47, serif=True)
+F_PANEL = font(35, serif=True)
+F_CAP = font(19, bold=True)
+F_TEXT = font(24)
+F_SMALL = font(17)
+F_VALUE = font(27, bold=True)
+F_FINAL = font(34, serif=True)
+F_NOTE = font(23, note=True)
 
-def arrow(d,x1,y1,x2,y2,color,width=9):
-    d.line((x1,y1,x2,y2),fill=color,width=width,joint='curve')
-    a=math.atan2(y2-y1,x2-x1)
-    d.polygon([(x2,y2),
-               (x2-25*math.cos(a-.48),y2-25*math.sin(a-.48)),
-               (x2-25*math.cos(a+.48),y2-25*math.sin(a+.48))],fill=color)
 
-def exact_logo():
-    # Use the actual vector asset: do not approximate the logo paths.
+def ease(t):
+    t = max(0.0, min(1.0, t))
+    return t*t*(3.0-2.0*t)
+
+
+def source_svg(relpath: str, width: int, height: int):
+    """No synthetic replacement of canonical source assets."""
+    source = ROOT / relpath
+    if not source.exists():
+        return None  # source layout QA can run without repo assets
     import cairosvg
-    b=cairosvg.svg2png(url=str(ROOT/'logos'/'brush-slash.svg'),output_width=122,output_height=78)
-    return Image.open(BytesIO(b)).convert('RGBA')
-LOGO=exact_logo()
+    png = cairosvg.svg2png(url=str(source), output_width=width, output_height=height)
+    return Image.open(BytesIO(png)).convert('RGBA')
+
+
+def paste_svg(im, svg_image, xy):
+    if svg_image is not None:
+        im.paste(svg_image, xy, svg_image)
+
+
+LOGO = source_svg('logos/brush-slash.svg', 115, 75)
+CLIP = source_svg('motifs/paperclip.svg', 31, 45)
+SWASH = source_svg('motifs/marker-swash.svg', 439, 34)
+
+
+def line_arrow(d, origin, tip, color=ORANGE, width=8):
+    x0, y0 = origin; x1, y1 = tip
+    d.line((x0,y0,x1,y1), fill=color, width=width, joint='curve')
+    theta = math.atan2(y1-y0,x1-x0)
+    a = 21
+    d.polygon([(x1,y1),
+               (x1-a*math.cos(theta-.47), y1-a*math.sin(theta-.47)),
+               (x1-a*math.cos(theta+.47), y1-a*math.sin(theta+.47))], fill=color)
+
+
+def ring(d, cx, cy, radius, color, width=4):
+    d.ellipse((cx-radius,cy-radius,cx+radius,cy+radius), outline=color, width=width)
+
 
 def frame(t):
-    im=Image.new('RGB',(W,H),FOREST);d=ImageDraw.Draw(im)
-    d.text((60,37),'THE KNOWLEDGE FRONTIER',font=TITLE,fill=CREAM)
-    d.line((60,113,1140,113),fill=SAGE,width=2)
-    im.paste(LOGO,(1032,18),LOGO)
-    cx,cy,R=738,372,213
-    d.ellipse((cx-R,cy-R,cx+R,cy+R),fill=DEEP,outline=CREAM,width=4)
-    d.text((790,129),'COLLECTIVE KNOWLEDGE',font=TINY,fill=STONE)
-    d.line((820,155,873,171),fill=SAGE,width=2)
-    for a in [15,90,165,240,315]:
-        x=cx+R*math.cos(math.radians(a))
-        y=cy+R*math.sin(math.radians(a))
-        d.ellipse((x-4,y-4,x+4,y+4),fill=SAGE)
-    stages=[(0,2.25),(2.25,4.65),(4.65,6.85),(6.85,10.3)]
-    idx=next((i for i,(s,e) in enumerate(stages) if s<=t<e),3)
-    titles=['20 years to learn','40 years to push','AI starts near the edge','What is left for us?']
-    detail=[['Build a small personal','map of what humanity knows.'],
-            ['A career of specialization','pushes one narrow frontier.'],
-            ['Broad knowledge becomes','cheap and widely accessible.'],
-            ['Set direction. Align people.','Judge trade-offs. Own outcomes.']]
-    bands=['BEFORE AI  /  00–20','BEFORE AI  /  20–60',
-           'AFTER AI  /  KNOWLEDGE','AFTER AI  /  HUMAN VALUE']
-    d.rounded_rectangle((60,158,337,197),radius=7,fill=CORAL if idx<2 else YELLOW)
-    d.text((74,165),bands[idx],font=SMALL,fill=DEEP)
-    d.text((60,229),titles[idx],font=HERO,fill=CREAM)
-    for i,s in enumerate(detail[idx]):d.text((60,307+i*39),s,font=BODY,fill=STONE)
-    tags=['LEARNING','SPECIALIZATION','THE DISRUPTION','THE HUMAN EDGE']
-    notes=['The circle grows.','A rectangle breaks the rim.',
-           'Knowledge alone loses scarcity.','Choose what is worth moving.']
-    d.text((60,441),tags[idx],font=LABEL,fill=YELLOW)
-    d.text((60,478),notes[idx],font=SMALL,fill=CREAM)
-    g=ease((t-.18)/1.89) if t<2.25 else 1
-    hr=4+58*g
-    d.ellipse((cx-hr,cy-hr,cx+hr,cy+hr),fill=CORAL,outline=CREAM,width=2)
-    if idx<2:d.text((cx-31,cy-11),'YOU',font=LABEL,fill=DEEP)
-    if t>=2.25:
-        prog=ease((t-2.34)/1.98) if t<4.65 else max(0,1-(t-4.65)/.35)
-        end=int(cx+hr+(R+59-hr)*prog)
-        if prog>0:
-            d.rounded_rectangle((cx+hr-9,cy-14,end,cy+14),radius=7,fill=CORAL)
-            if end>cx+R:d.ellipse((cx+R-3,cy-24,cx+R+6,cy+24),outline=YELLOW,width=4)
-    if idx==1:d.text((cx+R+22,cy+46),'ONE NEW EDGE',font=TINY,fill=YELLOW)
-    if t>=4.65:
-        ar=66+(R-16-66)*ease((t-4.72)/1.58)
-        overlay=Image.new('RGBA',(W,H),(0,0,0,0));od=ImageDraw.Draw(overlay)
-        od.ellipse((cx-ar,cy-ar,cx+ar,cy+ar),fill=(141,171,153,38),
-                   outline=(141,171,153,235),width=8)
-        im=Image.alpha_composite(im.convert('RGBA'),overlay)
-        d=ImageDraw.Draw(im)
-        d.ellipse((cx-12,cy-12,cx+12,cy+12),fill=CORAL,outline=CREAM,width=2)
-        if t>=5.35:d.text((cx-12,cy+27),'AI: BROAD COVERAGE',font=TINY,fill=STONE)
-    if t>=6.85:
-        p=ease((t-6.94)/1.10)
-        end=(cx+(1040-cx)*p,cy+(206-cy)*p)
-        arrow(d,cx,cy,*end,CORAL,10)
-        if t>=7.92:
-            ox,oy=1040,206
-            d.ellipse((ox-20,oy-20,ox+20,oy+20),outline=YELLOW,width=5)
-            d.ellipse((ox-6,oy-6,ox+6,oy+6),fill=YELLOW)
-            d.text((978,252),'REAL-WORLD',font=SMALL,fill=YELLOW)
-            d.text((997,282),'OUTCOME',font=SMALL,fill=YELLOW)
-            d.text((60,532),'KNOWING ≠ DOING',font=LABEL,fill=CREAM)
-            d.line((60,565,301,565),fill=YELLOW,width=6)
-    d.line((60,605,1140,605),fill=SAGE,width=3)
-    for k,lab in enumerate(['LEARN','PUSH','AI ARRIVES','DIRECT']):
-        d.text((68+k*260,615),lab,font=TINY,fill=CREAM if idx==k else SAGE)
-    d.line((60,605,60+1080*min(1,t/10.3),605),fill=CORAL,width=6)
-    d.text((740,651),'Conceptual illustration, not a measure of model knowledge.',
-           font=TINY,fill=SAGE)
-    return im.convert('RGB')
+    im = Image.new('RGB', (W,H), FOREST)
+    d = ImageDraw.Draw(im)
+    d.text((49,25), 'WHEN KNOWLEDGE STOPS BEING THE EDGE', font=F_TITLE, fill=CREAM)
+    d.text((51,88), 'One frontier, two eras. The outer ring is the reference boundary.', font=F_SMALL, fill=STONE)
+    paste_svg(im, LOGO, (1108,10))
 
-fps=8;duration=10.3
-frames=[frame(i/fps) for i in range(round(fps*duration)+1)]
-palette=frames[-1].quantize(colors=90,method=Image.Quantize.FASTOCTREE)
-indexed=[f.quantize(palette=palette,dither=Image.Dither.NONE) for f in frames]
-# Omit GIF loop extension: animation plays once on supported viewers/slides.
-indexed[0].save(OUT,save_all=True,append_images=indexed[1:],
-                duration=round(1000/fps),optimize=True,disposal=2)
-check=Image.open(OUT)
-assert check.n_frames>50 and check.size==(W,H)
-print(f'PASS {OUT} {check.n_frames} frames {OUT.stat().st_size} bytes')
+    # Cream working paper on the left; deliberately darker, unadorned AI stage on the right.
+    d.rounded_rectangle((40,124,624,578), radius=10, fill=CREAM)
+    d.rounded_rectangle((656,124,1240,578), radius=10, fill=DEEP, outline=SAGE, width=2)
+    d.text((75,146), 'BEFORE AI', font=F_CAP, fill=INK)
+    d.text((692,146), 'AFTER AI', font=F_CAP, fill=CREAM)
+    d.text((75,184), 'Learn. Specialize. Push.', font=F_PANEL, fill=INK)
+    d.text((692,184), 'AI covers the map.', font=F_PANEL, fill=CREAM)
+
+    # The paperclip is used only on the actual paper surface.
+    paste_svg(im, CLIP, (557,115))
+    d = ImageDraw.Draw(im)
+    lc,rc,cy,R = 313,953,371,129
+    ring(d,lc,cy,R,INK,4);ring(d,rc,cy,R,CREAM,4)
+    # Directional perimeter guide marks distinguish the common reference frontier.
+    for x,fg in [(lc,INK),(rc,CREAM)]:
+        d.line((x-12,cy-R-11,x+12,cy-R-11),fill=fg,width=2)
+        d.line((x-12,cy+R+11,x+12,cy+R+11),fill=fg,width=2)
+
+    # Left: compressed learning period followed by forty years of one-dimensional frontier push.
+    r=4+32*ease((t-.55)/2.4)
+    d.ellipse((lc-r,cy-r,lc+r,cy+r),fill=ORANGE)
+    if t < 3.2:
+        d.text((88,515),'0–20 YEARS   Build your foundation',font=F_TEXT,fill=INK)
+    else:
+        p=ease((t-3.15)/2.45)
+        if p>0:
+            start=lc+r-3
+            end=start+157*p
+            d.rounded_rectangle((start,cy-15,end,cy+15),radius=8,fill=ORANGE)
+            if end>lc+R:
+                d.arc((lc+R-7,cy-34,lc+R+11,cy+34),270,90,fill=ORANGE,width=4)
+        d.text((88,515),'20–60 YEARS   Push one narrow edge',font=F_TEXT,fill=INK)
+        if t>=5.05:
+            # Precise callout: thin line ends at the far end of the specialized rectangle.
+            d.text((411,288),'one direction',font=F_NOTE,fill=INK)
+            d.line((475,319,479,341),fill=INK,width=2)
+
+    # Right: near-frontier AI knowledge, then a symbolic widening, not a literal capability measurement.
+    if t >= 4.75:
+        reveal=ease((t-4.75)/1.15)
+        outer=116+33*ease((t-5.8)/2.35)
+        over=Image.new('RGBA',(W,H),(0,0,0,0))
+        o=ImageDraw.Draw(over)
+        o.ellipse((rc-outer,cy-outer,rc+outer,cy+outer),
+                  fill=(141,171,153,int(48*reveal)),
+                  outline=(255,100,51,int(255*reveal)),width=9)
+        im=Image.alpha_composite(im.convert('RGBA'),over).convert('RGB')
+        d=ImageDraw.Draw(im)
+        if t < 7.65:
+            d.text((697,515),'Starts near the frontier; then broadens',font=F_TEXT,fill=CREAM)
+        else:
+            d.text((697,515),'Human: direct capability to outcomes',font=F_TEXT,fill=CREAM)
+    else:
+        d.text((697,515),'AI starts with broad learned knowledge',font=F_TEXT,fill=CREAM)
+
+    # Real agency: a human-directed goal. The arrow lands on its visible target.
+    if t>=7.65:
+        d=ImageDraw.Draw(im)
+        p=ease((t-7.73)/1.52)
+        d.ellipse((rc-12,cy-12,rc+12,cy+12),fill=YELLOW)
+        ox,oy=1140,353
+        if p>0.02:
+            line_arrow(d,(rc+17,cy),(rc+17+(ox-rc-17)*p, cy+(oy-cy)*p),color=YELLOW,width=8)
+        if t>=9.25:
+            ring(d,1147,353,24,YELLOW,5)
+            d.ellipse((1139,345,1155,361),fill=YELLOW)
+            d.text((1092,394),'OUTCOME',font=F_CAP,fill=CREAM)
+
+    # Permanent comparison cue, then the deliberate editorial conclusion with one semantic swash.
+    d=ImageDraw.Draw(im)
+    d.line((40,589,1240,589),fill=SAGE,width=2)
+    d.text((63,609),'OLD EDGE',font=F_CAP,fill=STONE)
+    d.text((660,609),'NEW EDGE',font=F_CAP,fill=STONE)
+    if t>=9.65:
+        d.rounded_rectangle((40,598,1240,703),radius=8,fill=CREAM)
+        d.text((70,604),'Knowledge becomes abundant.',font=F_FINAL,fill=INK)
+        paste_svg(im, SWASH, (67,648))
+        d=ImageDraw.Draw(im)
+        d.text((75,652),'Human edge: choose goals. Align people. Own outcomes.',
+               font=F_VALUE,fill=INK)
+    else:
+        d.text((171,612),'WHAT YOU KNOW',font=F_VALUE,fill=CREAM)
+        d.text((787,612),'WHAT YOU MAKE HAPPEN',font=F_VALUE,fill=CREAM)
+        d.text((50,672),'Conceptual metaphor: circle areas are not measured knowledge.',font=F_SMALL,fill=SAGE)
+
+    return im
+
+
+def build():
+    # 10-second motion sequence. Last image holds for seven seconds.
+    fps=9
+    ts=[i/fps for i in range(87)] + [9.8]
+    rgb=[frame(t) for t in ts]
+    # Palette anchored to the final frame keeps small text consistent.
+    palette=rgb[-1].quantize(colors=180,method=Image.Quantize.FASTOCTREE)
+    indexed=[fr.quantize(palette=palette,dither=Image.Dither.NONE) for fr in rgb]
+    intervals=[round(1000/fps)]*(len(indexed)-1)+[7000]
+    indexed[0].save(OUT,save_all=True,append_images=indexed[1:],duration=intervals,
+                    optimize=True,disposal=2)
+    check=Image.open(OUT)
+    assert check.n_frames >= 70 and check.size==(W,H)
+    # Preview and contact sheet remain local; CI commits only GIF.
+    if os.getenv('BSPT_MOTION_PREVIEW'):
+        preview=OUT.parent / 'frontier-review'
+        preview.mkdir(exist_ok=True)
+        indices=[0,15,29,42,55,71,82,len(rgb)-1]
+        for i in indices:rgb[i].save(preview / f'frame-{i:03d}.png')
+        sheet=Image.new('RGB',(W*2,H*4),CREAM)
+        for j,i in enumerate(indices):sheet.paste(rgb[i],((j%2)*W,(j//2)*H))
+        sheet.resize((1280,1440),Image.Resampling.LANCZOS).save(preview/'contact.png')
+    print(f'PASS {OUT} {check.n_frames} frames {OUT.stat().st_size} bytes, final hold 7 seconds')
+
+
+if __name__=='__main__':build()
