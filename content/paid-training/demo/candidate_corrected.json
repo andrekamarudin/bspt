@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "line_id": 1,
+      "classification": "proposal",
+      "quote": "Let's test with 10 users.",
+      "claim": "Proposal for a ten-user test"
+    },
+    {
+      "line_id": 2,
+      "classification": "offer",
+      "quote": "I can draft the invitation.",
+      "claim": "Dan offered draft"
+    },
+    {
+      "line_id": 3,
+      "classification": "unknown",
+      "quote": "I need to check my schedule.",
+      "claim": "Alex's availability unknown"
+    }
+  ],
+  "confirmed_approvals": 0
+}

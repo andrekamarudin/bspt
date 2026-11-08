@@ -1,58 +1,33 @@
-# Flexible facilitator plan | 120 / 150 / 180 minutes
+# Paid workshop timing | human-first v4
 
-This is a **learning sequence**; not a rule that every beat needs a slide. Timing is a first rehearsal hypothesis, not measured. The first PPTX uses **150 minutes** and fictional data.
+**Training design, not validated audience preference.** Versions scale meaningful practice and discussion, not lecture complexity.
 
-| Stage | 120 min | 150 min (v1) | 180 min | Evidence of capability |
+| Session stage | 120 min | 150 min (v4) | 180 min | What learners must demonstrate |
 |---|---:|---:|---:|---|
-| Human hook + baseline | 6 | 8 | 10 | Learner identifies why AI babysitting feels costly |
-| The technical truth | 10 | 12 | 15 | Explains why model self-confidence is not proof |
-| A. Human above the loop | 16 | 20 | 25 | Draws low-risk work vs human-approval boundary |
-| B. Outcome + Proof + Boundaries | 20 | 25 | 30 | Writes checkable criteria, negative cases and a receipt |
-| Practice: improve the brief | 15 | 18 | 20 | Revises a vague brief to include acceptance checks |
-| Break | 5 | 10 | 10 | |
-| Delegate check and bounded repair | 18 | 22 | 30 | Chooses an independent checker and stop condition |
-| Workflow + exception design | 12 | 15 | 15 | Builds minimal execution and escalation route |
-| Novel-use-case capstone | 18 | 20 | 25 | Proves an original use case against a rubric |
+| Big picture: work, knowledge frontier, human value | 18 | 25 | 30 | Explain exposure versus replacement and choose a human stake |
+| Mei's problem and the two principles | 26 | 32 | 40 | Identify fabricated commitment and mark the correct human decision |
+| Define 'done', inspect sources, and design proof | 25 | 32 | 37 | Produce a checkable outcome and spot an unverified claim |
+| Guided Outcome Contract practice | 12 | 15 | 18 | Partner can interpret and test the contract |
+| Break | 5 | 10 | 10 | Reset |
+| Repeatable workflow and uncertainty handling | 8 | 9 | 12 | State test, repair, stop and approval boundary |
+| Unseen-case capstone | 13 | 15 | 20 | Independently design an original workflow |
+| Rubric, feedback, first next move | 13 | 12 | 13 | Improve weakest criterion and name a real-world application |
 | **Total** | **120** | **150** | **180** | |
 
-## Instructor's desired emotional arc
+For **150 minutes**, detailed slide durations and presenter guidance are embedded in the editable v4 PPTX speaker notes. The 30th reference slide is an untimed appendix. Source-of-truth content: [workforce story](workforce-story-v4.md).
 
-**Recognition:** "I spend too much time babysitting my AI." → **Relief:** "I can define done once." → **Control:** "I can check the right things automatically." → **Pride:** "I can design my own use case and defend it."
+## Teaching sequence
 
-Do not frighten people with unsupported job-loss claims. Emotion drives relevance; evidence protects credibility.
+1. Start with the [committed conceptual animation](../../motion/human-value-knowledge-frontier.gif), wait for the one-shot motion, ask what changed, then ground the discussion in ILO, Stanford and WEF findings.
+2. Explain who remains accountable for real outcomes; avoid simplistic "AI replaces everyone" framing.
+3. Let learners recognize Mei's human frustration, then read her three fictional source lines. Ask which commitments were actually made.
+4. Show the fabricated summary, then explain why the problem is an outcome without proof rather than merely poor wording.
+5. Teach **two principles**, not five competing frameworks. Use ordinary words before the terms human-above-loop and Outcome Contract.
+6. Show the source-backed register, then execute a known-answer FAIL/PASS fixture, explicitly stating its limited scope.
+7. Give participants a guided 15-minute contract exercise; include the 10-minute break.
+8. Explain bounded repair, UNKNOWN, external-action approvals and when not to use AI.
+9. End with an independent, novel 15-minute capstone and a short peer check. Have learners state a first real, safe application.
 
-## Teaching sequence and tactics
+## Safety and realism
 
-### 1. Hook and baseline
-Show a *fictional* team lead asking AI to summarize notes and correcting invented decisions. Ask: *Who is doing the work now?* Learners describe one bounded task. Record baseline of what "done" means, without scoring people publicly.
-
-### 2. Technical truth
-Show model/context/tools/checks, and contrast "draft an email" with an actual authorized send. Keep it to 12 minutes. Oral checks are in [technical essentials](technical-essentials.md).
-
-### 3. Human above the loop
-Use two lanes: routine, reversible and testable work may run within limits; external, sensitive or irreversible actions require exact authorization. Draw a stop line. Explain that "above the loop" does not mean no human oversight.
-
-### 4. Outcome + Proof + Boundaries
-Show **weak:** "Create a great report." **Better:** "Using these source lines, output a decision table, cite the evidence for each decision, put missing owners as unknown, reconcile row count, and return an exception list; do not send."
-Learners write an Outcome Contract, especially **what would prove it succeeded**. Require one negative check.
-
-### 5. Guided brief improvement
-Pairs exchange a low-risk task brief. Partner tries to determine outcome, evidence, and permission scope without asking "What did you mean?" Improve once. Do not optimize for prompt length.
-
-### 6. Check and repair
-Demonstrate an intentionally flawed fictional output. Compare three checkers: weak AI self-praise, AI critique against input, **external/known-answer validation**. Use check outcomes PASS / FAIL / UNKNOWN. If FAIL, give the *observed discrepancy* to AI and limit retries. If UNKNOWN, escalate or disclose.
-
-### 7. Workflow/exception
-Learners draw: **Define → Generate → Test → Repair (bounded) → Deliver / Escalate**. Mark approval boundaries and who owns judgment. For simple text tasks, do not introduce unnecessary autonomous agents.
-
-### 8. Unseen-case capstone
-Learners design their own **25th nugget** from a new fictional job or harmless personal task. No copying 24 example prompts. Score outcome, contract, proof, autonomy and boundary against [assessment rubric](transfer-assessment.md).
-
-## Preparation and reliability
-
-- Test demos with actual approved AI client, using synthetic data and a fresh chat.
-- Put exercise input and expected results in speaker notes; do not announce simulated AI answers as live recordings.
-- Have a no-network fallback: print the fake notes and evaluate the same acceptance contract manually.
-- Ensure accessibility: readable typography, sufficient color contrast, non-color-only status indicators and no rapid motion.
-- Do not ask participants to paste actual payroll, employee records, customer material or confidential company strategy into public AI tools.
-- Use participant feedback to change examples and pacing; no survey response exists yet.
+No proprietary material or identifiable personal data in public chat tools. Never present fictional model outputs as recorded live results or model self-evaluation as independent evidence. No autonomous send/spend/delete without the appropriate exact approval. Use a no-network facilitator fallback and rehearse on the actual classroom technology.
