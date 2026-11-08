@@ -2,9 +2,19 @@ name: Build BSPT collaboration motion GIF
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - scripts/render_collaboration_motion.py
+      - logos/brush-slash.svg
+      - motifs/paperclip.svg
+      - motifs/marker-swash.svg
 
 permissions:
   contents: write
+
+concurrency:
+  group: bspt-collaboration-motion
+  cancel-in-progress: false
 
 jobs:
   render:
@@ -16,27 +26,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install rendering libraries
+      - name: Install renderer dependencies
         run: python -m pip install "Pillow>=11,<13" "CairoSVG>=2.7,<3"
-      - name: Bootstrap renderer source
-        shell: bash
-        run: |
-          mkdir -p scripts
-          echo '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' | base64 --decode | python -c "import sys,zlib,pathlib; pathlib.Path('scripts/render_collaboration_motion.py').write_bytes(zlib.decompress(sys.stdin.buffer.read()))"
-      - name: Rebuild with canonical BSPT assets
+      - name: Verify official BSPT vector assets exist
         shell: bash
         run: |
           test -s logos/brush-slash.svg
           test -s motifs/paperclip.svg
           test -s motifs/marker-swash.svg
-          python scripts/render_collaboration_motion.py
-      - name: Commit renderer and actual SVG-backed GIF
+      - name: Render one-shot collaboration animation
+        run: python scripts/render_collaboration_motion.py
+      - name: Commit the generated GIF
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scripts/render_collaboration_motion.py motion/collaboration-with-ai.gif
+          git add motion/collaboration-with-ai.gif
           if ! git diff --cached --quiet; then
-            git commit -m "feat(motion): show faster AI collaboration with exact BSPT SVG"
+            git commit -m "assets(motion): rebuild SVG-backed AI collaboration GIF"
             git push origin HEAD:main
           fi
