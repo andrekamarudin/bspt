@@ -47,3 +47,7 @@ The CI workflow rebuilds from committed GitHub sources, runs structural/media/no
 - **Still requires a pilot:** comprehension and transfer with real learners. All illustrative fictional examples must be labeled as such.
 
 The GIF uses an 11-second ending hold to let learners read the payoff. Run it **once**, do not loop it as wallpaper or interrupt it with narration before the key comparison appears.
+
+## Design and reproducibility ownership
+
+**GitHub is authoritative, Figma is the editable visual mirror, OneDrive is distribution only.** See [source-of-truth and Figma sync rules](../../../docs/source-of-truth.md) and the [pinned asset inventory](../../../design/figma-asset-manifest.json). Run `node scripts/verify-figma-source.mjs` at repository root to verify original media and required source paths. This local check does not establish remote Figma synchronization.

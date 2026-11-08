@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "title": "BSPT source-of-truth visual asset and Figma mirror contract",
+  "policy": {
+    "code": "GitHub",
+    "originalArt": "GitHub",
+    "editableVisualLibrary": "Figma (derived mirror)",
+    "finishedCopies": "OneDrive (distribution only)",
+    "precedence": "GitHub committed source bytes and reproducible code win on any mismatch."
+  },
+  "figma": {
+    "fileKey": "hpKg4rZiyQJYwQ7TVBAnft",
+    "url": "https://www.figma.com/design/hpKg4rZiyQJYwQ7TVBAnft",
+    "syncStatus": "NOT_VERIFIED_RATE_LIMIT",
+    "reason": "Figma Starter plan MCP call limit on 2026-11-08; no writes/readback performed in this audit",
+    "verifiedAt": null,
+    "verifiedNodes": []
+  },
+  "authoritativeDeck": {
+    "directory": "training/ai-mental-os/v5",
+    "build": "bash build.sh",
+    "workflow": ".github/workflows/build-ai-mental-os-v5.yml",
+    "sourceGenerator": "training/ai-mental-os/v5/generate.js",
+    "primaryAnimation": "motion/collaboration-with-ai.gif"
+  },
+  "assets": [
+    {
+      "path": "logos/brush-slash.svg",
+      "gitBlobSha": "53b6dea24695d1fdcd8991afd66238f2586c9458",
+      "byteCount": 46122,
+      "figmaForm": "editable-vector",
+      "purpose": "canonical BSPT brand geometry"
+    },
+    {
+      "path": "motifs/hand-arrow.svg",
+      "gitBlobSha": "41707437f654e3b538efd77fcd3701ced76e9e5d",
+      "byteCount": 460,
+      "figmaForm": "editable-vector",
+      "purpose": "handwritten semantic arrow"
+    },
+    {
+      "path": "motifs/marker-swash.svg",
+      "gitBlobSha": "8e9ae46e9dff9f69a9f4c6138e8487c9672850c3",
+      "byteCount": 389,
+      "figmaForm": "editable-vector",
+      "purpose": "highlight on meaningful evidence"
+    },
+    {
+      "path": "motifs/paperclip.svg",
+      "gitBlobSha": "3d69d3ba0e9b783c9e76cf07edc146d908566f41",
+      "byteCount": 390,
+      "figmaForm": "editable-vector",
+      "purpose": "notebook motif on true note surfaces"
+    },
+    {
+      "path": "motion/brush-slash-draw.svg",
+      "gitBlobSha": "9e9a52c6275020268e46b49329296bbe408adbb3",
+      "byteCount": 46694,
+      "figmaForm": "editable-motion",
+      "purpose": "logo animation source SVG"
+    },
+    {
+      "path": "motion/brush-slash-draw-transparent.gif",
+      "gitBlobSha": "d7dda747c71c974621ea255684729bd12d948e38",
+      "byteCount": 242424,
+      "figmaForm": "motion-reference",
+      "purpose": "original moving logo presentation reference"
+    },
+    {
+      "path": "motion/collaboration-with-ai.gif",
+      "gitBlobSha": "aaf781b542dbfe8a23feee6b33777974e1433803",
+      "byteCount": 5060026,
+      "figmaForm": "motion-reference",
+      "purpose": "primary 49-second workshop opening"
+    },
+    {
+      "path": "motion/human-value-knowledge-frontier.gif",
+      "gitBlobSha": "c64c7d848fb12833e019cdb40076cc50f7c96c6c",
+      "byteCount": 3301652,
+      "figmaForm": "motion-reference",
+      "purpose": "older optional conceptual animation"
+    },
+    {
+      "path": "assets/collaboration-avatars/character-atlas.png",
+      "gitBlobSha": "17e817a3ff11d26ec7373f9b7203f5cda8c0e57f",
+      "byteCount": 9777,
+      "figmaForm": "source-image",
+      "purpose": "approved original character atlas"
+    },
+    {
+      "path": "assets/collaboration-avatars/data.png",
+      "gitBlobSha": "dbfd1b25fce7421167e36cdaf4d9ac9a8088e7ae",
+      "byteCount": 4324,
+      "figmaForm": "source-image",
+      "purpose": "data specialist character"
+    },
+    {
+      "path": "assets/collaboration-avatars/design.png",
+      "gitBlobSha": "5061f3a3deb61976684c2b787cf17febc0a97934",
+      "byteCount": 4633,
+      "figmaForm": "source-image",
+      "purpose": "design specialist character"
+    },
+    {
+      "path": "assets/collaboration-avatars/legal.png",
+      "gitBlobSha": "e4853ae1ec6fcac99805f1845e1ddbcb562222ce",
+      "byteCount": 4739,
+      "figmaForm": "source-image",
+      "purpose": "legal specialist character"
+    },
+    {
+      "path": "assets/collaboration-avatars/ops.png",
+      "gitBlobSha": "7da4f12cfe6f2ff0a6f8c63ea05f60ce0f37977b",
+      "byteCount": 3824,
+      "figmaForm": "source-image",
+      "purpose": "operations specialist character"
+    },
+    {
+      "path": "assets/collaboration-avatars/lead-listening.png",
+      "gitBlobSha": "15829ae2a27131054cf6c898a34711fe02e8a997",
+      "byteCount": 4225,
+      "figmaForm": "source-image",
+      "purpose": "project lead listening"
+    },
+    {
+      "path": "assets/collaboration-avatars/lead-presenting.png",
+      "gitBlobSha": "d5ce8057165f5d1fc2417bf7b3a2bf5b498b197d",
+      "byteCount": 5423,
+      "figmaForm": "source-image",
+      "purpose": "project lead presenting"
+    },
+    {
+      "path": "training/ai-mental-os/v4/base/assets/mei.jpg",
+      "gitBlobSha": "5ad225ede567564b4cef44458f1df49e5139a4a1",
+      "byteCount": 195989,
+      "figmaForm": "source-image",
+      "purpose": "fictional Mei protagonist illustration reused in v5"
+    },
+    {
+      "path": "training/ai-mental-os/v4/base/assets/cover.jpg",
+      "gitBlobSha": "5a35fdce266cb8e07a6f8ec87cf64ddc18dd5484",
+      "byteCount": 288130,
+      "figmaForm": "source-image",
+      "purpose": "fictional hero illustration reused from v4"
+    },
+    {
+      "path": "training/ai-mental-os/v4/base/assets/brush-slash-canonical.png",
+      "gitBlobSha": "2cad803353ade33b3a67140c0a2b89c1a48473cf",
+      "byteCount": 15625,
+      "figmaForm": "derived-raster",
+      "purpose": "source-derived logo silhouette, exact SVG preferable"
+    },
+    {
+      "path": "training/ai-mental-os/v4/base/assets/bspt-brush-draw-once.gif",
+      "gitBlobSha": "d817539d97c3a8742b1e53499376ea982ec9edd9",
+      "byteCount": 135202,
+      "figmaForm": "derived-motion",
+      "purpose": "one-shot PowerPoint brush animation"
+    }
+  ]
+}

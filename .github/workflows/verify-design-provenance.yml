@@ -1,0 +1,38 @@
+name: Verify BSPT GitHub/Figma source provenance
+on:
+  push:
+    paths:
+      - 'design/figma-asset-manifest.json'
+      - 'docs/source-of-truth.md'
+      - 'scripts/verify-figma-source.mjs'
+      - 'logos/**'
+      - 'motifs/**'
+      - 'motion/**'
+      - 'assets/collaboration-avatars/**'
+      - 'training/ai-mental-os/v4/base/assets/**'
+      - 'training/ai-mental-os/v5/**'
+      - '.github/workflows/verify-design-provenance.yml'
+  pull_request:
+    paths:
+      - 'design/figma-asset-manifest.json'
+      - 'docs/source-of-truth.md'
+      - 'scripts/verify-figma-source.mjs'
+      - 'logos/**'
+      - 'motifs/**'
+      - 'motion/**'
+      - 'assets/collaboration-avatars/**'
+      - 'training/ai-mental-os/v4/base/assets/**'
+      - 'training/ai-mental-os/v5/**'
+      - '.github/workflows/verify-design-provenance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-figma-source.mjs
