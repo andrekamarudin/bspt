@@ -76,3 +76,7 @@ The [v3 visual-thread standard](deck-v3-visual-thread.md) records how the first 
 ## The workforce-first v4 learning experience
 
 The latest [human-first story and evidence review](workforce-story-v4.md) begins with the newly committed [knowledge-frontier GIF](../../motion/human-value-knowledge-frontier.gif), then explains actual workforce changes before introducing AI techniques. It follows fictional Mei through a verifiable outcome contract and ends with an unseen-case capstone. See [v4 timing](session-plans.md), [quality ledger](deck-v4-qa.md), and [runnable source-checking example](demo/check_register.py). The actual editable PPTX and source ZIP were delivered in the conversation.
+
+## Current v5 opening: Why learn AI?
+
+See [collaboration-first story](workforce-story-v5.md) and [reproducible v5 generator](../../training/ai-mental-os/v5/README.md). The canonical [collaboration GIF](../../motion/collaboration-with-ai.gif) replaces the knowledge-frontier metaphor as the opening; human experts remain essential. v4 is preserved and can still be rebuilt.

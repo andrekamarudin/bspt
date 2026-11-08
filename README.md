@@ -67,3 +67,7 @@ The [AI Mental OS paid curriculum](content/paid-training/README.md) teaches two 
 **Every deliverable requires a GitHub commit before distribution.** Keep the owning generator/source, unique source assets, dependency versions, an exact build command, automated checks and enough context to rebuild. Do not leave the only source in ChatGPT's temporary `/mnt/data`, OneDrive, a ZIP download, Figma, or an unversioned computer folder.
 
 For decks, the complete [AI Mental OS v4 source](training/ai-mental-os/v4/README.md) is the example. Build it from a clean checkout using `cd training/ai-mental-os/v4 && bash build.sh`. CI independently generates a downloadable PPTX. Generated caches and rebuildable outputs may be excluded; unique unrecoverable assets may not. If a binary exceeds a sensible Git size, track a checksum, immutable approved asset-store URL, and an automated retrieval step. Report the pushed SHA and test evidence.
+
+## AI Mental OS v5: Collaboration-first opening
+
+The [active 150-minute v5 deck source](training/ai-mental-os/v5/README.md) starts from the [original collaboration-with-AI animation](motion/collaboration-with-ai.gif) and answers **“What's in it for you?”**: useful cross-functional first passes without treating AI as a replacement for human specialists. v4 remains intact for reproduction and history. [Workflow](.github/workflows/build-ai-mental-os-v5.yml) builds the exact canonical GIF into the editable deck and uploads both PPTX and 30-slide preview.

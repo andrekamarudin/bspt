@@ -1,0 +1,13 @@
+{
+  "name": "bspt-ai-mental-os-v5",
+  "private": true,
+  "version": "5.0.0",
+  "description": "Editable PPTX generator for the collaboration-first paid BSPT workshop",
+  "scripts": {
+    "build": "bash build.sh",
+    "preview": "python render_preview.py"
+  },
+  "dependencies": {
+    "pptxgenjs": "3.12.0"
+  }
+}
