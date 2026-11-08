@@ -31,3 +31,7 @@ Outputs: `BSPT_AI_Mental_OS_Training_v4.pptx`, `slides_meta.json`, `human-value-
 ## Limitations
 
 The known-answer checker is **not** general semantic verification. This build does not claim independently tested GIF playback in Microsoft PowerPoint, projector legibility, or actual participant learning gains. The animation's frontier is a conceptual metaphor, not a measured AI capability.
+
+## Reproduce the visual preview
+
+After `bash build.sh`, run `python render_preview.py`. Requires LibreOffice, Poppler `pdftoppm` and Pillow; produces a **30-slide contact sheet** at `BSPT_AI_Mental_OS_v4_preview.png`. The CI workflow regenerates and publishes both the editable PPTX and this contact sheet. A contact sheet does not prove native GIF playback or all accessibility requirements.
