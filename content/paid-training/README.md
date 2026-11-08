@@ -68,3 +68,7 @@ The learner should feel **competent, not dependent**; the training should instil
 Universal hallucination elimination, zero human review, a guaranteed 30% time saving, autonomous authority to act, immediate expertise in building software agents, or that an LLM grader independently validates its own output.
 
 **Source and risk notes:** [evidence](evidence.md). **Training source-of-truth:** this content folder. **Reusable cross-repo skill:** [howto-delegate-by-outcomes](https://github.com/andrekamarudin/skills/blob/master/howto-delegate-by-outcomes/SKILL.md).
+
+## Visual continuity release v3
+
+The [v3 visual-thread standard](deck-v3-visual-thread.md) records how the first 26-slide paid deck gains BSPT cohesion with an authentic brush signature, progressing chapter line, annotated field notes and two non-looping GIF moments. The editable presentation and generator are supplied as conversation artifacts; native PowerPoint playback and learner pilot remain to be verified.
