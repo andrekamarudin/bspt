@@ -24,3 +24,10 @@
 - Canonical BSPT brand: `brand/`, `logos/`, `motifs/`, `motion/`.
 
 **Default delivery contract:** GitHub source commit + reproducible build + QA evidence + accessible delivery link. The user should not need to ask where the source was kept.
+
+## GitHub, Figma and OneDrive boundary
+
+- **Authoritative:** GitHub commits hold buildable code, exact original vector/image/motion assets, and tests.
+- **Visual collaboration:** Figma is an editable *mirror* of selected design assets. Follow [the sync contract](docs/source-of-truth.md). Never treat an unverified Figma import as done.
+- **File delivery:** OneDrive is for sharing reviewed outputs only, not versioning source code or approving design drift.
+- Before final response run `node scripts/verify-figma-source.mjs`, verify GitHub CI, and record Figma sync state truthfully. If Figma is rate-limited, mark blocked and preserve source in GitHub.
