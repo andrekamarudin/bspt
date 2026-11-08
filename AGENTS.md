@@ -17,7 +17,8 @@
 6. **Approval gates remain.** Do not publish, send to others, deploy production changes, delete shared assets or move money without required user authorization.
 
 ## Current deck ownership
-- v4: `training/ai-mental-os/v4/`, build with `bash build.sh`.
+- **Active v5:** `training/ai-mental-os/v5/`, build with `bash build.sh`; embeds the canonical collaboration GIF and publishes PPTX plus preview via CI.
+- **Archived but reproducible v4:** `training/ai-mental-os/v4/`, build with `bash build.sh`.
 - Earlier versions: `training/ai-mental-os/history/`.
 - Current story and research claims: `content/paid-training/`.
 - Canonical BSPT brand: `brand/`, `logos/`, `motifs/`, `motion/`.

@@ -1,0 +1,57 @@
+name: Rebuild BSPT AI Mental OS v5
+on:
+  push:
+    paths:
+      - 'training/ai-mental-os/v5/**'
+      - 'training/ai-mental-os/v4/base/assets/**'
+      - 'training/ai-mental-os/v4/demo/**'
+      - 'motion/collaboration-with-ai.gif'
+      - '.github/workflows/build-ai-mental-os-v5.yml'
+  pull_request:
+    paths:
+      - 'training/ai-mental-os/v5/**'
+      - 'training/ai-mental-os/v4/base/assets/**'
+      - 'training/ai-mental-os/v4/demo/**'
+      - 'motion/collaboration-with-ai.gif'
+      - '.github/workflows/build-ai-mental-os-v5.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-preview:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: training/ai-mental-os/v5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install rendering dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-impress poppler-utils fonts-dejavu-core fonts-liberation
+      - name: Install exact direct dependencies
+        run: |
+          npm install --no-audit --no-fund
+          python -m pip install -r requirements.txt
+      - name: Build and verify presentation
+        run: bash build.sh
+      - name: Render and inspect all 30 slides
+        run: python render_preview.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BSPT_AI_Mental_OS_Training_v5
+          path: training/ai-mental-os/v5/BSPT_AI_Mental_OS_Training_v5.pptx
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BSPT_AI_Mental_OS_v5_preview
+          path: training/ai-mental-os/v5/BSPT_AI_Mental_OS_v5_preview.png
+          if-no-files-found: error
+          retention-days: 90
