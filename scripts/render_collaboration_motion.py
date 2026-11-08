@@ -74,11 +74,27 @@ def alpha_rgb(hexval, alpha):
     h=hexval.lstrip('#');return tuple(int(h[i:i+2],16) for i in (0,2,4))+(int(alpha),)
 
 
-def draw_avatar(d, cx,cy, label, fill, dark=False, r=31):
-    d.ellipse((cx-r,cy-r,cx+r,cy+r),fill=fill)
-    inner=D if dark else I
-    b=d.textbbox((0,0),label,font=LABEL)
-    d.text((cx-(b[2]-b[0])/2,cy-(b[3]-b[1])/2-3),label,font=LABEL,fill=inner)
+# Generated character artwork is isolated into individual transparent PNGs.
+# Keep pictorial assets independent from layout, text, motion and brand marks.
+AVATAR_DIR=ROOT/'assets'/'collaboration-avatars'
+AVATAR_IDS=('data','design','legal','ops','lead-listening','lead-presenting')
+
+def avatar(name: str, target: tuple[int,int]):
+    source=AVATAR_DIR/f'{name}.png'
+    if not source.exists():
+        raise FileNotFoundError(f'Missing isolated character asset: {source}')
+    original=Image.open(source).convert('RGBA')
+    original.thumbnail(target,Image.Resampling.LANCZOS)
+    return original
+
+AVATARS={name:avatar(name,(102,108) if name.startswith('lead-') else (73,73))
+         for name in AVATAR_IDS}
+
+def put_avatar(base, name, x, y, fade=1.0):
+    img=AVATARS[name]
+    if fade<1.0:
+        img=img.copy();img.putalpha(img.getchannel('A').point(lambda x:int(x*fade)))
+    base.paste(img,(int(x-img.width/2),int(y-img.height/2)),img)
 
 
 def arrow(d,x1,y1,x2,y2,fill,width=4,head=10):
@@ -119,9 +135,9 @@ def draw(t: float):
     d.text((746,232),'A first pass is always nearby.',font=PANEL,fill=C)
 
     # Lead is the same person in both halves; no robotic "AI replaces the team" framing.
-    draw_avatar(d,143,432,'ME',O, r=43)
+    put_avatar(im,'lead-listening',143,414)
     d.text((90,485),'Project lead',font=BODY,fill=I)
-    draw_avatar(d,809,432,'ME',O,r=43)
+    put_avatar(im,'lead-presenting' if t>=23 else 'lead-listening',809,414)
     d.text((753,485),'Project lead',font=BODY,fill=C)
 
     expert=[('DA','Data',321),('DE','Design',409),('LE','Legal',497),('OP','Ops',585)]
@@ -131,8 +147,10 @@ def draw(t: float):
         overlay=Image.new('RGBA',(W,H),(0,0,0,0));od=ImageDraw.Draw(overlay)
         xx=487
         od.line((192,432,xx-38,y),fill=alpha_rgb(F,int(p*170)),width=3)
-        od.ellipse((xx-30,y-30,xx+30,y+30),fill=alpha_rgb(S,int(p*245)))
-        od.text((xx-14,y-12),initial,font=BADGE,fill=alpha_rgb(D,int(p*255)))
+        portrait=AVATARS[name.lower()]
+        faded=portrait.copy()
+        faded.putalpha(faded.getchannel('A').point(lambda a:int(a*p)))
+        overlay.alpha_composite(faded,(int(xx-portrait.width/2),int(y-portrait.height/2)))
         od.text((537,y-17),name,font=LABEL,fill=alpha_rgb(I,int(p*255)))
         if t>=17:
             od.rounded_rectangle((542,y+13,652,y+38),radius=5,fill=alpha_rgb('#E6D3C4',int(p*255)))
