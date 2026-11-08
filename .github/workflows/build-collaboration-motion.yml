@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - scripts/render_collaboration_motion.py
+      - scripts/extract_collaboration_avatars.py
+      - assets/collaboration-avatars/character-atlas.png
       - logos/brush-slash.svg
       - motifs/paperclip.svg
       - motifs/marker-swash.svg
@@ -34,6 +36,8 @@ jobs:
           test -s logos/brush-slash.svg
           test -s motifs/paperclip.svg
           test -s motifs/marker-swash.svg
+      - name: Extract isolated character PNGs from approved atlas
+        run: python scripts/extract_collaboration_avatars.py
       - name: Render one-shot collaboration animation
         run: python scripts/render_collaboration_motion.py
       - name: Commit the generated GIF
@@ -41,7 +45,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add motion/collaboration-with-ai.gif
+          git add assets/collaboration-avatars/*.png motion/collaboration-with-ai.gif
           if ! git diff --cached --quiet; then
             git commit -m "assets(motion): rebuild SVG-backed AI collaboration GIF"
             git push origin HEAD:main
