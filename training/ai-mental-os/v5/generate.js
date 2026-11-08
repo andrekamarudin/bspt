@@ -68,10 +68,10 @@ function narr(s,{time=0,objective='',say='',ask='',show='',sources=[],safety='',
  T(s,'Question → AI first pass → Human expert when needed',.91,6.18,11.53,.53,{sz:25,bold:true,color:K.yellow});
  narr(s,{time:4,objective:'Distinguish removing routine coordination delays from replacing human collaboration.',say:'Projects still need cooperation, specialist expertise and accountable owners. AI can now help with a rough analysis, mockup, first draft or checklist before an expert is available. A first pass is not an approved decision. Do not promise that every job or team gets instant answers or eliminates all handoffs.',ask:'What do you still want a real colleague to decide after AI prepares a draft?',sources:['gif']});}
 // 04 Extend reach across disciplines without claiming to replace them.
-{const s=make();head(s,'YOUR REACH EXPANDS','You can begin work across disciplines.',{sz:39});
- O(s,.98,3.20,2.10,K.forest);T(s,'YOU',1.39,3.93,1.30,.59,{sz:33,bold:true,color:K.cream,align:'center'});
+{const s=make();head(s,'YOUR REACH EXPANDS','You can begin across disciplines.',{sz:39});
+ O(s,.98,3.53,2.10,K.forest);T(s,'YOU',1.39,4.25,1.30,.59,{sz:33,bold:true,color:K.cream,align:'center'});
  const work=[['ANALYSIS','Explore numbers'],['DESIGN','Sketch a mockup'],['WRITING','Produce a first draft'],['OPERATIONS','Map a checklist']];
- work.forEach((v,i)=>{const y=2.03+i*1.12;AR(s,3.12,4.21,4.07,y+.36,K.orange,1.7);R(s,4.27,y,8.05,.87,i%2===0?K.mint:K.white);T(s,v[0],4.52,y+.13,2.66,.29,{sz:18,bold:true,color:K.forest});T(s,v[1],7.21,y+.08,4.72,.55,{sz:23,color:K.ink});});
+ work.forEach((v,i)=>{const y=2.50+i*1.08;AR(s,3.12,4.53,4.07,y+.36,K.orange,1.7);R(s,4.27,y,8.05,.87,i%2===0?K.mint:K.white);T(s,v[0],4.52,y+.13,2.66,.29,{sz:18,bold:true,color:K.forest});T(s,v[1],7.21,y+.08,4.72,.55,{sz:23,color:K.ink});});
  foot(s,'AI supplies a draft; trained people validate specialist and high-stakes decisions.');
  narr(s,{time:4,objective:'Recognize four useful cross-functional starting points without confusing first passes with expert work.',say:'These examples are possibilities, not guaranteed outputs or specialist equivalence. A basic financial table can be explored before involving analytics. A rough screen can be mocked up before a designer reviews it. An operations checklist can be drafted before a process owner confirms it.',ask:'Which one of these would remove the most friction in your own week?',check:'Learner picks one opportunity and names the necessary expert or safety boundary.'});}
 // 05 Ground the transformation without fearmongering.
