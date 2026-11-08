@@ -44,3 +44,12 @@
 - Obtain actual learner feedback and evaluate transfer. The current deck remains a creative first draft.
 
 **Artifact handoff:** The editable PPTX, preview image and portable generator/source zip are downloadable conversation artifacts, not checked into this GitHub repository.
+
+## Six-P story functions: quality check
+
+- **Promise:** competence to delegate by outcomes, not memorized prompts.
+- **Problem:** fictional Mei must recheck an AI summary that invents commitments.
+- **Pivot:** human above the loop plus success provable by design.
+- **Proof:** trace source lines to proposed, action and unknown states; show real checks and honest limitations.
+- **Participation:** baseline reflection, contract writing, peer challenge and novel capstone.
+- **Payoff:** learner can invent and defend the 25th AI-assisted workflow.
