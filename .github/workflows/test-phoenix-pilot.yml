@@ -4,13 +4,17 @@ on:
     paths:
       - 'apps/phoenix-rehab-pilot/**'
       - 'logos/brush-slash.svg'
+      - 'motion/brush-slash-draw.svg'
       - 'motifs/marker-swash.svg'
+      - 'motifs/paperclip.svg'
       - '.github/workflows/test-phoenix-pilot.yml'
   pull_request:
     paths:
       - 'apps/phoenix-rehab-pilot/**'
       - 'logos/brush-slash.svg'
+      - 'motion/brush-slash-draw.svg'
       - 'motifs/marker-swash.svg'
+      - 'motifs/paperclip.svg'
       - '.github/workflows/test-phoenix-pilot.yml'
 permissions:
   contents: read
@@ -22,4 +26,25 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
-      - run: node --test apps/phoenix-rehab-pilot/test/engine.test.mjs
+      - name: Unit and canonical brand source tests
+        run: node --test apps/phoenix-rehab-pilot/test/*.test.mjs
+      - name: Install pinned Chromium QA tooling
+        working-directory: apps/phoenix-rehab-pilot
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0
+          npx playwright install --with-deps chromium
+      - name: Check mobile and desktop layouts in Chromium
+        run: |
+          python3 -m http.server 4179 --directory apps/phoenix-rehab-pilot > /tmp/phoenix-pilot-http.log 2>&1 &
+          for n in 1 2 3 4 5 6 7 8 9 10; do
+            if curl --silent --fail http://127.0.0.1:4179/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node apps/phoenix-rehab-pilot/qa/check-layout.mjs
+      - name: Upload responsive QA screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: phoenix-responsive-qa
+          path: apps/phoenix-rehab-pilot/qa/screenshots/
+          if-no-files-found: warn
