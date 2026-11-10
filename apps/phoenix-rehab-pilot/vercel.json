@@ -31,7 +31,12 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/about",
+      "destination": "https://phoenix.bytesizeprotip.com/about",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://phoenix.bytesizeprotip.com/:path*",
       "permanent": false
     }
   ],

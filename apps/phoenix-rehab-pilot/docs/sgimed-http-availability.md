@@ -30,3 +30,9 @@ These are **implementation clues only**, not a supported, authorised, or reliabl
 Keep user-facing booking handoffs pointed to the official calendars. **Do not issue availability claims or connect live data** until authorised read-only endpoints and their contract are confirmed and tested. Avoid live appointment mutation endpoints; they are unnecessary for this work.
 
 Next step: obtain formal SGiMED API/integration documentation or explicit permission from Phoenix Rehab's authorised account owner, then verify a read-only call under least-privilege credentials with bounded rate limits.
+
+## 11 Nov internal adapter update
+
+The isolated GreenCloud internal pilot now performs **read-only** date-scoped SGiMED calendar calls via public clinic booking links. The backend discards the raw upstream responses (which may contain private staff fields and booking tokens), retains only a strict allowlist of publicly offered opening times, caches the projection for two minutes, and exposes no booking mutation route. Synthetic privacy tests validate that private fields cannot be emitted. One internal check for 12 Nov reached all five branches and returned 14 open blocks, but their continuing availability is not guaranteed.
+
+**This is technical verification, not contractual approval.** Clinic/supplier terms, permitted use, availability semantics and supported API behaviour remain to be confirmed before any customer-facing availability service. No actual appointments are made by this prototype.

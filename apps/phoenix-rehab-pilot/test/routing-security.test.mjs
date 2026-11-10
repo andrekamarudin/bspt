@@ -34,10 +34,20 @@ test('secure proxy enforces project OIDC and same-origin writes',()=>{
  assert.match(s,/origin/);
  assert.match(s,/req\.headers\.cookie/);
 });
-test('Vercel hardens response and root redirects to /about',()=>{
+test('Vercel hardens response and sends every route to the protected GreenCloud instance',()=>{
  const c=JSON.parse(text('vercel.json'));
- assert.ok(c.redirects.some(x=>x.source==='/'&&x.destination==='/about'));
+ assert.ok(c.redirects.some(x=>x.source==='/'&&x.destination==='https://phoenix.bytesizeprotip.com/about'));
+ assert.ok(c.redirects.some(x=>x.source==='/:path*'&&x.destination==='https://phoenix.bytesizeprotip.com/:path*'));
  const headerNames=c.headers.flatMap(x=>x.headers.map(h=>h.key));
  assert.ok(headerNames.includes('Content-Security-Policy'));
  assert.ok(headerNames.includes('X-Frame-Options'));
+});
+
+test('dashboard handlers are scoped correctly and developer setup supports manual enrollment',()=>{
+ const script=text('shared/console.mjs');
+ assert.match(script,/let loadAdmin=async\(\)=>\{\},loadDev=async\(\)=>\{\}/);
+ assert.match(script,/loadAdmin=async function\(\)/);
+ assert.match(script,/loadDev=async function\(\)/);
+ assert.match(script,/totp-manual/);
+ assert.match(text('dev/index.html'),/id="totp-manual"/);
 });

@@ -47,3 +47,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:760px){header.site-header{padding:10px 12px;gap:6px}.mark{gap:4px}.mark img{width:43px;height:37px}.mark strong{font-size:9.5px}.mark small{font-size:8px}header.site-header nav{gap:1px}header.site-header nav a{padding:10px 8px;font-size:10px}.container{padding:22px 14px 40px}.grid{grid-template-columns:1fr}.panel{padding:20px}.hand{font-size:24px}.lead{font-size:14px}}
 @media(max-width:370px){.mark strong{font-size:8.5px}header.site-header nav a{padding:9px 6px;font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Notebook construction: keep notebook margin and ruled accents OUTSIDE readable text. */
+.paper { padding-left: clamp(40px, 3.7vw, 55px) !important; padding-right: 28px !important; overflow: visible; }
+.paper:before { left: 24px; }
+.paper .clip { right: 13px; top: -16px; }
+.paper > *:not(.clip) { position: relative; z-index: 1; }
+.paper h2, .paper h3, .paper p, .paper .hand { max-width: 100%; overflow-wrap: anywhere; }
+@media(max-width:560px){.paper {padding-left:40px !important;padding-right:16px !important}.paper:before{left:24px}}
