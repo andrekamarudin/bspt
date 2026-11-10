@@ -6,18 +6,19 @@
  <meta name="theme-color" content="#082E24">
  <meta name="description" content="Independent, no-risk web chatbot pilot for Phoenix Rehab. Explore clinic FAQs and official booking links without switching your existing system.">
  <title>Phoenix Rehab · Conversation pilot by BSPT</title>
- <link rel="icon" type="image/svg+xml" href="./brand-mark.svg">
+ <link rel="icon" type="image/svg+xml" href="./brush-slash.svg">
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+ <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
  <link rel="stylesheet" href="./style.css">
+ <link rel="stylesheet" href="./responsive-brand.css">
  <script type="module" src="./app.mjs"></script>
 </head>
 <body>
  <a class="skip" href="#conversation">Skip to conversation</a>
  <header class="masthead">
    <div class="brand">
-     <div class="brand-symbol" aria-hidden="true"><span>✳</span></div>
+     <div class="brand-symbol" aria-hidden="true"><picture><source media="(prefers-reduced-motion: reduce)" srcset="./brush-slash.svg"><img src="./brand-mark-animated.svg" alt="" width="62" height="49"></picture></div>
      <div class="brand-text"><strong>PHOENIX REHAB</strong><small>Conversation pilot</small></div>
    </div>
    <nav aria-label="Main navigation">
@@ -26,22 +27,25 @@
    </nav>
  </header>
  <main class="main">
-   <section class="intro" aria-labelledby="intro-title">
+   <section class="intro bspt-paper-section" aria-labelledby="intro-title">
      <div class="eyebrow"><span class="pulse" aria-hidden="true"></span> PRIVATE EVALUATION CONCEPT · NOV 2026</div>
      <h1 id="intro-title">A better first<br><span class="highlighted">conversation.</span></h1>
+     <div class="intro-scribble" aria-hidden="true">Keep the old system.<br>Test this one first.</div>
      <p class="lede">A simple way to get clinic answers and reach the right booking calendar. Built to test alongside Phoenix Rehab's existing system, <strong>not to replace it overnight.</strong></p>
      <div class="assurance">
        <div class="assurance-line"><span class="number">01</span><div><strong>Useful after hours</strong><small>Everyday questions, without waiting on reception.</small></div></div>
        <div class="assurance-line"><span class="number">02</span><div><strong>Booking, without guesswork</strong><small>Real slot selection stays in Phoenix's own calendar.</small></div></div>
        <div class="assurance-line"><span class="number">03</span><div><strong>Easy human handoff</strong><small>No confident-sounding answers when we aren't sure.</small></div></div>
      </div>
-     <div class="notebook" aria-label="Pilot notes">
-       <span class="note-label">A NOTE FROM BSPT</span>
-       <p>Keep the old system running. Test the new one on the awkward questions first.</p>
-       <img src="./brush-slash.svg" alt="" class="note-mark" width="75" height="50">
-     </div>
+     <aside class="notebook bspt-notebook-brief" aria-label="BSPT field note">
+       <img class="notebook-clip" src="./paperclip.svg" alt="" width="32" height="48">
+       <span class="note-label">FIELD NOTE / 01</span>
+       <p>Keep BotMD running while you compare how the two assistants answer.</p>
+       <span class="notebook-hand">No risky switch-over.</span>
+     </aside>
    </section>
    <section class="experience" id="conversation" aria-labelledby="chat-title">
+     <div class="mobile-chat-heading"><span class="mobile-kicker">BSPT × PHOENIX REHAB / PRIVATE PILOT</span><p>Ask a question. <span class="mobile-mark">See what works.</span></p></div>
      <div class="chat-shell">
        <div class="chat-header">
          <div class="agent-mark" aria-hidden="true">P<span>.</span></div>
