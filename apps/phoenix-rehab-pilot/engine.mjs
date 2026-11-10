@@ -66,7 +66,7 @@ export function respond(raw,previous={}){
  if(/\b(cancel|reschedul|postpone|change my booking|change appointment|refund|late)\b/.test(q)){
   return result("Phoenix asks for at least 24 hours' notice when cancelling or rescheduling. Its published policy says later cancellations may incur the full appointment fee, with exceptions for genuinely unforeseen situations. Please contact the clinic directly to make changes; this demo cannot change bookings.",state,[{label:"Talk to staff",prompt:"Speak to a person"}],[linked("Cancellation policy",SOURCES.faq)],"faq",SOURCES.faq);
  }
- if(/\b(remind|no.show|follow.up|automated message|notification)\b/.test(q)){
+ if(/\b(remind(?:er|ers|ing|s)?|no.show|follow.up|automated messages?|notifications?)\b/.test(q)){
   return result("This is a parallel web pilot. It does not send WhatsApp reminders, send follow-ups, or access patient bookings. Phoenix's existing booking and messaging system remains the operational source of truth until an authorised integration is tested.",state,[{label:"Book a visit",prompt:"I'd like to book"},{label:"Talk to staff",prompt:"Speak to a person"}],[],"pilot");
  }
  if(/\b(privacy|store|record|data|confidential|personal information)\b/.test(q)){
