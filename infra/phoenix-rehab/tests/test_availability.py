@@ -2,6 +2,9 @@ import asyncio
 import unittest
 from datetime import datetime,timedelta
 from zoneinfo import ZoneInfo
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from availability import _per_branch, validate_date
 class DummyResponse:
     def __init__(self,url,data=None):self.url=url;self.data=data
