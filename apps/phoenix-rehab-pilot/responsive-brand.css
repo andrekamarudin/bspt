@@ -1,0 +1,183 @@
+/*
+ * Phoenix Rehab pilot · BSPT responsive brand composition.
+ * Authoritative visuals: /logos/brush-slash.svg, /motion/brush-slash-draw.svg,
+ * /motifs/marker-swash.svg, /motifs/paperclip.svg copied without modification.
+ * Overrides the original prototype's fixed chat and misplaced mobile hero.
+ */
+
+/* 01 · Brand signature and restrained one-shot motion */
+:root{--bspt-paper:#fffcf4;--bspt-ink:#17372c;--bspt-pencil:#bb4928}
+html{scroll-padding-top:80px}
+body{min-width:0;background-color:var(--cream);background-image:radial-gradient(#a98d6714 .7px,transparent .7px);background-size:9px 9px}
+.brand-symbol{width:63px;height:49px;min-width:63px;background:none;transform:none;border-radius:0;display:flex;align-items:center;justify-content:center;overflow:visible}
+.brand-symbol img{display:block;width:63px;height:49px;object-fit:contain;transform:none}
+.brand-text strong{letter-spacing:.11em}
+.masthead{position:relative;z-index:10}
+.masthead::after{content:"";height:1px;background:#d5dfd2;position:absolute;left:clamp(20px,4.5vw,72px);right:clamp(20px,4.5vw,72px);bottom:0}
+.mobile-chat-heading{display:none}
+.intro{position:relative;min-width:0}
+.intro h1{position:relative;z-index:1}
+.intro-scribble{display:inline-block;font:700 clamp(24px,2.7vw,34px)/1.05 "Caveat",cursive;color:var(--orange);transform:rotate(-3deg);margin:-1px 0 21px 18px;max-width:300px}
+.intro .highlighted{display:inline-block}
+.intro .highlighted:after{bottom:.05em;height:.35em;left:0;width:100%;z-index:-1}
+.notebook.bspt-notebook-brief{display:block;position:relative;margin-top:44px;max-width:485px;transform:rotate(-.7deg);padding:24px 58px 24px 46px;background-color:var(--bspt-paper);background-image:repeating-linear-gradient(0deg,transparent 0,transparent 31px,rgba(151,131,105,.09) 32px,transparent 33px);border:1px solid #d6c5ad;border-radius:3px;box-shadow:8px 9px 0 #c5b6a252,0 16px 31px #66533e12}
+.notebook.bspt-notebook-brief::before{left:20px;border-color:#efbca9}
+.notebook.bspt-notebook-brief::after{content:"";position:absolute;left:8px;top:20px;bottom:18px;width:10px;background:radial-gradient(circle,#beb3a0 3px,transparent 4px) top/10px 32px repeat-y;pointer-events:none}
+.notebook-clip{position:absolute;right:12px;top:-24px;width:33px;height:52px;transform:rotate(10deg);pointer-events:none}
+.notebook .note-label{display:block;color:#8a6b51}
+.notebook p{margin:13px 0 8px;font:600 clamp(17px,1.7vw,21px)/1.5 var(--serif);color:var(--deep)}
+.notebook-hand{display:inline-block;font:700 27px/1.1 "Caveat",cursive;color:var(--orange);transform:rotate(-3deg);margin-top:5px}
+.note-mark{display:none}
+.eyebrow{line-height:1.55}
+.eyebrow .pulse{flex-shrink:0}
+
+/* 02 · Chat looks like a professional service, not a demo window */
+.experience{position:relative;min-width:0}
+.chat-shell{height:min(740px,calc(100dvh - 155px));min-height:530px;max-height:none;border-radius:19px;border:1px solid #d9e1d4;box-shadow:0 18px 50px #082e2414,0 3px 10px #082e2406;background:var(--white)}
+.chat-header{padding:18px 21px;background:var(--white);flex-shrink:0}
+.agent-title h2{font-size:15px;letter-spacing:-.015em}
+.agent-title p{font-size:11px}
+.agent-mark{height:43px;width:43px;min-width:43px;border-radius:13px 13px 13px 4px}
+.reset{min-height:44px;min-width:44px;flex-shrink:0}
+.demo-notice{margin:11px 16px 0;border:1px solid #f0ddb4;border-left:3px solid #e6b85f;border-radius:8px;padding:10px 12px;background:#fff9ed;flex-shrink:0}
+.demo-notice strong{font-size:10px}
+.demo-notice span{font-size:11.5px;line-height:1.55}
+.messages{min-height:0;padding:21px 19px 16px;gap:17px}
+.bubble{font-size:14px;line-height:1.65;padding:13px 15px}
+.bubble-content{max-width:min(87%,550px)}
+.assistant .bubble{background:#eff4ed}
+.response-links{gap:7px}
+.answer-link{min-height:39px;display:inline-flex;align-items:center;white-space:normal;font-size:12px}
+.citation{font-size:10.5px}
+.composer{position:relative;flex-shrink:0;min-width:0;background:var(--white);padding:12px 18px max(13px,env(safe-area-inset-bottom))}
+.suggestions{min-width:0;gap:8px;min-height:46px;scroll-padding:0 4px}
+.suggestion{min-height:40px;white-space:nowrap;scroll-snap-align:start;font-size:12px;padding:8px 14px}
+.composer form{min-width:0;padding:5px 5px 5px 10px;border-radius:12px}
+.composer input{min-width:0;font-size:16px;line-height:1.45;padding:8px 4px}
+.composer form button{flex-shrink:0;height:44px;width:46px;color:#fff;font-size:25px}
+.composer-foot{margin-top:8px}
+.composer-foot span{font-size:10.5px}
+.composer-foot button{min-height:30px;font-size:11.5px}
+.under-chat{margin-top:16px}
+.under-chat button{min-height:40px}
+.footer-sign img{width:55px;height:36px;object-fit:contain}
+
+/* 03 · Mobile first: chat is the first product, explanatory content comes after */
+@media(max-width:980px){
+  .masthead{padding:12px 18px 11px;position:relative;background:var(--cream)}
+  .masthead::after{left:18px;right:18px}
+  .masthead nav a{display:none}
+  .brand-symbol{width:55px;height:44px;min-width:55px}
+  .brand-symbol img{width:55px;height:44px}
+  .brand{gap:6px}
+  .brand-text strong{font-size:11px;letter-spacing:.075em}
+  .brand-text small{font-size:9px}
+  .nav-action{padding:9px 12px;min-height:44px;font-size:11.5px}
+  .main{display:flex;flex-direction:column;max-width:720px;width:100%;gap:31px;padding:10px 13px 36px}
+  .experience{order:0;width:100%}
+  .intro{order:1;width:100%;padding:0 8px}
+  .mobile-chat-heading{display:block;padding:1px 6px 12px}
+  .mobile-kicker{display:block;color:#586d5c;font-size:9px;line-height:1.3;letter-spacing:.11em;font-weight:800}
+  .mobile-chat-heading p{margin:5px 0 0;font:600 clamp(19px,4.9vw,24px)/1.16 var(--serif);letter-spacing:-.02em}
+  .mobile-mark{position:relative;isolation:isolate;white-space:nowrap}
+  .mobile-mark::after{content:"";position:absolute;left:0;right:0;bottom:.01em;height:.39em;background:url("./marker-swash.svg") center/100% 100% no-repeat;z-index:-1}
+  .chat-shell{height:clamp(460px,calc(100dvh - 156px),760px);min-height:0;max-height:none;border-radius:15px}
+  .chat-header{padding:12px 15px}
+  .chat-header .agent-title h2{font-size:14px}
+  .chat-header .agent-title p{font-size:10px}
+  .demo-notice{margin:9px 11px 0;padding:8px 9px}
+  .demo-notice span{font-size:10.5px}
+  .messages{padding:14px 11px;gap:16px}
+  .composer{padding:10px 11px max(10px,env(safe-area-inset-bottom))}
+  .suggestions{padding-bottom:9px}
+  .under-chat{padding:0 5px;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+  .under-chat div{max-width:none}
+  .under-chat button{padding:7px 0}
+  .intro .eyebrow{font-size:9px}
+  .intro h1{font-size:clamp(42px,9vw,63px);margin:15px 0 9px}
+  .intro-scribble{margin:5px 0 15px 12px;font-size:26px}
+  .intro .lede{max-width:none;margin:0 0 27px;font-size:14px;line-height:1.65}
+  .assurance{display:block;max-width:none}
+  .assurance-line{padding:13px 0}
+  .notebook.bspt-notebook-brief{display:block;margin:34px 4px 0;max-width:none;padding:19px 48px 17px 40px}
+  .notebook p{font-size:17px}
+  .notebook-hand{font-size:24px}
+  .footer{display:grid;gap:10px;padding:25px 20px}
+  .footer a{white-space:normal}
+}
+
+/* 04 · Small phones: large tap targets and stable keyboard/viewport */
+@media(max-width:480px){
+  .masthead{padding:10px 13px 9px}
+  .masthead::after{left:13px;right:13px}
+  .brand-symbol{width:49px;height:40px;min-width:49px}
+  .brand-symbol img{width:49px;height:40px}
+  .brand-text strong{font-size:10px}
+  .brand-text small{font-size:8px}
+  .masthead .nav-action{padding:8px 10px;font-size:10px}
+  .main{padding:7px 8px 30px;gap:27px}
+  .mobile-chat-heading{padding:1px 10px 9px}
+  .mobile-kicker{font-size:8px}
+  .mobile-chat-heading p{font-size:20px}
+  .chat-shell{height:clamp(435px,calc(100dvh - 136px),790px);border-radius:12px}
+  .agent-mark{height:38px;width:38px;min-width:38px}
+  .chat-header{padding:11px 11px;gap:9px}
+  .chat-header .agent-title h2{font-size:13px}
+  .chat-header .agent-title p{font-size:10px}
+  .reset{min-height:40px;min-width:40px}
+  .bubble{font-size:13.5px;line-height:1.6;padding:11px 12px}
+  .bubble-content{max-width:88%}
+  .bubble-avatar{width:23px;height:23px}
+  .answer-link{font-size:11.5px}
+  .demo-notice strong{font-size:9px}
+  .demo-notice span{font-size:10px}
+  .composer-foot span{font-size:9.5px}
+  .composer-foot button{font-size:10px}
+  .intro h1{font-size:clamp(39px,10vw,51px)}
+}
+@media(max-width:360px){
+  .masthead{gap:5px}
+  .brand-text strong{font-size:9.5px}
+  .nav-action{font-size:9.5px}
+  .mobile-chat-heading p{font-size:18px}
+  .chat-header .agent-title p{font-size:9px}
+  .composer-foot span{max-width:68%}
+  .demo-notice{gap:6px}
+}
+@media(max-height:590px) and (max-width:980px){
+  .main{padding-top:5px}
+  .mobile-chat-heading{padding-bottom:5px}
+  .mobile-chat-heading p{font-size:18px;margin:0}
+  .mobile-kicker{font-size:8px}
+  .chat-shell{height:max(280px,calc(100dvh - 114px));min-height:0}
+  .chat-header{padding:8px 11px}
+  .agent-mark{height:34px;width:34px;min-width:34px}
+  .reset{min-height:36px;min-width:36px}
+  .demo-notice{margin-top:5px;padding:5px 8px}
+  .demo-notice span{font-size:9.5px;line-height:1.35}
+  .messages{padding:8px 10px;gap:9px}
+  .bubble{padding:7px 10px;font-size:12.5px}
+  .composer{padding:5px 9px}
+  .suggestions{min-height:35px;padding-bottom:5px}
+  .suggestion{min-height:32px;padding:5px 10px}
+  .composer form button{height:36px;width:39px}
+  .composer input{padding:5px 3px}
+  .composer-foot{margin-top:2px}
+  .composer-foot span{display:none}
+}
+@media(max-width:980px) and (orientation:landscape){
+  .main{max-width:900px}
+  .intro{max-width:750px}
+}
+dialog{max-height:calc(100dvh - 24px);overflow-y:auto}
+@media(max-width:480px){
+ dialog{width:calc(100% - 20px);padding:18px 17px;border-radius:14px}
+ dialog h2{font-size:28px}
+ dialog p{font-size:12px}
+ dialog textarea{font-size:16px}
+ .dialog-actions button{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+  .brand-symbol img{animation:none!important}
+  .mobile-mark::after,.highlighted::after{transition:none!important}
+}
