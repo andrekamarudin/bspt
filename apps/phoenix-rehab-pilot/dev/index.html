@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
+<title>Developer safeguards · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script>
+</head><body data-console="dev"><header class="site-header" id="site-header"></header>
+<main class="container dashboard">
+<section class="hero-compact"><div><div class="kicker">DEVELOPER CONTROL / PASSWORD + TOTP</div><h1>Guardrail <span class="highlight">control.</span></h1><span class="hand">Spend only when the request fits.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
+<div id="flash" class="status" role="status" aria-live="polite"></div>
+<section class="gate panel" id="auth-panel"><h2>Developer authentication</h2><p class="muted">Separate developer credentials. TOTP (authenticator app) is mandatory before unlocking operational controls. Enrolment is permitted once after password verification.</p>
+<form id="login-form"><label for="password">Developer password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200">
+<label for="otp">6-digit authenticator code</label><input id="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="Required after first setup">
+<div class="actions"><button type="submit" class="primary">Unlock developer console</button></div></form></section>
+<section class="panel hidden" id="totp-panel"><h2>Set up your authenticator</h2><p class="note">Scan this QR with your authenticator app after unlocking with the developer password. The TOTP seed lives in Infisical. This QR is shown only during password-authenticated setup; do not photograph or share it.</p>
+<img id="totp-qr" alt="Scan the authenticator QR" width="205" height="205"><p class="muted">If the QR cannot be scanned, use a compatible authenticator app and complete the code challenge on this page.</p>
+<form id="totp-form"><label for="totp-code">Enter your current 6-digit code</label><input id="totp-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required><div class="actions"><button class="primary" type="submit">Verify and activate TOTP</button></div></form></section>
+<section class="hidden" id="console-panel">
+<div class="grid two">
+<section class="panel"><div class="kicker">MODEL ROUTING</div><h2>Cost gate</h2><div class="note">The deterministic filters and rate limits always remain active, regardless of this toggle.</div><form id="dev-form">
+<label class="switchline"><input id="decision" type="checkbox"><span><strong>Luna decision first</strong><small>First call GPT-6 Luna for an allow/deny decision before the response call. Turning off saves one call but the main model still receives strict safety instructions first.</small></span></label>
+<label for="max-day">Global pilot conversations per day</label><input type="number" min="1" max="500" id="max-day">
+<label for="max-ip">Conversations per IP per day</label><input type="number" min="1" max="60" id="max-ip">
+<label for="max-tokens">Max output tokens per answer</label><input type="number" min="80" max="1400" id="max-tokens">
+<label for="extra-policy">Additional developer restrictions</label><textarea id="extra-policy" rows="5" maxlength="2800" placeholder="Optional additional prohibited content or scope limits."></textarea>
+<button class="primary" type="submit">Save safeguard controls</button></form></section>
+<section class="panel"><div class="kicker">NON-NEGOTIABLE SYSTEM POLICY</div><h2>Guardrails</h2><p class="muted">The following baseline is enforced by code; clinic administrators cannot override it.</p><pre id="policy" class="policy"></pre><div class="divider"></div><div class="kicker">MODEL</div><strong id="model">openai/gpt-6-luna</strong></section>
+</div>
+<section class="panel"><h2>Test a prompt without spending tokens</h2><p class="muted">Run deterministic scope and privacy checks before testing the actual Luna decision flow in /chat.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Check non-LLM gate</button></form><div id="test-result" class="status"></div></section>
+</section>
+</main><footer class="site-footer"><span>Developer access requires password and TOTP · All changes audited</span><a href="/about">Pilot overview</a></footer></body></html>

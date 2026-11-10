@@ -27,5 +27,13 @@
         }
       ]
     }
-  ]
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/about",
+      "permanent": false
+    }
+  ],
+  "trailingSlash": false
 }
