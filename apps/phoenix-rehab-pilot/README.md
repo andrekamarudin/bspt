@@ -41,3 +41,16 @@ Official global and branch calendar links were directly provided by Nigel over W
 4. Only then enable booking and consented appointment reminders/follow-ups, with duplicate suppression, cancellation sync and alerts.
 
 Deployment: set Vercel root directory to apps/phoenix-rehab-pilot. Static site, no secrets or build command. robots.txt blocks indexing and security headers restrict script execution.
+
+## BSPT mobile design system (10 Nov 2026)
+
+The original desktop-first prototype was corrected after mobile and motif review. The website uses two stylesheets: `style.css` for base UI and `responsive-brand.css` as the mobile-first BSPT composition layer.
+
+- **Canonical, byte-identical art:** `brush-slash.svg` from `logos/brush-slash.svg`, `brand-mark-animated.svg` from `motion/brush-slash-draw.svg`, `marker-swash.svg` and `paperclip.svg` from the `motifs/` directory. The header runs the actual one-shot SVG motion; reduced-motion browsers load the static mark. Never approximate the logo with CSS polygons.
+- **Handwriting:** genuine editable HTML, using Caveat font, for a brief purposeful margin note and the actual paper field-note. The highlighter is the canonical source SVG. No arrows without a verified semantic target.
+- **Mobile:** at widths up to 980px, the functional chatbot moves **ahead** of editorial copy and notebook, with 16px input, safe-area padding and touch targets; landscape below 590px viewport height has a compact chat so the composer stays visible.
+- **Privacy:** the design layer does not introduce new data storage, analytics, network calls or outbound customer messages.
+
+Automated checks: `node --test apps/phoenix-rehab-pilot/test/*.test.mjs`. The GitHub workflow `.github/workflows/test-phoenix-pilot.yml` runs pinned Chromium tests on actual layout at 360×740, 390×844, 430×932, 768×1024, 891×411 landscape and 1440×900 desktop, tests interactions and uploads six screenshots as the `phoenix-responsive-qa` artifact.
+
+The known Figma brand file (https://www.figma.com/design/hpKg4rZiyQJYwQ7TVBAnft) was referenced through the canonical GitHub design documentation, but Figma's Starter-plan MCP rate limit prevented a fresh Figma read/sync on 10 Nov 2026. The committed GitHub SVG geometry and the browser screenshots are the verified release evidence; **do not claim Figma sync** until a fresh read/write succeeds.
