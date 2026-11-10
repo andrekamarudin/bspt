@@ -33,6 +33,7 @@ jobs:
       - name: Verify JavaScript parses before browser QA
         run: |
           node --check apps/phoenix-rehab-pilot/shared/console.mjs
+          node --check apps/phoenix-rehab-pilot/shared/owner.mjs
           node --check apps/phoenix-rehab-pilot/chat/chat.mjs
       - name: Install pinned Chromium QA tooling
         working-directory: apps/phoenix-rehab-pilot

@@ -51,3 +51,17 @@ test('dashboard handlers are scoped correctly and developer setup supports manua
  assert.match(script,/totp-manual/);
  assert.match(text('dev/index.html'),/id="totp-manual"/);
 });
+
+test('owner-first admin teaches the same bot through reviewed drafts',()=>{
+ const admin=text('admin/index.html');
+ assert.match(admin,/data-tab="answers"/);
+ assert.match(admin,/id="owner-answer-form"/);
+ assert.match(admin,/id="owner-import"/);
+ assert.match(admin,/shared\/owner.mjs/);
+ const script=text('shared/owner.mjs');
+ assert.match(script,/action:'publish'/);
+ assert.match(script,/action:'save'/);
+ assert.match(script,/action:'archive'/);
+ assert.match(script,/phoenix-admin-ready/);
+ assert.match(script,/anonymized/);
+});

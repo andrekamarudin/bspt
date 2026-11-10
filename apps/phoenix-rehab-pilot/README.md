@@ -48,3 +48,20 @@ Public factual reference: https://phoenixrehabgroup.com/about/patient-info-faq/ 
 ## Login repairs (11 Nov)
 
 The admin and developer consoles now register their data-loading handlers in shared scope; JavaScript syntax and loader references are checked in CI. Direct links to /admin and /dev preserve the intended destination when pilot entry is required. First-time developer authenticator enrolment presents a QR and a manually copyable base32 code only after the separate developer password succeeds; the browser must confirm a six-digit challenge to activate 2FA. Do not print enrolment codes in logs or commit them to Git.
+
+
+## Owner-first admin and GreenCloud WhatsApp test connector (11 Nov 2026)
+
+The canonical instance remains **GreenCloud**. The website, the FastAPI AI backend and the signed Meta webhook run in one GreenCloud container. The earlier `phoenix-wa-meta-test` Vercel project is an obsolete, send-disabled scaffold, **not the production callback**.
+
+The clinic-owner admin workflow starts with **Teach the bot**. Staff can add or correct a customer-facing FAQ; create drafts from anonymized Q/A examples of previous conversations; review and explicitly publish or archive answers; restore older versions as drafts; upload policy documents for approval; set a tone; schedule a temporary notice; and review conversations. Published knowledge is incorporated into the **same server-side AI prompt** for website chat and approved Meta test-number WhatsApp messages. No raw historical patient conversations may be bulk imported; redact and review Q/A examples first.
+
+The WhatsApp callback is `https://phoenix.bytesizeprotip.com/api/whatsapp`. GET requires the configured Meta verify token. POST requires the Meta App Secret HMAC-SHA256 signature of the raw payload. Only configured, allowlisted developer testers and text messages addressed to the expected test number are accepted for reply. Message IDs are HMAC-hashed for idempotency, messages are not logged or stored, and test senders have a 24-message/day quota. The system returns 503 when Meta signing credentials are absent. **Outbound sending must remain disabled until an approved Meta API credential, webhook subscription and both recipient confirmations are verified.** Do not migrate the clinic's existing WhatsApp or BotMD number; do not connect actual patient traffic.
+
+Server-only required Meta variables:
+- `PHOENIX_WA_META_APP_SECRET`, `PHOENIX_WA_VERIFY_TOKEN`, `PHOENIX_WA_PHONE_NUMBER_ID`, `PHOENIX_WA_ALLOWED_TEST_NUMBERS`
+- `PHOENIX_WA_ACCESS_TOKEN` (needed for delivery; requires a Meta-issued token)
+- `PHOENIX_WA_SEND_ENABLED=false` until signed testing and explicit authorization
+- Optional `PHOENIX_WA_GRAPH_VERSION` (default `v25.0`)
+
+All Meta secrets and allowlisted phone numbers belong in the private GreenCloud runtime/Infisical secret store, never in GitHub, frontend source or server logs. The sender and message bodies are discarded after responding; only a keyed message-id hash and delivery status are retained for deduplication.

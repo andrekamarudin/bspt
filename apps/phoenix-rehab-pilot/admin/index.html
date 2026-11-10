@@ -2,17 +2,54 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>Clinic admin · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script>
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script><script type="module" src="/shared/owner.mjs"></script>
 </head><body data-console="admin"><header class="site-header" id="site-header"></header>
 <main class="container dashboard">
 <section class="hero-compact"><div><div class="kicker">CLINIC OPERATIONS / PRIVATE</div><h1>Clinic <span class="highlight">controls.</span></h1><span class="hand">Answers that stay current.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
 <div id="flash" class="status" role="status" aria-live="polite"></div>
-<section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Manage approved knowledge, voice, time-limited announcements and conversation audit. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
+<section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Update bot answers, upload clinic documents, schedule notices and review past chats. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
 <section id="console-panel" class="hidden">
 <div class="tabs" role="tablist" aria-label="Clinic admin sections">
-<button type="button" class="active" data-tab="settings">Tone & instructions</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button>
+<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button>
 </div>
-<section class="tab-panel" data-panel="settings"><div class="panel"><h2>How the assistant speaks</h2><p class="muted">These instructions shape the answer, but cannot override core medical and privacy safeguards.</p>
+<section class="tab-panel" data-panel="answers">
+<div class="panel owner-welcome">
+ <div class="kicker">YOUR CLINIC, YOUR ANSWERS</div>
+ <h2>What should the bot do differently?</h2>
+ <p>Update what patients hear without touching prompts or code. A new answer is saved as a draft first, then published to the shared clinic knowledge for website chat and the WhatsApp test bot.</p>
+ <div class="owner-shortcuts">
+  <button type="button" class="secondary" data-go="context">Upload clinic documents</button>
+  <button type="button" class="secondary" data-go="schedule">Announce a holiday closure</button>
+  <button type="button" class="secondary" data-go="audit">Review recent conversations</button>
+  <a class="secondary" href="/chat" target="_blank" rel="noopener">Try the live chatbot</a>
+ </div>
+</div>
+<div class="owner-grid">
+ <section class="panel">
+  <h2>Fix or add an answer</h2><p class="muted">Write the question the way someone would ask it, then the answer you want the bot to give.</p>
+  <form id="owner-answer-form">
+  <input type="hidden" id="owner-edit-id">
+  <label for="owner-question">When someone asks...</label>
+  <textarea id="owner-question" required minlength="8" maxlength="420" rows="3" placeholder="e.g. Can I change my appointment?"></textarea>
+  <label for="owner-answer">The bot should explain...</label>
+  <textarea id="owner-answer" required minlength="10" maxlength="2500" rows="5" placeholder="e.g. Please contact our reception team using the clinic's published contact number..."></textarea>
+  <div class="actions"><button class="primary" type="submit">Save draft</button><button class="secondary" type="button" id="owner-cancel-edit">Clear form</button></div>
+  <p class="muted">Keep answers factual and non-clinical. Editing a published entry creates a draft that must be re-approved.</p>
+  </form>
+ </section>
+ <section class="panel">
+  <h2>Learn from past conversations</h2>
+  <p class="muted">Paste only anonymized example questions and the ideal clinic-approved responses. Patient details and medical histories must not be included.</p>
+  <label for="owner-examples">One or more Q/A pairs</label>
+  <textarea id="owner-examples" rows="9" placeholder="Q: Do you have a clinic near Serangoon?&#10;A: Yes, Phoenix Rehab has a Serangoon location. See our official clinic directory.&#10;&#10;Q: Can I book a Saturday appointment?&#10;A: Please check our official booking calendar for current availability."></textarea>
+  <div class="actions"><button id="owner-import" class="secondary" type="button">Review examples before importing</button></div>
+  <div id="owner-preview" class="data-list" aria-live="polite"></div>
+ </section>
+</div>
+<section class="panel"><div class="owner-heading"><div><h2>Clinic answers</h2><p class="muted">Drafts are not visible to the bot until published. Archived answers stop being used.</p></div><button id="owner-refresh" type="button" class="secondary">Refresh answers</button></div>
+<div id="owner-entries" class="data-list"><p class="muted">Unlock admin to manage answers.</p></div></section>
+</section>
+<section class="tab-panel hidden" data-panel="settings"><div class="panel"><h2>How the assistant speaks</h2><p class="muted">These instructions shape the answer, but cannot override core medical and privacy safeguards.</p>
 <form id="settings-form"><label for="tone">Response tone</label><select id="tone"><option value="warm-professional">Warm and professional</option><option value="concise">Concise and factual</option><option value="friendly">Friendly and conversational</option><option value="formal">Formal and clinical-administrative</option></select>
 <label for="special">Additional clinic instructions</label><textarea id="special" maxlength="4000" rows="8" placeholder="E.g. Gently ask which branch is most convenient; always explain that an actual appointment must be confirmed in the official system."></textarea><p class="muted">Only provide verified public operational information. No patient files or private clinical identifiers here.</p>
 <button class="primary" type="submit">Save clinic settings</button></form></div></section>
