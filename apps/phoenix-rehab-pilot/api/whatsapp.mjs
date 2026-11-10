@@ -41,7 +41,7 @@ export function makeReply(input){
   return result.text.slice(0,1600);
 }
 export async function sendText({to,text,phoneId,token,fetchImpl=fetch}){
-  if(!NUMBER.test(to)||!NUMBER.test(String(phoneId))||!token)throw Error('invalid_config');
+  if(!NUMBER.test(to)||!/^\d{5,24}$/.test(String(phoneId||''))||!token)throw Error('invalid_config');
   const version=process.env.PHOENIX_WA_GRAPH_VERSION||'v26.0';
   if(!/^v\d{1,2}\.0$/.test(version))throw Error('invalid_version');
   const r=await fetchImpl('https://graph.facebook.com/'+version+'/'+phoneId+'/messages',{
