@@ -35,10 +35,21 @@ Never commit tokens, app secrets, telephone numbers or patient messages to this 
 6. Verify 403 for a bad signature, silent ACK for an unapproved sender or different test number, and no deliveries on non-text messages. Disable sending again when not actively testing.
 7. For a durable service, move to a long-lived system-user token, persistent deduplication/consent log, retention policy, and clinic-verified approvals before expanding beyond the sandbox.
 
-## Existing infrastructure state
-- Source: \`andrekamarudin/bspt/apps/phoenix-rehab-pilot\`, preview branch \`feat/phoenix-operational-console\`.
-- Vercel project: \`phoenix-rehab-pilot\`, team \`team_AvN7MKcxJAbxz7njF38yYSIW\`.
-- The preview Vercel project is SSO protected, has no confirmed backend secrets, and the \`phoenix-api.bytesizeprotip.com\` backend in REVIEW-STATUS.md is not yet live.
-- The purchased WhatsApp Business App number remains registered. Do not delete its account as part of Meta sandbox setup.
+## Verified deployment (11 Nov 2026)
 
-Verification: \`node --test apps/phoenix-rehab-pilot/test/whatsapp.test.mjs\`. GitHub's Phoenix workflow also runs \`test/*.test.mjs\`.
+A **standalone, publicly reachable** webhook-only Vercel project has been deployed. No Phoenix web UI, admin or developer console is present.
+
+- Project: `phoenix-wa-meta-test`, ID `prj_Gls47YutiOIqLrIWMideGXBarAm1`, in the same Vercel team.
+- Callback: `https://phoenix-wa-meta-test.vercel.app/api/whatsapp`.
+- Deployment: `dpl_CqJtGKx3s6idrwAn3spvh6jtB8G6`; state `READY`.
+- Source snapshot: `api/whatsapp.mjs`, `engine.mjs` and `package.json` from `apps/phoenix-rehab-pilot` at `4811de9a55252ad352ec52f0e8ec58cbd0f0d6e7`, deployed with Vercel's inline files API.
+- Verified via GreenCloud HTTP: `GET /api/whatsapp` -> 503 (no verify token); `POST /api/whatsapp` -> 503 (no Meta App Secret); `GET /admin` -> 404, `GET /dev` -> 404, `GET /` -> 404. These are expected fail-closed results before configuring secrets.
+- This isolated project is not Git-linked. To reproduce deployment, create an inline Vercel deployment from these three committed files, with framework unset and Node 22, then configure the server-side Meta environment variables and redeploy. The source of truth is GitHub, not a manually edited Vercel bundle.
+- The existing SSO-protected Phoenix web app was **not changed**.
+- Meta login credentials were stored securely in Unbrowse, Facebook login/email verification succeeded, but Meta Developer then demanded additional identity verification (including a human reCAPTCHA). The developer app and test number were **not created**. Account owner must finish this checkpoint directly on Meta before enrollment.
+- Once Meta account access is restored, complete the steps above and set the phone number ID/app secret/test token on this standalone project only.
+
+## Existing infrastructure state
+- Source: `andrekamarudin/bspt/apps/phoenix-rehab-pilot`, review branch `feat/phoenix-operational-console`; sandbox changes in `feat/phoenix-meta-test-number`.
+- Production web app: `phoenix-rehab-pilot` remains SSO-protected; no patient-facing WhatsApp traffic enabled.
+- Purchased WhatsApp Business App number remains registered; do not delete its account.
