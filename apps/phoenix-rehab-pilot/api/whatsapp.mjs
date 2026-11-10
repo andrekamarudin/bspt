@@ -4,6 +4,8 @@
  */
 import {createHmac,timingSafeEqual} from 'node:crypto';
 import {respond,SOURCES,CLINICS} from '../engine.mjs';
+// Preserve the raw webhook bytes for Meta HMAC validation (Vercel default JSON parser must be disabled).
+export const config={api:{bodyParser:false}};
 
 const MAX_BYTES=256*1024;
 const NUMBER=/^\d{8,15}$/;
