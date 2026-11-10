@@ -32,7 +32,7 @@ jobs:
         working-directory: apps/phoenix-rehab-pilot
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
       - name: Check mobile and desktop layouts in Chromium
         run: |
           python3 -m http.server 4179 --directory apps/phoenix-rehab-pilot > /tmp/phoenix-pilot-http.log 2>&1 &
