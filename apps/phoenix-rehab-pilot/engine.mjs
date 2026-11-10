@@ -4,7 +4,7 @@ export const SOURCES = Object.freeze({
   team:"https://phoenixrehabgroup.com/team/",
   clinics:"https://phoenixrehabgroup.com/clinics/",
   globalBooking:"https://hbp.sgimed.com/l/_5wgE2UA",
-  medicalCertificate:"https://phoenixrehabgroup.com/programs/flexor-tendon-repair-recovery/"
+  medicalCertificate:"https://phoenixrehabgroup.com/ankle-dislocation-first-aid-treatment-and-rehabilitation/"
 });
 export const CLINICS = Object.freeze([
   {id:"orchard",name:"Orchard",address:"400 Orchard Road #12-12, Orchard Towers, Singapore 238875",phone:"6588001830",calendar:"https://phoenixrehabgroup.com/calendar/orchard/wa"},
