@@ -1,55 +1,67 @@
-# Phoenix Rehab: WhatsApp Cloud API test-number integration
+# Phoenix Rehab — WhatsApp Cloud API sandbox
 
-Status (11 Nov 2026): **code staged on review branch; NOT connected to a Meta app and NOT live**. This document is for the isolated developer sandbox, not real patient traffic. Existing WhatsApp Business App registration and purchased SIM must remain untouched.
+**Status, 11 Nov 2026:** Meta app and free test number created, webhook challenge verified and configured. **No real WhatsApp conversation has been sent or received, and automated replies remain disabled.** Meta placed the developer account in another security checkpoint during Graph API Explorer. All remote Meta sign-in attempts must stop; account owner should restore access on a trusted device.
 
-## Architecture and security
-Meta's free developer test number -> public HTTPS callback \`/api/whatsapp\` -> signed webhook verification -> **explicit allowlist of up to five verified tester numbers** -> deterministic, public-clinic FAQ engine -> Meta Cloud API reply.
+This integration is a **developer-only sandbox**. It is not the real Phoenix clinic WhatsApp number, not clinic-approved production infrastructure, and not connected to SGiMED, WAHA, EHR or patient data.
 
-- No database, no transcript storage, no content logs, no SGiMED access, no appointment mutation.
-- The reply engine is deliberately limited to general clinic information and official booking links. It is not the still-disabled Phoenix Luna backend, nor is it connected to WAHA.
-- Every POST must present the Meta App Secret HMAC-SHA256 signature of the **raw** body. Wrong signatures reject with 403.
-- GET handshake requires a separate configured verify token. No secret defaults.
-- Outbound replies are **off by default**. Set \`PHOENIX_WA_SEND_ENABLED=true\` only for an authenticated Meta test number AND allowlisted testers.
-- This is an integration smoke test, not a production chatbot. No durable idempotency or delivery ledger: Meta retries could duplicate replies if the platform times out mid-send. Do not use real patient numbers.
-- The Vercel preview is currently behind Vercel SSO protection. Meta's webhook callback cannot verify through that login wall. Before Meta setup, configure a **dedicated, public, HTTPS callback** with path-level isolation or a separate test deployment. Never disable protections for Phoenix's \`/admin\` or \`/dev\`.
+## Verified Meta inventory
 
-## Environment variables (server-side only)
-| Variable | Purpose |
-| --- | --- |
-| \`PHOENIX_WA_VERIFY_TOKEN\` | Random 32+ byte verify token that must match the token entered in Meta → WhatsApp Configuration → Webhook |
-| \`PHOENIX_WA_META_APP_SECRET\` | Meta developer app secret for HMAC signature verification |
-| \`PHOENIX_WA_ACCESS_TOKEN\` | Meta test-token/API credential; treat short-lived developer tokens as expiring |
-| \`PHOENIX_WA_PHONE_NUMBER_ID\` | Meta-generated test **phone number ID**, not the visible phone number |
-| \`PHOENIX_WA_ALLOWED_TEST_NUMBERS\` | Comma-separated permitted WhatsApp numbers, E.164 digits without the \`+\` sign |
-| \`PHOENIX_WA_SEND_ENABLED\` | Must be explicitly \`true\` to reply |
-| \`PHOENIX_WA_GRAPH_VERSION\` | Optional; defaults to \`v26.0\` |
+| Resource | Value | Status |
+| --- | --- | --- |
+| Meta developer app | `BSPT Phoenix WA Test`, App ID `1870450800635906` | Created in development/unpublished mode |
+| Associated Meta business portfolio | `Cultifate.com`, ID `517642749086889` | **Temporary sandbox association only**; Byte Size Pro Tip portfolio was disabled for selection, and Meta blocked creation of any additional portfolio due to limits |
+| Meta free sender number | `+1 555 161 6897` | Developer sandbox, not a real clinic public number |
+| Sender phone number ID | `1455443810979099` | Set in Vercel |
+| Messaging/WABA account ID | `2636802173432923` | Observed in Meta's test dashboard |
+| Webhook HTTPS callback | `https://phoenix-wa-meta-test.vercel.app/api/whatsapp` | Meta GET challenge verified and saved |
+| Webhook subscription | `messages`, v27.0 | Subscribed (alongside Meta's default event subscriptions) |
+| Meta App Secret | Encrypted Vercel env `PHOENIX_WA_META_APP_SECRET` | Configured without exposing the value in Git |
+| API access token | `PHOENIX_WA_ACCESS_TOKEN` | **Missing**; Meta's Generate Token flow did not complete in remote browser |
+| Recipient allowlist | `PHOENIX_WA_ALLOWED_TEST_NUMBERS` | Not set; no recipient approved |
+| Reply gate | `PHOENIX_WA_SEND_ENABLED=false` | Outbound disabled |
 
-Never commit tokens, app secrets, telephone numbers or patient messages to this repo. Use Infisical/Vercel's server-side environment settings; never expose secrets to browser bundles.
+**Critical:** This developer app must not be used as Phoenix's final clinic-owned app while attached to Cultifate.com. For production use a clinic-controlled Meta business account, with its own app and approved number.
 
-## Setup once Meta login is available
-1. Sign in at https://developers.facebook.com/apps/ and create a **Business** app with the **WhatsApp** use case under a development BSPT or clinic-controlled portfolio. Do **not** add or migrate the user's new SIM for this sandbox.
-2. Under WhatsApp → API Setup, note the free test phone number's ID and WABA ID. Add/verify only consenting testers (Meta limit: five). Generate a temporary API token for the smoke test.
-3. Configure the isolated HTTPS callback URL ending in \`/api/whatsapp\`, enter \`PHOENIX_WA_VERIFY_TOKEN\` in Meta, and subscribe to the \`messages\` webhook field. The callback must answer Meta's GET challenge.
-4. Retrieve the Meta App Secret from the app's Basic Settings and install the remaining server-side secrets. Keep send disabled until signed webhook receipt is proven.
-5. Send Meta's \`hello_world\` test template, reply from an approved tester's phone to open the service window, then enable sends and check that exactly one authorised FAQ answer arrives.
-6. Verify 403 for a bad signature, silent ACK for an unapproved sender or different test number, and no deliveries on non-text messages. Disable sending again when not actively testing.
-7. For a durable service, move to a long-lived system-user token, persistent deduplication/consent log, retention policy, and clinic-verified approvals before expanding beyond the sandbox.
+## Isolated infrastructure
 
-## Verified deployment (11 Nov 2026)
+- Vercel project: `phoenix-wa-meta-test` (`prj_Gls47YutiOIqLrIWMideGXBarAm1`) under Andre's Vercel team.
+- Public endpoint: `https://phoenix-wa-meta-test.vercel.app/api/whatsapp`, **only** webhook handler; `/admin`, `/dev`, `/` are 404.
+- Latest observed deployment including webhook token, sender ID and Meta app secret: `dpl_EEdVHGxicu9DVqd9zvoJ28ox9jg4`, `READY`.
+- Source snapshot deployed from `apps/phoenix-rehab-pilot/api/whatsapp.mjs`, `engine.mjs`, and `package.json` at Git commit `4811de9a55252ad352ec52f0e8ec58cbd0f0d6e7`.
+- The isolated Vercel project was created by inlining committed files (not git-linked). Reproduction requires an explicit redeploy from the three committed files and managed secrets. No code needs to be reconstructed from a web UI.
+- Existing `phoenix-rehab-pilot` project with SSO-protected `/admin`, `/dev` and still-disabled model proxy was **not changed**.
+- The recently purchased SIM remains in WhatsApp Business App. Nothing was migrated or deleted.
 
-A **standalone, publicly reachable** webhook-only Vercel project has been deployed. No Phoenix web UI, admin or developer console is present.
+## Security contract
 
-- Project: `phoenix-wa-meta-test`, ID `prj_Gls47YutiOIqLrIWMideGXBarAm1`, in the same Vercel team.
-- Callback: `https://phoenix-wa-meta-test.vercel.app/api/whatsapp`.
-- Deployment: `dpl_CqJtGKx3s6idrwAn3spvh6jtB8G6`; state `READY`.
-- Source snapshot: `api/whatsapp.mjs`, `engine.mjs` and `package.json` from `apps/phoenix-rehab-pilot` at `4811de9a55252ad352ec52f0e8ec58cbd0f0d6e7`, deployed with Vercel's inline files API.
-- Verified via GreenCloud HTTP: `GET /api/whatsapp` -> 503 (no verify token); `POST /api/whatsapp` -> 503 (no Meta App Secret); `GET /admin` -> 404, `GET /dev` -> 404, `GET /` -> 404. These are expected fail-closed results before configuring secrets.
-- This isolated project is not Git-linked. To reproduce deployment, create an inline Vercel deployment from these three committed files, with framework unset and Node 22, then configure the server-side Meta environment variables and redeploy. The source of truth is GitHub, not a manually edited Vercel bundle.
-- The existing SSO-protected Phoenix web app was **not changed**.
-- Meta login credentials were stored securely in Unbrowse, Facebook login/email verification succeeded, but Meta Developer then demanded additional identity verification (including a human reCAPTCHA). The developer app and test number were **not created**. Account owner must finish this checkpoint directly on Meta before enrollment.
-- Once Meta account access is restored, complete the steps above and set the phone number ID/app secret/test token on this standalone project only.
+1. GET challenge only returns Meta's challenge when `PHOENIX_WA_VERIFY_TOKEN` matches the server-side high-entropy token.
+2. POST requires the exact Meta App Secret HMAC-SHA256 signature over **raw request bytes**. Vercel automatic JSON body parsing is disabled in the handler.
+3. All replies require both `PHOENIX_WA_SEND_ENABLED=true` and an explicit comma-separated number in `PHOENIX_WA_ALLOWED_TEST_NUMBERS`, and the matching Meta sender phone ID.
+4. No database, transcript storage or patient-message logs; replies are deterministic public FAQ/navigation only. No clinic bookings, changes, clinical diagnosis or automated reminders.
+5. Never put the App Secret, verify token, API token or test recipient personal numbers in Git, screenshots or chat. Vercel env values are managed server-side. `PHOENIX_WA_GRAPH_VERSION=v25.0` matches the Meta API testing page; webhook subscription is v27.0.
+6. No durable delivery idempotency or queue: duplicates are possible on webhook delivery retries. The implementation must not expand to real patients without deduplication, opt-in/retention controls, compliance review and owner approval.
+7. The code's five unit tests passed in isolated Node 22 Docker, and GitHub Actions passed at `4811de9`.
 
-## Existing infrastructure state
-- Source: `andrekamarudin/bspt/apps/phoenix-rehab-pilot`, review branch `feat/phoenix-operational-console`; sandbox changes in `feat/phoenix-meta-test-number`.
-- Production web app: `phoenix-rehab-pilot` remains SSO-protected; no patient-facing WhatsApp traffic enabled.
-- Purchased WhatsApp Business App number remains registered; do not delete its account.
+## Meta account and testing blockers
+
+- The owner's Meta developer login was restored, allowing creation of the app and the free sandbox number. Meta's app creation required password confirmation; app was successfully created.
+- Meta GET verification accepted the callback URL and verify token. The `messages` field is shown as subscribed.
+- The Meta dashboard currently warns: **unpublished apps only receive test webhooks from the dashboard, not actual inbound WhatsApp traffic, including from app administrators/testers.** A dashboard sample does **not** prove live conversations work.
+- The dashboard `Generate token` button did not yield an access token in the available remote browser, likely because the OAuth dialogue opens outside the current tab. Do not claim an access token exists.
+- On navigating to Graph API Explorer and choosing this app, Meta redirected to a checkpoint saying the account was locked and required login on a previously used device. Remote browser access was stopped and the browser session closed; **do not initiate another cloud Meta login until explicitly reauthorised after the user completes account recovery.**
+- No real send/receive test occurred. The dashboard sample-send action was attempted, but neither Meta delivery success nor a signature-verified POST log receipt was established. Keep the deliverability gate open.
+
+## Remaining setup (after account owner verifies access in trusted local browser)
+
+1. In Meta Developer dashboard for App ID `1870450800635906`, visit **Connect on WhatsApp → Step 1: Try it out → Generate token**. Approve the requested scopes and capture the API token **securely**, not in this GitHub repository or chat.
+2. Configure `PHOENIX_WA_ACCESS_TOKEN` on `phoenix-wa-meta-test` server-side, redeploy, and validate API access. For durable testing, prefer a least-privilege system user token with access to the linked messaging account, if portfolio capabilities permit.
+3. Add one user-approved tester's WhatsApp number under Meta's recipient selector and verify via the official confirmation flow (limit five).
+4. Before enabling any responses, confirm subscribed app/WABA relationship and perform a Meta-signed test webhook that demonstrably returns 200. Add redacted diagnostic counters if needed; never log raw payloads.
+5. Establish an appropriate test-only Live/published app configuration if Meta requires it for actual inbound messages. Do not publish a clinic-branded or patient-facing service under the unrelated Cultifate.com portfolio.
+6. After verified ingress, set only that tester's number in the server allowlist and enable outbound replies. Send the tester a harmless FAQ question and verify exactly one answer, then disable replies when testing ends.
+
+## Source and ownership
+
+- Repository: `andrekamarudin/bspt`.
+- Review branch: `feat/phoenix-meta-test-number`; PR #14 is draft, based on `feat/phoenix-operational-console`.
+- Main Phoenix web code remains review-only and requires the separately documented security gates before any clinical pilot.
