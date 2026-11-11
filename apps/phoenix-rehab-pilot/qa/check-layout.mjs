@@ -76,7 +76,7 @@ try{
      assert.equal(await admin.locator('.owner-import-details:not([open])').count(),1,
                   'Bulk import hidden until expressly requested');
      await admin.locator('[data-workspace="review"]').click();
-     await admin.locator('[data-workflow="testing"]').click();
+     await admin.locator('.workspace-tasks [data-workflow="testing"]').click();
      assert.equal(await admin.locator('[data-panel="testing"]:visible').count(),1,
                   'Testing reachable from Review & test');
      await admin.locator('[data-panel="testing"] [data-workflow="fewshot"]').click();
