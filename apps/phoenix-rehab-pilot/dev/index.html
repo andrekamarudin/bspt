@@ -25,6 +25,19 @@
 <button class="primary" type="submit">Save safeguard controls</button></form></section>
 <section class="panel"><div class="kicker">NON-NEGOTIABLE SYSTEM POLICY</div><h2>Guardrails</h2><p class="muted">The following baseline is enforced by code; clinic administrators cannot override it.</p><pre id="policy" class="policy"></pre><div class="divider"></div><div class="kicker">MODEL</div><strong id="model">openai/gpt-6-luna</strong></section>
 </div>
+<section class="panel" id="wa-webhook-setup">
+<div class="kicker">WHATSAPP TEST CONNECTION</div>
+<h2>Connect Meta to GreenCloud</h2>
+<p class="muted">Use these two fields in Meta &gt; WhatsApp &gt; Step 2 Production setup &gt; Configure Webhooks. This only verifies where Meta can deliver messages. Outbound replies remain switched off until app credentials and signed-message testing are complete.</p>
+<label for="wa-callback">Callback URL</label>
+<input id="wa-callback" type="text" readonly value="https://phoenix.bytesizeprotip.com/api/whatsapp">
+<div class="actions"><button type="button" class="secondary" id="wa-copy-url">Copy callback URL</button></div>
+<label for="wa-verify">Verify token (not your Meta API access token)</label>
+<input id="wa-verify" type="text" readonly autocomplete="off" spellcheck="false" placeholder="Only visible after developer TOTP authentication">
+<div class="actions"><button type="button" class="primary" id="wa-copy-verify">Copy verify token</button><button type="button" class="secondary" id="wa-refresh">Refresh</button><button type="button" class="danger" id="wa-regenerate">Rotate token</button></div>
+<div id="wa-status" class="note" role="status" aria-live="polite">Checking webhook configuration...</div>
+<p class="muted">After Meta verifies the webhook, subscribe to the <code>messages</code> event. Do not enable customer messaging or use real patient details.</p>
+</section>
 <section class="panel"><h2>Test a prompt without spending tokens</h2><p class="muted">Run deterministic scope and privacy checks before testing the actual Luna decision flow in /chat.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Check non-LLM gate</button></form><div id="test-result" class="status"></div></section>
 </section>
 </main><footer class="site-footer"><span>Developer access requires password and TOTP · All changes audited</span><a href="/about">Pilot overview</a></footer></body></html>

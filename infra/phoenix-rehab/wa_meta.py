@@ -13,6 +13,17 @@ PHONE = re.compile(r"^[1-9]\d{7,14}$")
 SIG = re.compile(r"^sha256=[0-9a-f]{64}$")
 LIMIT = 262144
 
+def read_verify_token():
+    """Return only the active verifier; its encrypted DB copy never reaches logs."""
+    from app import setting, decrypt
+    ciphertext=setting("wa_meta_verify_encrypted")
+    if isinstance(ciphertext,str):
+        value=decrypt(ciphertext.encode("ascii"))
+        if len(value)>=30 and value!="[Encrypted record could not be decrypted. Check original Infisical key.]":
+            return value
+    return os.getenv("PHOENIX_WA_VERIFY_TOKEN","")
+
+
 def install(app):
     from app import db
     with db() as con:
@@ -82,7 +93,7 @@ def install(app):
 
     @app.get("/api/whatsapp")
     async def handshake(request:Request):
-        expected=os.getenv("PHOENIX_WA_VERIFY_TOKEN","")
+        expected=read_verify_token()
         query=request.query_params
         challenge=query.get("hub.challenge","")
         if not expected:

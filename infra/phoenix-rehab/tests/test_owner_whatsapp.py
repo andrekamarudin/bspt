@@ -45,6 +45,29 @@ class OwnerAndWhatsapp(unittest.TestCase):
                 "answer":"Contact the published reception phone line."})
             self.assertEqual(r.status_code,200)
             self.assertEqual(c.post("/api/knowledge",json={"action":"publish","id":r.json()["id"]}).status_code,422)
+    def test_developer_controls_verify_token_without_exposing_to_testers(self):
+        from app import set_setting
+        with self.session() as c:
+            # A clinic admin is not entitled to developer Webhook credentials.
+            self.assertEqual(c.post("/api/dev",json={"action":"wa_webhook_info"}).status_code,401)
+            with patch("app.authed",return_value=None):
+                generated=c.post("/api/dev",json={"action":"wa_generate_verify"})
+                self.assertEqual(generated.status_code,200)
+                self.assertEqual(generated.headers.get("cache-control"),"no-store, private")
+                token=generated.json()["verify_token"]
+                self.assertGreaterEqual(len(token),30)
+                info=c.post("/api/dev",json={"action":"wa_webhook_info"})
+                self.assertEqual(info.json()["verify_token"],token)
+                self.assertFalse(info.json()["outbound_enabled"])
+            # Meta GET handshake must work without browser cookies.
+            r=TestClient(APP,base_url="https://testserver").get("/api/whatsapp",params={
+                "hub.mode":"subscribe","hub.verify_token":token,"hub.challenge":"1234567"})
+            self.assertEqual(r.status_code,200,r.text)
+            self.assertEqual(r.text,"1234567")
+            self.assertEqual(TestClient(APP,base_url="https://testserver").get("/api/whatsapp",params={
+                "hub.mode":"subscribe","hub.verify_token":"wrong","hub.challenge":"1234567"}).status_code,403)
+            set_setting("wa_meta_verify_encrypted",None)
+
     def test_webhook_requires_signature_and_does_not_need_tester_cookie(self):
         with TestClient(APP,base_url="https://testserver") as c:
             r=c.get("/api/whatsapp")

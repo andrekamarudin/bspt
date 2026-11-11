@@ -514,6 +514,22 @@ async def dev_ops(request:Request):
     if action=="state":
         return {"ok":True,"model":MODEL,"settings":setting("dev"),
                 "baseline":SAFE_PROMPT}
+    if action=="wa_webhook_info":
+        from wa_meta import read_verify_token
+        token=read_verify_token()
+        return JSONResponse({"ok":True,"callback":"https://phoenix.bytesizeprotip.com/api/whatsapp",
+                             "verify_token":token,
+                             "verification_ready":len(token)>=30,
+                             "outbound_enabled":os.getenv("PHOENIX_WA_SEND_ENABLED")=="true",
+                             "signature_ready":bool(os.getenv("PHOENIX_WA_META_APP_SECRET"))},
+                            headers={"Cache-Control":"no-store, private","Pragma":"no-cache"})
+    if action=="wa_generate_verify":
+        token=secrets.token_urlsafe(32)
+        set_setting("wa_meta_verify_encrypted",crypt(token).decode("ascii"))
+        audit("dev","meta_verify_rotated","webhook")
+        return JSONResponse({"ok":True,"callback":"https://phoenix.bytesizeprotip.com/api/whatsapp",
+                             "verify_token":token,"verification_ready":True},
+                            headers={"Cache-Control":"no-store, private","Pragma":"no-cache"})
     if action=="save":
         try:
             max_day=int(body.get("max_day"))

@@ -65,3 +65,14 @@ test('owner-first admin teaches the same bot through reviewed drafts',()=>{
  assert.match(script,/phoenix-admin-ready/);
  assert.match(script,/anonymized/);
 });
+
+test('developer can copy GreenCloud Meta webhook verification token after secure unlock',()=>{
+ const html=text('dev/index.html');
+ const script=text('shared/console.mjs');
+ assert.match(html,/id="wa-webhook-setup"/);
+ assert.match(html,/id="wa-copy-verify"/);
+ assert.match(html,/id="wa-verify"/);
+ assert.match(script,/wa_webhook_info/);
+ assert.match(script,/wa_generate_verify/);
+ assert.match(script,/navigator\.clipboard\.writeText/);
+});
