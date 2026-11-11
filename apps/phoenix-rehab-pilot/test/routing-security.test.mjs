@@ -100,3 +100,13 @@ test('developer model selection is searchable and uses validated catalog save',(
  assert.match(js,/modelInput\.value\.trim\(\)!==chosenModel/);
  assert.match(css,/\.model-list/);
 });
+
+
+test('developer OTP form exposes standard autofill-compatible semantics',()=>{
+ const html=text('dev/index.html');
+ assert.match(html,/<label for="otp">One-time password \(2FA\)<\/label>/);
+ assert.match(html,/<input id="otp" name="otp" type="text"[^>]*autocomplete="one-time-code"/);
+ assert.match(html,/<input id="password" name="password" type="password"[^>]*autocomplete="current-password"/);
+ assert.match(html,/<input id="totp-code" name="otp" type="text"[^>]*autocomplete="one-time-code"/);
+ assert.match(html,/<input id="otp"[^>]*pattern="\[0-9\]\{6\}"/);
+});
