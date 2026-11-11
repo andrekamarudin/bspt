@@ -201,7 +201,7 @@ class APIFlows(unittest.TestCase):
                     response=c.post('/api/chat',json={'sessionId':str(uuid.uuid4()),'message':'Pryce?'})
                 self.assertEqual(response.json()['status'],'answered')
                 self.assertEqual(len(calls),1)
-                self.assertIn('separate Luna decision is disabled',calls[0][0]['content'])
+                self.assertIn('separate model decision is disabled',calls[0][0]['content'])
         finally:
             set_setting('dev',prior)
 
@@ -221,7 +221,100 @@ class APIFlows(unittest.TestCase):
                 self.assertEqual(response.json()['status'],'answered')
                 self.assertEqual(len(calls),2)
                 self.assertIn('OUT_OF_SCOPE',calls[0][0]['content'])
-                self.assertNotIn('separate Luna decision is disabled',calls[1][0]['content'])
+                self.assertNotIn('separate model decision is disabled',calls[1][0]['content'])
+        finally:
+            set_setting('dev',prior)
+
+    def test_model_catalog_filters_nonchat_and_training_models(self):
+        from app import supported_chat_models,_MODEL_CATALOG_CACHE
+        import asyncio
+        class Reply:
+            def raise_for_status(self):return None
+            def json(self):
+                def entry(identifier,kind='language',training='all',output=('text',)):
+                    return {'id':identifier,'name':identifier.split('/')[-1],
+                        'owned_by':identifier.split('/')[0],'type':kind,
+                        'no_training':training,'modalities':{'input':['text'],'output':list(output)},
+                        'supported_specifications':['v2'],'supported_parameters':['max_tokens'],
+                        'pricing':{'input':'0.000001','output':'0.000002'}}
+                return {'data':[
+                    entry('openai/gpt-6-luna'),entry('anthropic/claude-sonnet-5.5'),
+                    entry('openai/gpt-6-luna-batch'),entry('bad/image',kind='image'),
+                    entry('bad/training-risk',training='some'),
+                    entry('bad/tts',output=('audio',))]}
+        class Client:
+            async def __aenter__(self):return self
+            async def __aexit__(self,*args):return False
+            async def get(self,url):return Reply()
+        before=dict(_MODEL_CATALOG_CACHE)
+        try:
+            _MODEL_CATALOG_CACHE.update({'checked':0,'models':None})
+            with patch('app.httpx.AsyncClient',return_value=Client()):
+                items=asyncio.run(supported_chat_models())
+            self.assertEqual([m['id'] for m in items],
+                             ['anthropic/claude-sonnet-5.5','openai/gpt-6-luna'])
+            self.assertEqual(items[0]['input_per_m'],1)
+            self.assertEqual(items[0]['output_per_m'],2)
+        finally:
+            _MODEL_CATALOG_CACHE.update(before)
+
+    def test_developer_model_selector_save_and_rollback(self):
+        from app import set_setting,active_model,public_context
+        prior=setting('dev')
+        catalog=[{'id':'openai/gpt-6-luna','name':'Luna'},
+                 {'id':'anthropic/claude-sonnet-5.5','name':'Sonnet'}]
+        try:
+            with self.client() as c:
+                self.pilot(c)
+                with patch('app.authed',return_value=True),patch(
+                    'app.supported_chat_models',new=AsyncMock(return_value=catalog)):
+                    available=c.post('/api/dev',json={'action':'models'})
+                    self.assertEqual(available.status_code,200)
+                    self.assertEqual(len(available.json()['models']),2)
+                    current=c.post('/api/dev',json={'action':'state'})
+                    self.assertEqual(current.json()['model'],'openai/gpt-6-luna')
+                    payload={'action':'save','model':'anthropic/claude-sonnet-5.5',
+                             'decision':False,'max_day':80,'max_ip':12,
+                             'max_tokens':460,'extra_policy':''}
+                    saved=c.post('/api/dev',json=payload)
+                    self.assertEqual(saved.status_code,200,saved.text)
+                    self.assertEqual(active_model(),'anthropic/claude-sonnet-5.5')
+                    self.assertEqual(public_context()['model'],'anthropic/claude-sonnet-5.5')
+                    self.assertFalse(setting('dev')['decision'])
+                    invalid=c.post('/api/dev',json={**payload,'model':'not-there/nope'})
+                    self.assertEqual(invalid.status_code,422)
+                    self.assertEqual(active_model(),'anthropic/claude-sonnet-5.5')
+                    revert=c.post('/api/dev',json={**payload,'model':'openai/gpt-6-luna'})
+                    self.assertEqual(revert.status_code,200)
+                    self.assertEqual(active_model(),'openai/gpt-6-luna')
+        finally:
+            set_setting('dev',prior)
+
+    def test_active_model_is_used_in_gateway_requests(self):
+        from app import set_setting,luna_call
+        import asyncio
+        prior=setting('dev')
+        seen=[]
+        class Reply:
+            status_code=200
+            def json(self):
+                return {'choices':[{'message':{'content':'Synthetic response'}}],
+                        'usage':{'prompt_tokens':10,'completion_tokens':3}}
+        class Client:
+            async def __aenter__(self):return self
+            async def __aexit__(self,*args):return False
+            async def post(self,url,headers,json):
+                seen.append(json)
+                return Reply()
+        try:
+            for id in ('anthropic/claude-sonnet-5.5','openai/gpt-6-luna'):
+                set_setting('dev',{**prior,'model':id})
+                with patch('app.httpx.AsyncClient',return_value=Client()):
+                    result,usage=asyncio.run(luna_call([{'role':'user','content':'Test'}]))
+                self.assertEqual(result,'Synthetic response')
+                self.assertEqual(seen[-1]['model'],id)
+            self.assertNotIn('reasoning_effort',seen[0])
+            self.assertEqual(seen[1].get('reasoning_effort'),'minimal')
         finally:
             set_setting('dev',prior)
 

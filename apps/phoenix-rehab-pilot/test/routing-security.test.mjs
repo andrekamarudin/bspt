@@ -85,3 +85,18 @@ test('Meta credential submission is available only in the developer console',()=
  assert.match(html,/id="wa-access-token"/);
  assert.match(js,/wa_credentials_store/);
 });
+
+
+test('developer model selection is searchable and uses validated catalog save',()=>{
+ const html=text('dev/index.html'),js=text('shared/console.mjs'),css=text('shared/console.css');
+ assert.match(html,/id="model-search"[^>]*role="combobox"/);
+ assert.match(html,/id="model-list"[^>]*role="listbox"/);
+ assert.match(html,/id="model-hint"/);
+ assert.match(js,/action:'models'/);
+ assert.match(js,/gatewayModels\.filter/);
+ assert.match(js,/ArrowDown/);
+ assert.match(js,/aria-activedescendant/);
+ assert.match(js,/model:chosenModel/);
+ assert.match(js,/modelInput\.value\.trim\(\)!==chosenModel/);
+ assert.match(css,/\.model-list/);
+});

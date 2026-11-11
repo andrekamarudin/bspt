@@ -4,3 +4,17 @@
 
 .owner-welcome{background:#f1f5ea}.owner-welcome h2{font-size:clamp(23px,3vw,36px);margin:6px 0 10px}.owner-welcome p{max-width:740px}.owner-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.owner-shortcuts .secondary{display:inline-flex;align-items:center;text-decoration:none;color:inherit}.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.owner-grid>.panel{margin:0}.owner-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}.owner-heading h2{margin:0}.owner-example{background:#f5f8f3;border:1px solid #d9e6da;padding:12px;border-radius:9px;margin:10px 0}.owner-entry{border:1px solid #d4e1d5;border-radius:11px;padding:16px;margin:12px 0}.owner-entry .muted{white-space:pre-wrap}.owner-entry .actions{flex-wrap:wrap}.owner-state{font-weight:600;font-size:12px;color:#2c5e42}.owner-state.draft{color:#88611c}.owner-state.archived{color:#777}.owner-safe{font-size:12px;margin-top:10px;color:#526558}
 @media(max-width:830px){.owner-grid{grid-template-columns:1fr}.owner-shortcuts{gap:8px}.owner-welcome .secondary{padding:8px 10px}}
+
+
+/* Accessible searchable gateway-model combobox in the private developer console. */
+.model-picker{position:relative;max-width:100%;margin-top:6px}
+.model-picker input{width:100%;box-sizing:border-box}
+.model-list{position:absolute;z-index:30;top:calc(100% + 5px);left:0;right:0;max-height:330px;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:1px solid #b6cfbc;border-radius:10px;box-shadow:0 14px 35px rgba(8,46,36,.16)}
+.model-option{display:flex;justify-content:space-between;align-items:flex-start;gap:9px;width:100%;border:0;border-bottom:1px solid #e8ede8;background:#fff;color:#1b3f32;padding:11px 13px;text-align:left;font:inherit;cursor:pointer}
+.model-option:last-child{border-bottom:0}
+.model-option[aria-selected="true"],.model-option:hover,.model-option:focus-visible{background:#e9f2e9;outline:0}
+.model-option .model-name{font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.model-option .model-id{display:block;font-size:11px;line-height:1.5;color:#587164;overflow-wrap:anywhere}
+.model-option .model-price{font-size:11px;flex-shrink:0;color:#486652;text-align:right;line-height:1.4}
+.model-empty{font-size:12px;padding:14px;color:#53675b}
+.model-hint{font-size:12px;line-height:1.5;color:#426250;margin:8px 0 12px;overflow-wrap:anywhere}

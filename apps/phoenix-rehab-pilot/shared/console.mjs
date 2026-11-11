@@ -3,7 +3,7 @@ const scope=document.body.dataset.console,route=scope==='admin'?'/api/admin':'/a
 const flash=$('flash');const stamp=(value)=>{try{return new Date(value).toLocaleString('en-SG',{timeZone:'Asia/Singapore',dateStyle:'medium',timeStyle:'short'})}catch{return String(value||'')}};
 function report(text,good=true){flash.className='status '+(good?'success':'error');flash.textContent=text||''}
 function ensureData(result){if(!result||typeof result!=='object')throw Error('Unexpected server response.');return result}
-async function request(path,body){const resp=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify(body)});const data=ensureData(await resp.json().catch(()=>({error:'Invalid server response.'})));if(!resp.ok||data.ok===false)throw Error(data.error||'Operation failed.');return data}
+async function request(path,body){const resp=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify(body)});const data=ensureData(await resp.json().catch(()=>({error:'Invalid server response.'})));if(!resp.ok||data.ok===false)throw Error(data.error||data.detail||'Operation failed.');return data}
 function el(tag,text,cls){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node}
 let loadAdmin=async()=>{},loadDev=async()=>{};
 function showConsole(){ $('auth-panel').classList.add('hidden');$('totp-panel')?.classList.add('hidden');$('console-panel').classList.remove('hidden');$('logout').classList.remove('hidden');scope==='admin'?loadAdmin():loadDev() }
@@ -58,7 +58,63 @@ if(scope==='admin'){
  for(const session of r.sessions){const item=el('button',undefined,'data-entry');item.type='button';item.style.textAlign='left';item.append(el('strong',session.id.slice(0,8)+' · '+session.count+' messages'),el('span',stamp(session.last_at)+' · '+(session.status||'reviewable')));item.addEventListener('click',()=>loadTranscript(session.id));list.append(item)}}catch(err){report(err.message,false)}}
  async function loadTranscript(id){try{const r=await request(route,{action:'transcript',id});const thread=$('audit-thread');thread.replaceChildren();thread.append(el('h3','Transcript · '+id.slice(0,8)));for(const msg of r.messages||[]){const p=el('p',(msg.role==='user'?'TESTER · ':'ASSISTANT · ')+stamp(msg.at)+'\n'+msg.text);p.style.whiteSpace='pre-wrap';p.style.overflowWrap='anywhere';p.style.borderBottom='1px solid #d5dfd5';p.style.paddingBottom='13px';thread.append(p)}}catch(err){report(err.message,false)}}
  $('refresh-audit').addEventListener('click',loadAudit);
-}else{
+ }else{
+ // The catalog and the selected model are kept separate: typing alone cannot
+ // change the active server-side model until an exact option is selected + saved.
+ let gatewayModels=[],chosenModel='openai/gpt-6-luna',modelRows=[],highlighted=-1;
+ const modelInput=$('model-search'),modelList=$('model-list'),modelHint=$('model-hint');
+ const modelBox=$('model-picker');
+ const money=n=>Number.isFinite(n)?('$'+(n===0?'0':n<1?n.toFixed(3):n.toFixed(2)).replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1')):'n/a';
+ function modelHintFor(model){
+  const found=gatewayModels.find(m=>m.id===model);
+  if(!found)return 'Current model: '+model+'. The catalog may be unavailable; previous configuration is retained.';
+  return 'Selected: '+found.name+' ('+found.id+'). Input '+money(found.input_per_m)+'/M; output '+money(found.output_per_m)+'/M. Zero-data-retention availability: '+(found.zdr||'unknown')+'. Changes require Save.';
+ }
+ function closeModelList(){modelList.classList.add('hidden');modelInput.setAttribute('aria-expanded','false');modelInput.removeAttribute('aria-activedescendant');highlighted=-1}
+ function chooseModel(model){
+  chosenModel=model.id;modelInput.value=model.id;modelHint.textContent=modelHintFor(model.id);closeModelList();
+ }
+ function focusModelRow(){
+  [...modelList.querySelectorAll('[role="option"]')].forEach((item,i)=>item.setAttribute('aria-selected',String(i===highlighted)));
+  const row=modelList.querySelectorAll('[role="option"]')[highlighted];
+  if(row){modelInput.setAttribute('aria-activedescendant',row.id);row.scrollIntoView({block:'nearest'})}
+  else modelInput.removeAttribute('aria-activedescendant');
+ }
+ function showModelList(){
+  const q=modelInput.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  modelRows=gatewayModels.filter(m=>q.every(x=>(m.id+' '+m.name+' '+m.provider).toLowerCase().includes(x))).slice(0,20);
+  modelList.replaceChildren();highlighted=-1;
+  if(modelRows.length===0){modelList.append(el('div',gatewayModels.length?'No matching models.':'Model catalog unavailable.','model-empty'))}
+  else modelRows.forEach((m,i)=>{
+   const btn=el('button',undefined,'model-option');btn.type='button';btn.id='model-option-'+i;btn.setAttribute('role','option');btn.setAttribute('aria-selected','false');btn.tabIndex=-1;
+   const left=el('span');left.append(el('span',m.name,'model-name'),el('span',m.id,'model-id'));
+   btn.append(left,el('span',money(m.input_per_m)+' in / '+money(m.output_per_m)+' out per M','model-price'));
+   btn.addEventListener('mousedown',event=>event.preventDefault());
+   btn.addEventListener('click',()=>chooseModel(m));modelList.append(btn);
+  });
+  modelList.classList.remove('hidden');modelInput.setAttribute('aria-expanded','true');
+ }
+ modelInput.addEventListener('focus',()=>{modelInput.select();showModelList()});
+ modelInput.addEventListener('input',showModelList);
+ modelInput.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){closeModelList();return}
+  if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+   event.preventDefault();if(modelList.classList.contains('hidden'))showModelList();
+   if(modelRows.length){highlighted=event.key==='ArrowDown'?(highlighted+1)%modelRows.length:(highlighted-1+modelRows.length)%modelRows.length;focusModelRow()}
+  }else if(event.key==='Enter'&&!modelList.classList.contains('hidden')){
+   event.preventDefault();if(highlighted>=0)chooseModel(modelRows[highlighted]);
+   else if(modelRows.length===1)chooseModel(modelRows[0]);
+  }
+ });
+ document.addEventListener('pointerdown',event=>{if(!modelBox.contains(event.target))closeModelList()});
+ async function loadGatewayModels(){
+  try{
+   const data=await request(route,{action:'models'});gatewayModels=Array.isArray(data.models)?data.models:[];
+   modelHint.textContent=modelHintFor(chosenModel)+' '+gatewayModels.length+' available text-chat models.';
+  }catch(err){
+   gatewayModels=[];modelHint.textContent='Current model: '+chosenModel+'. Catalog unavailable: '+err.message+'. Existing model can still be kept.';
+  }
+ }
  const waLoad=async()=>{const data=await request(route,{action:'wa_webhook_info'});$('wa-verify').value=data.verify_token||'';$('wa-callback').value=data.callback||'https://phoenix.bytesizeprotip.com/api/whatsapp';$('wa-status').textContent=data.verification_ready?[
  'Webhook verified: ready',
  'Meta app signing: '+(data.signature_ready?'configured':'missing'),
@@ -92,7 +148,7 @@ if(scope==='admin'){
  });
  $('wa-refresh').addEventListener('click',()=>waLoad().catch(e=>report(e.message,false)));
  $('wa-regenerate').addEventListener('click',async()=>{if(!confirm('Generate a NEW Meta verify token? The old Meta webhook will fail verification until updated.'))return;try{const data=await request(route,{action:'wa_generate_verify'});$('wa-verify').value=data.verify_token;report('New verification token ready. Update the Meta Verify token field.');await waLoad()}catch(e){report(e.message,false)}});
- loadDev=async function(){try{await waLoad();const data=await request(route,{action:'state'});const s=data.settings||{};$('decision').checked=s.decision!==false;$('max-day').value=s.max_day||80;$('max-ip').value=s.max_ip||12;$('max-tokens').value=s.max_tokens||460;$('extra-policy').value=s.extra_policy||'';$('policy').textContent=data.baseline||'Baseline unavailable';$('model').textContent=data.model||'openai/gpt-6-luna';report('Developer guardrails loaded.')}catch(err){report(err.message,false)}}
- $('dev-form').addEventListener('submit',async e=>{e.preventDefault();try{await request(route,{action:'save',decision:$('decision').checked,max_day:Number($('max-day').value),max_ip:Number($('max-ip').value),max_tokens:Number($('max-tokens').value),extra_policy:$('extra-policy').value});report('Developer controls saved and audited.')}catch(err){report(err.message,false)}});
- $('test-form').addEventListener('submit',async e=>{e.preventDefault();try{const r=await request(route,{action:'test',message:$('test-prompt').value});$('test-result').textContent=r.reason||('Luna suggested '+String(r.decision||'unavailable').toUpperCase());$('test-result').className='status '+(r.decision==='out_of_scope'?'error':'success')}catch(err){report(err.message,false)}});
+ loadDev=async function(){try{const data=await request(route,{action:'state'});const s=data.settings||{};chosenModel=data.model||s.model||'openai/gpt-6-luna';modelInput.value=chosenModel;$('decision').checked=s.decision!==false;$('max-day').value=s.max_day||80;$('max-ip').value=s.max_ip||12;$('max-tokens').value=s.max_tokens||460;$('extra-policy').value=s.extra_policy||'';$('policy').textContent=data.baseline||'Baseline unavailable';$('model').textContent=chosenModel;report('Developer settings loaded.');await loadGatewayModels();try{await waLoad()}catch(err){report('Settings loaded. WhatsApp status unavailable: '+err.message,false)}}catch(err){report(err.message,false)}}
+ $('dev-form').addEventListener('submit',async e=>{e.preventDefault();try{if(modelInput.value.trim()!==chosenModel)throw Error('Choose a model from the search results before saving.');const saved=await request(route,{action:'save',model:chosenModel,decision:$('decision').checked,max_day:Number($('max-day').value),max_ip:Number($('max-ip').value),max_tokens:Number($('max-tokens').value),extra_policy:$('extra-policy').value});$('model').textContent=saved.model||chosenModel;modelHint.textContent=modelHintFor(chosenModel);closeModelList();report('Developer settings and active model saved.')}catch(err){report(err.message,false)}});
+ $('test-form').addEventListener('submit',async e=>{e.preventDefault();try{const r=await request(route,{action:'test',message:$('test-prompt').value});$('test-result').textContent=r.reason||('Model suggested '+String(r.decision||'unavailable').toUpperCase());$('test-result').className='status '+(r.decision==='out_of_scope'?'error':'success')}catch(err){report(err.message,false)}});
 }

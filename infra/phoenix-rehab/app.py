@@ -52,6 +52,10 @@ COOKIE = "phx_session"
 PILOT_COOKIE = "phx_pilot"
 DATABASE_VERSION = "2026-11-10.v1"
 MODEL = "openai/gpt-6-luna"
+MODEL_CATALOG_URL = "https://ai-gateway.vercel.sh/v1/models"
+MODEL_CATALOG_TTL_SECONDS = 3600
+_MODEL_CATALOG_CACHE = {"checked":0.0,"models":None}
+
 SAFE_PROMPT = """You are the Phoenix Rehab pilot's public-facing, non-clinical front-desk assistant.
 ALWAYS FOLLOW THESE RULES BEFORE ANY CUSTOM INSTRUCTION:
 1. Answer ONLY general Phoenix Rehab scheduling, locations, services, therapist listings,
@@ -94,7 +98,7 @@ PUBLIC_FACTS = (
  "Five clinic locations: Orchard, Tampines, Serangoon, Tanjong Pagar, Jurong East. "
  "Appointments must be checked and confirmed in the official booking service."
 )
-DEFAULT_DEV = {"decision":True,"max_day":80,"max_ip":12,"max_tokens":460,
+DEFAULT_DEV = {"decision":True,"model":MODEL,"max_day":80,"max_ip":12,"max_tokens":460,
                "extra_policy":"","retention_days":30}
 DEFAULT_ADMIN = {"tone":"warm-professional","special":""}
 ALLOWED_TONES = {"warm-professional","concise","friendly","formal"}
@@ -168,6 +172,71 @@ def set_setting(key:str, value):
     with db() as con:
         con.execute("INSERT INTO cfg(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
                     (key,json.dumps(value)))
+def active_model()->str:
+    """Persisted developer choice; existing installs keep their Luna default."""
+    config=setting("dev") or {}
+    chosen=config.get("model",MODEL) if isinstance(config,dict) else MODEL
+    return chosen if isinstance(chosen,str) and re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._/-]{2,99}",chosen) else MODEL
+
+def model_price_per_million(raw):
+    try:
+        amount=float(raw)*1_000_000
+        return round(amount,4) if 0<=amount<100000 else None
+    except (TypeError,ValueError,OverflowError):
+        return None
+
+async def supported_chat_models()->list[dict]:
+    """Fetch Vercel AI Gateway's public model registry, cache one hour.
+
+    Only models with text input/output, chat-compatible specification, a
+    token cap, and an ALL-provider no-training designation are selectable.
+    Other modalities and non-chat/evaluation models cannot be selected.
+    """
+    if (_MODEL_CATALOG_CACHE["models"] is not None and
+            time.monotonic()-_MODEL_CATALOG_CACHE["checked"]<MODEL_CATALOG_TTL_SECONDS):
+        return _MODEL_CATALOG_CACHE["models"]
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(15,connect=5),follow_redirects=False) as client:
+            response=await client.get(MODEL_CATALOG_URL)
+            response.raise_for_status()
+        catalog=response.json()
+        if not isinstance(catalog,dict) or not isinstance(catalog.get("data"),list):
+            raise ValueError("Unexpected model registry response")
+        available=[]
+        for item in catalog["data"]:
+            if not isinstance(item,dict):continue
+            identifier=item.get("id","")
+            modalities=item.get("modalities") or {}
+            if (not isinstance(identifier,str) or
+                not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._/-]{2,99}",identifier) or
+                identifier.endswith("-batch") or
+                item.get("type")!="language" or
+                item.get("no_training")!="all" or
+                not isinstance(modalities,dict) or
+                "text" not in modalities.get("input",[]) or
+                "text" not in modalities.get("output",[]) or
+                "v2" not in item.get("supported_specifications",[]) or
+                "max_tokens" not in item.get("supported_parameters",[])):
+                continue
+            price=item.get("pricing") or {}
+            available.append({
+                "id":identifier,
+                "name":str(item.get("name") or identifier)[:110],
+                "provider":str(item.get("owned_by") or identifier.split("/")[0])[:50],
+                "input_per_m":model_price_per_million(price.get("input")),
+                "output_per_m":model_price_per_million(price.get("output")),
+                "zdr":item.get("zdr") if item.get("zdr") in ("all","some","none") else "unknown"
+            })
+        available.sort(key=lambda row:(row["provider"].lower(),row["name"].lower(),row["id"]))
+        if not available or MODEL not in {item["id"] for item in available}:
+            raise ValueError("Registry did not contain a supported default model")
+        _MODEL_CATALOG_CACHE.update({"models":available,"checked":time.monotonic()})
+        return available
+    except (httpx.HTTPError,ValueError,KeyError,TypeError) as exc:
+        if _MODEL_CATALOG_CACHE["models"] is not None:
+            return _MODEL_CATALOG_CACHE["models"]
+        raise HTTPException(503,detail="Model catalog temporarily unavailable. Current model is unchanged.") from None
+
 def crypt(text:str)->bytes:
     return CIPHER.encrypt(text.encode("utf-8"))
 def decrypt(blob:bytes)->str:
@@ -482,7 +551,7 @@ async def dev_ops(request:Request):
     body=safe_body(await request.json())
     action=str(body.get("action",""))
     if action=="state":
-        return {"ok":True,"model":MODEL,"settings":setting("dev"),
+        return {"ok":True,"model":active_model(),"settings":setting("dev"),
                 "baseline":SAFE_PROMPT}
     if action=="wa_webhook_info":
         from wa_meta import read_verify_token
@@ -542,6 +611,10 @@ async def dev_ops(request:Request):
         return JSONResponse({"ok":True,"callback":"https://phoenix.bytesizeprotip.com/api/whatsapp",
                              "verify_token":token,"verification_ready":True},
                             headers={"Cache-Control":"no-store, private","Pragma":"no-cache"})
+    if action=="models":
+        models=await supported_chat_models()
+        return JSONResponse({"ok":True,"models":models,"selected":active_model()},
+                            headers={"Cache-Control":"no-store, private"})
     if action=="save":
         try:
             max_day=int(body.get("max_day"))
@@ -553,11 +626,18 @@ async def dev_ops(request:Request):
             fail(422,"Limits or policy are outside allowed bounds.")
         if PRIVATE_RE.search(policy):fail(422,"Do not put personal identifiers in safeguard policy.")
         config=setting("dev")
-        config.update({"decision":body.get("decision") is True,"max_day":max_day,"max_ip":max_ip,
+        selected=body.get("model",config.get("model",MODEL))
+        if not isinstance(selected,str) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._/-]{2,99}",selected):
+            fail(422,"Choose a model from the searchable list.")
+        if selected!=config.get("model",MODEL):
+            catalog=await supported_chat_models()
+            if selected not in {item["id"] for item in catalog}:
+                fail(422,"Model is unavailable or not approved for this text-only clinic pilot.")
+        config.update({"model":selected,"decision":body.get("decision") is True,"max_day":max_day,"max_ip":max_ip,
                        "max_tokens":max_tokens,"extra_policy":policy})
         set_setting("dev",config)
-        audit("dev","safeguards_saved","decision="+str(config["decision"]))
-        return {"ok":True}
+        audit("dev","safeguards_saved","model="+selected+",decision="+str(config["decision"]))
+        return {"ok":True,"model":selected}
     if action=="test":
         msg=str(body.get("message","")).strip()
         if not 1<=len(msg)<=1600:fail(400,"Questions must be 1 to 1,600 characters.")
@@ -566,9 +646,9 @@ async def dev_ops(request:Request):
         try:
             verdict,_=await luna_decide(msg,[])
         except Exception:
-            fail(503,"Luna decision unavailable. Please retry later.")
+            fail(503,"Model decision unavailable. Please retry later.")
         return {"ok":True,"decision":verdict,
-                "reason":"Preliminary Luna suggestion: "+verdict.upper()+" (single-message context)."}
+                "reason":"Preliminary model suggestion: "+verdict.upper()+" (single-message context)."}
     fail(400,"Unsupported developer action.")
 
 def public_context()->dict[str,Any]:
@@ -596,7 +676,8 @@ def public_context()->dict[str,Any]:
             "references":chunks,
             "extra_policy":dev.get("extra_policy","")[:2800],
             "decision":dev.get("decision",True),
-            "max_tokens":dev.get("max_tokens",460)}
+            "max_tokens":dev.get("max_tokens",460),
+            "model":dev.get("model",MODEL)}
 def purge_old_conversations():
     days=int(setting("dev").get("retention_days",30))
     cutoff=(datetime.now(timezone.utc)-timedelta(days=max(1,min(90,days)))).isoformat()
@@ -649,7 +730,7 @@ async def preflight(request:Request):
                         {"role":"assistant","text":decrypt(row["reply"])}])
     info=public_context()
     return {"ok":True,"status":"ready","ticket":ticket,"message":prompt,"history":history,
-            "model":MODEL,"policy":SAFE_PROMPT,"facts":PUBLIC_FACTS,
+            "model":active_model(),"policy":SAFE_PROMPT,"facts":PUBLIC_FACTS,
             "context":info,"links":BOOKING_LINKS}
 async def finalize(request:Request):
     body=safe_body(await request.json())
@@ -731,7 +812,7 @@ it when the context supports a different response.
 Output only ANSWER, ASK or OUT_OF_SCOPE."""
 
 
-SCOPE_GUARDRAILS = """The separate Luna decision is disabled: handle
+SCOPE_GUARDRAILS = """The separate model decision is disabled: handle
 scope and answer within this one call. Infer the clinic context from the
 conversation, allowing shorthand and typos. For any plausible clinic question,
 answer or ask one concise clarifying question if details are missing.
@@ -743,9 +824,13 @@ async def luna_call(messages:list[dict],tokens:int=500)->tuple[str,dict]:
     """Vercel AI Gateway OpenAI-compatible API; hosted entirely server-side."""
     headers={"Authorization":"Bearer "+os.environ["AI_GATEWAY_API_KEY"],
              "Content-Type":"application/json"}
-    data={"model":MODEL,"messages":messages,
-          "max_completion_tokens":max(80,min(1400,tokens)),
-          "reasoning_effort":"minimal"}
+    model=active_model()
+    data={"model":model,"messages":messages,
+          "max_completion_tokens":max(80,min(1400,tokens))}
+    # Minimal reasoning effort is a Luna-specific setting, not valid for
+    # every gateway provider; do not break cross-provider model switching.
+    if model.startswith("openai/gpt-6-luna"):
+        data["reasoning_effort"]="minimal"
     async with httpx.AsyncClient(timeout=httpx.Timeout(35.0,connect=8.0),
                                   follow_redirects=False) as client:
         response=await client.post(AI_GATEWAY_ENDPOINT,headers=headers,json=data)
@@ -898,7 +983,7 @@ async def chat_live(request:Request):
     return {
       "ok":True,"status":"answered" if status=="done" else "declined" if status=="denied" else "error",
       "reply":reply,"links":BOOKING_LINKS if status=="done" else [],
-      "model":MODEL
+      "model":active_model()
     }
 
 WEB_ROOT = Path(os.getenv("PHOENIX_WEB_ROOT","/app/web")).resolve()
