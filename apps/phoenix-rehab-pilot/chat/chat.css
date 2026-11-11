@@ -38,3 +38,6 @@
 
 .suggestions .slot-date{flex:0 0 145px;width:145px;min-height:40px;border-radius:9px;border:1px solid #ccdcca;background:#fff;color:var(--forest);padding:7px;font-size:13px}
 @media(max-width:560px){.suggestions .slot-date{flex-basis:138px;width:138px}}
+
+.suggestions a.book-journey{white-space:nowrap;flex-shrink:0;padding:9px 12px;border-radius:100px;border:1px solid #bfd1c1;background:#ecf4e8;color:var(--forest);font-size:11px;font-weight:700;display:inline-flex;align-items:center;text-decoration:none;min-height:40px}
+.suggestions a.book-journey:focus-visible{outline:3px solid #d8792b;outline-offset:1px}

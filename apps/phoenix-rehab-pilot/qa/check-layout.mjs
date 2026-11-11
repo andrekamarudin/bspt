@@ -56,6 +56,10 @@ try{
      const about=await pageAt(context,'/about/');
      assert.ok(await about.getByText('Better conversations.').count());
      await about.screenshot({path:resolve(output,size.name+'-about.png'),fullPage:true,animations:'disabled'});
+     const book=await pageAt(context,'/book/');
+     assert.equal(await book.locator('#slot-form').count(),1,'Booking date/branch picker present');
+     assert.equal(await book.locator('#booking-step-2.hidden').count(),1,'Demo checkout hidden until real slot chosen');
+     await book.screenshot({path:resolve(output,size.name+'-booking.png'),fullPage:true,animations:'disabled'});
      const admin=await pageAt(context,'/admin/');
      assert.equal(await admin.locator('form#login-form input[type=password]').count(),1);
      assert.equal(await admin.locator('#console-panel:not(.hidden)').count(),0,'Admin console must remain locked');

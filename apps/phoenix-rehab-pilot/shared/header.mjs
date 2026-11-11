@@ -1,5 +1,5 @@
 const root='/';
-const navigation=[['About','/about'],['Chat','/chat'],['Admin','/admin'],['Dev','/dev']];
+const navigation=[['About','/about'],['Chat','/chat'],['Book','/book'],['Admin','/admin'],['Dev','/dev']];
 const route=location.pathname;
 const head=document.getElementById('site-header');
 if(head){

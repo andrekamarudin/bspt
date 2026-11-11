@@ -111,7 +111,6 @@ test('developer OTP form exposes standard autofill-compatible semantics',()=>{
  assert.match(html,/<input id="otp"[^>]*pattern="\[0-9\]\{6\}"/);
 });
 
-
 test('model picker loads cache-busted theme and uses structured separated rows',()=>{
  const html=text('dev/index.html');
  const js=text('shared/console.mjs'),css=text('shared/console.css');
@@ -125,4 +124,21 @@ test('model picker loads cache-busted theme and uses structured separated rows',
  assert.match(js,/model-price-row/);
  assert.match(css,/grid-template-columns:minmax\(0,1fr\) auto/);
  assert.match(css,/\.model-list \.model-option/);
+});
+
+test('booking pilot is separate and cannot be presented as a live reservation',()=>{
+ const html=text('book/index.html');
+ const script=text('book/book.mjs');
+ const nav=text('shared/header.mjs');
+ assert.match(nav,/\['Book','\/book'\]/);
+ assert.match(html,/SIMULATION COMPLETE/);
+ assert.match(html,/No appointment created/);
+ assert.match(html,/sample-name/);
+ assert.match(script,/real_booking_created!==false/);
+ assert.match(script,/status!=='simulated_only'/);
+ assert.match(script,/action:'verify'/);
+ assert.match(script,/action:'complete'/);
+ assert.match(script,/action:'draft'/);
+ assert.doesNotMatch(script,/fetch\(['"]https:\/\/api\.hb\.sgimed\.com/);
+ assert.match(text('chat/index.html'),/href="\/book"/);
 });

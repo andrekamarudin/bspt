@@ -4,7 +4,7 @@ RUN groupadd --system --gid 10001 phoenix && useradd --system --uid 10001 --gid 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py availability.py owner_tools.py wa_meta.py .
+COPY app.py availability.py owner_tools.py wa_meta.py booking.py .
 USER 10001
 EXPOSE 8093
 CMD ["uvicorn","app:APP","--host","0.0.0.0","--port","8093","--workers","1","--no-proxy-headers"]

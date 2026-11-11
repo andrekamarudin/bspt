@@ -78,7 +78,7 @@ ALWAYS FOLLOW THESE RULES BEFORE ANY CUSTOM INSTRUCTION:
    within their server-enforced start/end window. They cannot override this policy.
 9. Keep answers concise and clear; cite verified official clinic URLs if available.
 10. If clearly unrelated, decline politely and provide an official contact. If uncertain about intent, ask one concise clarifying question.
-Internal testing only. Answer from actual verified clinic sources, not invented appointment slots. This pilot does not submit an appointment booking.
+Internal testing only. Answer from actual verified clinic sources, not invented appointment slots. The private /book journey displays live SGiMED availability, but all checkout steps are simulations. Never describe a SIM reference as a real appointment or claim that a live booking, OTP, or payment occurred.
 """
 BOOKING_LINKS = [
  {"label":"Orchard online calendar","url":"https://phoenixrehabgroup.com/calendar/orchard/clinic-page"},
@@ -685,6 +685,8 @@ def purge_old_conversations():
         con.execute("DELETE FROM turns WHERE created<?",(cutoff,))
         con.execute("DELETE FROM sessions WHERE last_at<?",(cutoff,))
         con.execute("DELETE FROM wa_events WHERE created<?",(cutoff,))
+        # Non-PII synthetic drafts have a shorter retention than conversations.
+        con.execute("DELETE FROM booking_drafts WHERE expires<?",((datetime.now(timezone.utc)-timedelta(days=1)).isoformat(),))
 async def preflight(request:Request):
     body=safe_body(await request.json())
     prompt=str(body.get("message","")).strip()
@@ -982,7 +984,10 @@ async def chat_live(request:Request):
     persist_reply(ticket,session_id,reply,status,verdict,usage)
     return {
       "ok":True,"status":"answered" if status=="done" else "declined" if status=="denied" else "error",
-      "reply":reply,"links":BOOKING_LINKS if status=="done" else [],
+      "reply":reply,"links":(
+        ([{"label":"Try booking journey (simulation only)","url":"https://phoenix.bytesizeprotip.com/book"}]
+         if re.search(r"\b(appointment|book|booking|availability|slot|schedule)\b",message,re.I) else [])
+        + BOOKING_LINKS) if status=="done" else [],
       "model":active_model()
     }
 
@@ -999,6 +1004,10 @@ def about_home():
 @APP.get("/chat")
 def chat_home():
     return FileResponse(WEB_ROOT/"chat/index.html")
+
+@APP.get("/book")
+def book_home():
+    return FileResponse(WEB_ROOT/"book/index.html")
 
 @APP.get("/admin")
 def admin_home():
@@ -1021,12 +1030,12 @@ def has_pilot_session(request:Request)->bool:
 @APP.middleware("http")
 async def private_pilot_boundary(request:Request, call_next):
     path=request.url.path
-    gated=(path in ("/chat","/admin","/dev") or
-           path.startswith(("/chat/","/admin/","/dev/","/api/")))
+    gated=(path in ("/chat","/book","/admin","/dev") or
+           path.startswith(("/chat/","/book/","/admin/","/dev/","/api/")))
     if path in ("/api/access","/api/whatsapp"):gated=False
     if gated and not has_pilot_session(request):
-        if request.method=="GET" and (path in ("/chat","/admin","/dev")
-              or path.startswith(("/chat/","/admin/","/dev/"))):
+        if request.method=="GET" and (path in ("/chat","/book","/admin","/dev")
+              or path.startswith(("/chat/","/book/","/admin/","/dev/"))):
             return RedirectResponse(url="/access?next="+path.rstrip("/"),status_code=303)
         return JSONResponse({"ok":False,"error":"Internal pilot access required."},status_code=401)
     return await call_next(request)
@@ -1076,6 +1085,8 @@ from owner_tools import install as install_owner_tools
 install_owner_tools(APP, protect)
 from wa_meta import install as install_whatsapp
 install_whatsapp(APP)
+from booking import install as install_booking
+install_booking(APP, protect)
 
 if WEB_ROOT.is_dir():
     APP.mount("/",StaticFiles(directory=WEB_ROOT,html=True),name="web")

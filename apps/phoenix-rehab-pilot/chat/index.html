@@ -13,19 +13,19 @@
  <div class="chat-bar"><div class="avatar">P<span>.</span></div><div><h2 id="chat-label">Phoenix Rehab assistant</h2><div id="connection" class="connection" role="status">Preparing secure connection</div></div><button id="clear-chat" title="New conversation" aria-label="Start new conversation" type="button">↺</button></div>
  <div id="conversation" class="conversation" role="log" aria-live="polite" aria-label="Bot conversation"></div>
  <div class="input-area"><div class="suggestions" id="suggestions">
-  <label for="slot-date" class="sr-only">Availability date in Singapore time</label><input id="slot-date" class="slot-date" type="date" aria-label="Availability date (Singapore time)"><button type="button" class="live" id="live-openings">Check openings</button>
+  <label for="slot-date" class="sr-only">Availability date in Singapore time</label><input id="slot-date" class="slot-date" type="date" aria-label="Availability date (Singapore time)"><button type="button" class="live" id="live-openings">Check openings</button><a class="book-journey" href="/book">Test booking journey</a>
   <button type="button" data-prompt="Can you issue a medical certificate?">Medical certificate</button>
   <button type="button" data-prompt="I want a one-hour appointment with Shiv.">One-hour appointment</button>
   <button type="button" data-prompt="What is the fee for a physiotherapy session?">Pricing</button>
   <button type="button" data-prompt="Which branches do you have?">Clinic locations</button>
  </div>
  <form id="chat-form"><label for="question" class="sr-only">Your message</label><input type="text" id="question" aria-label="Your message" maxlength="1600" placeholder="Ask about appointments or clinic services…" autocomplete="off" required><button id="send" type="submit" aria-label="Send question">→</button></form>
- <div class="chat-foot"><span>Internal clinic evaluation · no appointment is submitted from this chat</span><button type="button" id="copy-conversation">Copy chat</button></div>
+ <div class="chat-foot"><span>Availability is real · checkout is simulated · <a href="/book">Test booking</a></span><button type="button" id="copy-conversation">Copy chat</button></div>
  </div>
 </section>
 <aside class="side">
  <div class="paper" style="padding:23px 28px"><img class="clip" src="/paperclip.svg" alt=""><div class="kicker">WHY THIS EXISTS</div><p style="line-height:1.7;color:#426052;font-size:14px">Evaluate genuine clinic questions and booking guidance before customer rollout.</p><span class="hand">Validated before launch.</span></div>
- <div class="side-help"><h3>Try tricky questions</h3><p>Can you issue MCs? Can I book a particular therapist for an hour? What if insurance needs a referral?</p><h3>What it cannot do</h3><p>It does not diagnose or submit an appointment on your behalf. Any proposed time still needs your confirmation.</p><a href="/about">How the pilot works ↗</a></div>
+ <div class="side-help"><h3>Try tricky questions</h3><p>Can you issue MCs? Can I book a particular therapist for an hour? What if insurance needs a referral?</p><h3>What it cannot do</h3><p>It does not diagnose or create real appointments. To test slot selection, verification and confirmation, open the <a href="/book">booking simulation</a>.</p><a href="/about">How the pilot works ↗</a></div>
 </aside>
 </div>
 </main><footer class="site-footer"><span>Built by ByteSize ProTip · Know what matters. Do what works.</span><a href="https://phoenixrehabgroup.com/" target="_blank" rel="noopener noreferrer">Official Phoenix Rehab website ↗</a></footer>
