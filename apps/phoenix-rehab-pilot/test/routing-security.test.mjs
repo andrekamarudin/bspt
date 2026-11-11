@@ -201,3 +201,29 @@ test('QA and reviewed few-shot workspaces are protected, isolated and accessible
  assert.match(css,/review-table-wrap/);
  assert.match(app,/authed\(request,"admin"\)/);
 });
+
+test('clinic admin reduces nine feature tabs to four task-first workspaces',()=>{
+ const html=text('admin/index.html');
+ const nav=text('shared/admin-navigation.mjs');
+ const css=text('shared/admin-navigation.css');
+ assert.equal((html.match(/data-workspace="/g)||[]).length,4);
+ assert.match(html,/<nav class="workspaces" aria-label="Clinic workspace">/);
+ assert.match(html,/data-workspace="teach"/);
+ assert.match(html,/data-workspace="review"/);
+ assert.match(html,/data-workspace="clinic"/);
+ assert.match(html,/data-workspace="customers"/);
+ assert.match(html,/class="legacy-tabs hidden" aria-hidden="true"/);
+ assert.match(html,/class="owner-import-details"/);
+ assert.match(html,/<summary>Have several past answers\? Import them together<\/summary>/);
+ assert.doesNotMatch(html,/class="owner-grid"/);
+ assert.doesNotMatch(html,/class="review-architecture"/);
+ assert.match(nav,/\bcontext:'teach'/);
+ assert.match(nav,/\bfewshot:'teach'/);
+ assert.match(nav,/\btesting:'review'/);
+ assert.match(nav,/\bcosts:'review'/);
+ assert.match(nav,/\bsettings:'clinic'/);
+ assert.match(nav,/\bcrm:'customers'/);
+ assert.match(nav,/\.click\(\)/);
+ assert.match(css,/:focus-visible/);
+ assert.match(css,/@media\(max-width:750px\)/);
+});

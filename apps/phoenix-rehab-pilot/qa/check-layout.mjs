@@ -63,6 +63,45 @@ try{
      const admin=await pageAt(context,'/admin/');
      assert.equal(await admin.locator('form#login-form input[type=password]').count(),1);
      assert.equal(await admin.locator('#console-panel:not(.hidden)').count(),0,'Admin console must remain locked');
+     // Static browser UX check: reveal only the markup, not admin credentials.
+     // No admin API actions are executed; real sessions are separately API-tested.
+     await admin.evaluate(()=>{
+       document.querySelector('#auth-panel').classList.add('hidden');
+       document.querySelector('#console-panel').classList.remove('hidden');
+     });
+     assert.equal(await admin.locator('.workspaces button:visible').count(),4,
+                  'Only four owner task workspaces visible');
+     assert.equal(await admin.locator('.legacy-tabs:visible').count(),0,
+                  'Internal routing must not appear to the clinic owner');
+     assert.equal(await admin.locator('.owner-import-details:not([open])').count(),1,
+                  'Bulk import hidden until expressly requested');
+     await admin.locator('[data-workspace="review"]').click();
+     await admin.locator('[data-workflow="testing"]').click();
+     assert.equal(await admin.locator('[data-panel="testing"]:visible').count(),1,
+                  'Testing reachable from Review & test');
+     await admin.locator('[data-workspace="clinic"]').click();
+     assert.equal(await admin.locator('[data-panel="schedule"]:visible').count(),1,
+                  'Time-limited clinic notices reachable from Clinic setup');
+     await admin.locator('[data-workspace="customers"]').click();
+     assert.equal(await admin.locator('[data-panel="crm"]:visible').count(),1,
+                  'Existing CRM reachable from Customers');
+     await admin.locator('[data-workspace="teach"]').click();
+     assert.equal(await admin.locator('[data-panel="answers"]:visible').count(),1,
+                  'Teach opens uncluttered answer form');
+     assert.equal(await admin.locator('.owner-import-details textarea:visible').count(),0,
+                  'Secondary bulk form is collapsed');
+     await admin.locator('.owner-import-details summary').click();
+     assert.equal(await admin.locator('.owner-import-details textarea:visible').count(),1,
+                  'Owner can expand bulk Q&A import on demand');
+     await admin.locator('.owner-import-details summary').click();
+     const adminWidth=await admin.evaluate(()=>({width:document.documentElement.scrollWidth,
+                                                  viewport:innerWidth}));
+     assert.ok(adminWidth.width<=adminWidth.viewport+2,
+               size.name+' admin horizontal overflow: '+JSON.stringify(adminWidth));
+     if(size.name==='desktop'||size.name==='iphone-portrait'){
+       await admin.screenshot({path:resolve(output,size.name+'-owner-simplified.png'),
+                               fullPage:true,animations:'disabled'});
+     }
      const dev=await pageAt(context,'/dev/');
      assert.equal(await dev.locator('form#login-form input[type=password]').count(),1);
      assert.equal(await dev.locator('input#otp').count(),1);
