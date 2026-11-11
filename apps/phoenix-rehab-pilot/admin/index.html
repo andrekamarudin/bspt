@@ -1,0 +1,196 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
+<title>Clinic admin · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-costs-v1"><link rel="stylesheet" href="/shared/costs.css?v=20261111-review-v1"><link rel="stylesheet" href="/shared/admin-navigation.css?v=20261111-simple-v1"><link rel="stylesheet" href="/shared/reviews.css?v=20261111-reviews-v1">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/crm-admin.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/reviews.mjs?v=20261111-reviews-v1"></script><script type="module" src="/shared/admin-navigation.mjs?v=20261111-simple-v1"></script>
+</head><body data-console="admin"><header class="site-header" id="site-header"></header>
+<main class="container dashboard">
+<section class="hero-compact"><div><div class="kicker">CLINIC OPERATIONS / PRIVATE</div><h1>Clinic <span class="highlight">controls.</span></h1><span class="hand">Answers that stay current.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
+<div id="flash" class="status" role="status" aria-live="polite"></div>
+<section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Update bot answers, upload clinic documents, schedule notices and review past chats. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
+<section id="console-panel" class="hidden">
+<nav class="workspaces" aria-label="Clinic workspace">
+<button type="button" class="workspace active" data-workspace="teach" aria-pressed="true">Improve answers</button>
+<button type="button" class="workspace" data-workspace="review" aria-pressed="false">Review &amp; test</button>
+<button type="button" class="workspace" data-workspace="clinic" aria-pressed="false">Clinic setup</button>
+<button type="button" class="workspace" data-workspace="customers" aria-pressed="false">Customers</button>
+</nav>
+<nav class="workspace-tasks" data-tasks="teach" aria-label="Improve answers actions">
+<button type="button" data-workflow="answers" aria-current="page">Fix an answer</button>
+<button type="button" data-workflow="context">Upload documents</button>
+</nav>
+<nav class="workspace-tasks hidden" data-tasks="review" aria-label="Review and test actions">
+<button type="button" data-workflow="audit">Conversations</button>
+<button type="button" data-workflow="testing">Run tests</button>
+<button type="button" data-workflow="costs">AI usage</button>
+</nav>
+<nav class="workspace-tasks hidden" data-tasks="clinic" aria-label="Clinic setup actions">
+<button type="button" data-workflow="schedule">Opening hours &amp; notices</button>
+<button type="button" data-workflow="settings">Bot personality</button>
+</nav>
+<div class="legacy-tabs hidden" aria-hidden="true">
+<button type="button" data-tab="answers" class="active">Answers</button>
+<button type="button" data-tab="context">Documents</button>
+<button type="button" data-tab="fewshot">Approved examples</button>
+<button type="button" data-tab="audit">Conversations</button>
+<button type="button" data-tab="testing">Testing</button>
+<button type="button" data-tab="costs">Costs</button>
+<button type="button" data-tab="schedule">Announcements</button>
+<button type="button" data-tab="settings">Personality</button>
+<button type="button" data-tab="crm">Customers</button>
+</div>
+<section class="tab-panel" data-panel="answers">
+<div class="owner-intro">
+ <div><div class="kicker">HELP THE ASSISTANT IMPROVE</div>
+ <h2>Give it the right answer.</h2>
+ <p>A simple change becomes a draft. You decide when it goes live on web and WhatsApp.</p></div>
+ <a href="/chat" class="owner-try" target="_blank" rel="noopener">Try the chatbot ↗</a>
+</div>
+<div class="owner-knowledge">
+ <section class="panel owner-answer-card">
+  <h2>Fix or add an answer</h2><p class="muted">What did someone ask, and what should the bot say instead?</p>
+  <form id="owner-answer-form">
+  <input type="hidden" id="owner-edit-id">
+  <label for="owner-question">When someone asks...</label>
+  <textarea id="owner-question" required minlength="8" maxlength="420" rows="3" placeholder="e.g. Can I change my appointment?"></textarea>
+  <label for="owner-answer">The bot should explain...</label>
+  <textarea id="owner-answer" required minlength="10" maxlength="2500" rows="5" placeholder="e.g. Please contact our reception team using the clinic's published contact number..."></textarea>
+  <div class="actions"><button class="primary" type="submit">Save draft</button><button class="secondary" type="button" id="owner-cancel-edit">Clear form</button></div>
+  <p class="muted">Keep answers factual and non-clinical. Editing a published entry creates a draft that must be re-approved.</p>
+  </form>
+ <details class="owner-import-details">
+  <summary>Have several past answers? Import them together</summary>
+  <div class="owner-import-body">
+   <p class="muted">Paste anonymized question-and-answer pairs. We'll prepare drafts for your review. Never include patient details or medical histories.</p>
+   <label for="owner-examples">Questions and approved answers</label>
+   <textarea id="owner-examples" rows="7" placeholder="Q: Do you have a clinic near Serangoon?&#10;A: Yes. See our Serangoon clinic directory.&#10;&#10;Q: Can I book on Saturday?&#10;A: Check our live appointment availability."></textarea>
+   <div class="actions"><button id="owner-import" class="secondary" type="button">Preview imported answers</button></div>
+   <div id="owner-preview" class="data-list" aria-live="polite"></div>
+  </div>
+ </details>
+ </section>
+</div>
+<section class="panel"><div class="owner-heading"><div><h2>Clinic answers</h2><p class="muted">Drafts are not visible to the bot until published. Archived answers stop being used.</p></div><button id="owner-refresh" type="button" class="secondary">Refresh answers</button></div>
+<div id="owner-entries" class="data-list"><p class="muted">Unlock admin to manage answers.</p></div></section>
+</section>
+<section class="tab-panel hidden" data-panel="settings"><div class="panel"><h2>How the assistant speaks</h2><p class="muted">These instructions shape the answer, but cannot override core medical and privacy safeguards.</p>
+<form id="settings-form"><label for="tone">Response tone</label><select id="tone"><option value="warm-professional">Warm and professional</option><option value="concise">Concise and factual</option><option value="friendly">Friendly and conversational</option><option value="formal">Formal and clinical-administrative</option></select>
+<label for="special">Additional clinic instructions</label><textarea id="special" maxlength="4000" rows="8" placeholder="E.g. Gently ask which branch is most convenient; always explain that an actual appointment must be confirmed in the official system."></textarea><p class="muted">Only provide verified public operational information. No patient files or private clinical identifiers here.</p>
+<button class="primary" type="submit">Save clinic settings</button></form></div></section>
+<section class="tab-panel hidden" data-panel="context"><div class="panel"><h2>Clinic documents</h2><p class="muted">Upload a clinic FAQ, service guide or other approved document. It stays private until you review and publish it. TXT, MD, PDF or DOCX, up to 1 MB. No patient records.</p>
+<form id="upload-form"><label for="file">Choose a knowledge document</label><input id="file" type="file" accept=".txt,.md,.pdf,.docx" required><label class="check"><input id="attest" type="checkbox" required> I confirm this document is authorised for this pilot and contains no identifiable patient information.</label><button type="submit" class="primary">Upload as draft</button></form></div>
+<div class="panel"><h2>Uploaded documents</h2><div id="docs-list" class="data-list"><p class="muted">Unlock the console to load documents.</p></div></div></section>
+<section class="tab-panel hidden" data-panel="schedule"><div class="panel"><h2>Opening hours &amp; notices</h2><p class="muted">Tell the bot about a temporary closure or schedule change. The notice expires automatically. Times are in Singapore time.</p>
+<form id="schedule-form"><label for="announcement">Announcement or instruction</label><textarea id="announcement" rows="4" maxlength="1000" required placeholder="Example: Orchard clinic is closed from 24 to 26 December. Do not offer bookings for this branch in that period."></textarea>
+<div class="date-grid"><div><label for="starts">Starts</label><input id="starts" type="datetime-local" required></div><div><label for="ends">Ends (exclusive)</label><input id="ends" type="datetime-local" required></div></div><div class="actions"><button type="submit" class="primary">Schedule instruction</button></div></form></div>
+<div class="panel"><h2>Active and upcoming</h2><div id="scheduled-list" class="data-list"></div><p class="muted">Expired announcements are retained for audit but no longer added to the chatbot's live instructions.</p></div></section>
+<section class="tab-panel hidden" data-panel="audit"><div class="panel"><h2>Past conversations</h2><p class="muted">Encrypted records of chatbot testing, accessible only to clinic administrators. Do not forward identifiable patient data. Records expire according to the retention setting.</p><button class="secondary" type="button" id="refresh-audit">Refresh</button><div class="audit-layout"><div id="audit-list" class="data-list"></div><div id="audit-thread" class="thread"><p class="muted">Select a conversation to inspect its transcript.</p></div></div></div></section>
+<section class="tab-panel hidden" data-panel="testing" id="testing-panel">
+ <div class="panel">
+  <div class="review-head"><div><div class="kicker">QUALITY / ADMIN EVALUATION</div><h2>Test patient questions</h2>
+   <p class="muted">Paste one question per line. Every line runs in a fresh, independent chat using the same answering engine, active model, system safeguards and approved examples.</p>
+   <button type="button" class="review-library-link" data-workflow="fewshot">Manage approved response examples</button></div>
+  <span class="review-note">Internal read-only testing; model usage is charged</span></div>
+  <label for="batch-questions">Questions to simulate (up to 20)</label>
+  <textarea id="batch-questions" rows="7" maxlength="35000" placeholder="Pricing?&#10;Can I see a physio on Saturday?&#10;How long is a typical consultation?&#10;Can you interpret my MRI?"></textarea>
+  <div class="actions"><button type="button" id="run-tests" class="primary">Generate independent chats</button>
+  <button type="button" id="stop-tests" class="secondary hidden">Stop after current</button>
+  <button type="button" id="refresh-tests" class="secondary">Refresh testing table</button></div>
+  <p class="review-note" id="test-progress" role="status" aria-live="polite">No test batch running.</p>
+ </div>
+ <div class="panel">
+  <div class="review-head"><div><h2>Response review</h2><p class="muted">Select a row to examine the full response, rate it, and provide an improved answer. Reviewed answers become drafts, never automatically published.</p></div><span id="test-count"></span></div>
+  <div class="review-table-wrap"><table class="review-table">
+   <thead><tr><th>Question</th><th>Answer preview</th><th>Rating</th><th>State</th><th></th></tr></thead>
+   <tbody id="testing-rows"><tr><td colspan="5">Run a batch to see responses.</td></tr></tbody>
+  </table></div>
+  <section class="review-detail hidden" id="test-detail">
+   <div class="review-head"><h3>Review selected response</h3><button class="secondary" type="button" id="close-test-detail">Close</button></div>
+   <div class="review-q"><strong>Question</strong><p id="detail-question"></p></div>
+   <div class="review-a"><strong>Generated answer</strong><p id="detail-answer"></p></div>
+   <div class="review-meta" id="detail-model"></div>
+   <label for="test-rating">Quality rating</label>
+   <select id="test-rating"><option value="">Choose a rating</option><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Needs improvement</option><option value="2">2 · Poor</option><option value="1">1 · Incorrect / unsafe</option></select>
+   <label for="test-feedback">Reviewer feedback</label>
+   <textarea id="test-feedback" rows="3" maxlength="1300" placeholder="What was good, missing, wrong, or misleading?"></textarea>
+   <label for="test-preferred">Preferred answer for few-shot example</label>
+   <textarea id="test-preferred" rows="5" maxlength="2500" placeholder="Write the response the assistant should give next time."></textarea>
+   <label class="check"><input type="checkbox" id="draft-fewshot" checked> Create or update a draft few-shot example from this review</label>
+   <p class="review-note">Only explicitly published examples influence future replies. Ratings and feedback alone do not override safety policy.</p>
+   <div class="actions"><button type="button" class="primary" id="save-test-review">Save review and draft</button><button type="button" class="secondary" id="retry-test">Rerun failed test</button><button type="button" class="secondary" id="delete-test">Delete test</button></div>
+  </section>
+ </div>
+</section>
+<section class="tab-panel hidden" data-panel="fewshot" id="fewshot-panel">
+ <button type="button" class="review-library-link" data-workflow="testing">Back to response testing</button>
+ <div class="panel">
+  <div class="review-head"><div><div class="kicker">APPROVED RESPONSE EXAMPLES</div><h2>Examples your bot can learn from</h2>
+   <p class="muted">Save a good example, review it, and publish it when ready. Unpublished changes won't affect the bot.</p></div>
+  <button type="button" class="secondary" id="refresh-fewshot">Refresh examples</button></div>
+
+ </div>
+ <div class="review-cols">
+  <section class="panel"><div class="review-head"><h2>Saved examples</h2><span id="fewshot-count"></span></div>
+   <div id="fewshot-list" class="review-library"><p class="muted">No examples loaded.</p></div>
+  </section>
+  <section class="panel">
+   <h2 id="fewshot-edit-title">Add a good example</h2>
+   <form id="fewshot-form"><input type="hidden" id="fewshot-id">
+    <label for="fewshot-question">What someone asks</label><textarea id="fewshot-question" rows="4" maxlength="1600" required></textarea>
+    <label for="fewshot-ideal">How the bot should reply</label><textarea id="fewshot-ideal" rows="8" maxlength="2500" required></textarea>
+    <p class="review-note">Use only correct public clinic information. Do not include patient identifiers or instructions to override the system policy.</p>
+    <div class="actions"><button type="submit" class="primary">Save draft</button><button type="button" class="secondary" id="fewshot-clear">New example</button></div>
+   </form>
+  </section>
+ </div>
+</section>
+<section class="tab-panel hidden" data-panel="costs" id="costs-panel">
+ <div class="panel costs-panel">
+  <div class="costs-heading">
+   <div><div class="kicker">AI MODEL USAGE / CLINIC CHAT</div><h2>Costs and usage</h2><p class="muted">Recorded provider calls, measured in USD. Times use Singapore local dates.</p></div>
+   <button type="button" class="secondary" id="refresh-costs">Refresh costs</button>
+  </div>
+  <div class="costs-kpis">
+   <div class="costs-total"><span class="costs-label">Estimated tracked AI spend</span><strong id="costs-total">—</strong><small id="costs-accuracy">Includes only priced model calls</small></div>
+   <div class="costs-kpi"><span class="costs-label">Model calls</span><strong id="costs-calls">—</strong><small id="costs-tokens">Input/output tokens</small></div>
+   <div class="costs-kpi"><span class="costs-label">Coverage</span><strong id="costs-coverage">—</strong><small id="costs-unknown">Calls with unavailable prices</small></div>
+  </div>
+  <p id="costs-notice" class="costs-notice" role="status" aria-live="polite">Select Costs to load your usage report.</p>
+ </div>
+ <div class="costs-grid">
+  <section class="panel">
+   <div class="costs-section-head"><h2>Daily spend</h2><span>Asia/Singapore · USD</span></div>
+   <div id="costs-days" class="costs-days"><p class="muted">No usage loaded yet.</p></div>
+  </section>
+  <section class="panel">
+   <div class="costs-section-head"><h2>Where it came from</h2><span>Web · WhatsApp · Developer</span></div>
+   <div id="costs-channels" class="costs-channels"><p class="muted">No channel data yet.</p></div>
+   <p class="costs-explainer">Costs cover model inference only. Hosting, messaging, credits, and taxes are not included.</p>
+  </section>
+ </div>
+ <section class="panel">
+  <div class="costs-section-head">
+   <div><h2>By conversation</h2><p class="muted">Aggregated from individual AI calls. Conversation IDs are abbreviated; no patient messages are shown.</p></div>
+   <span id="costs-conversation-count"></span>
+  </div>
+  <div id="costs-conversations" class="costs-conversations"><p class="muted">No conversations loaded yet.</p></div>
+  <div class="actions"><button type="button" class="secondary hidden" id="costs-more">Show more conversations</button></div>
+ </section>
+ <p class="costs-explainer" id="costs-methodology">Historical estimates and data limitations will appear here after loading.</p>
+</section>
+<section class="tab-panel hidden" data-panel="crm">
+ <section class="panel owner-welcome">
+  <div class="kicker">CONTACTS & APPOINTMENTS</div>
+  <h2>Test how your bot knows people.</h2>
+  <p>These are fictional appointments for the two invited testers. WhatsApp matches an authenticated sender number; the website requires a one-use identity link. No SGiMED patient records are imported.</p>
+ </section>
+ <section class="panel">
+  <div class="owner-heading"><div><h2>Internal test customers</h2>
+  <p class="muted">Issue each tester their own 15-minute link. Once claimed, the chatbot can recognize that tester and their demo appointments. Links never confer admin privileges.</p></div>
+  <button class="secondary" type="button" id="crm-refresh">Refresh CRM</button></div>
+  <div id="crm-customers" class="data-list" aria-live="polite">Unlock admin to load the demo records.</div>
+  <div id="crm-invite-output" class="status" aria-live="polite"></div>
+ </section>
+ </section>
+</section>
+</main><footer class="site-footer"><span>Clinic access is audited · BSPT pilot</span><a href="/chat">Back to public chat</a></footer></body></html>

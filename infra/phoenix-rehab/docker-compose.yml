@@ -1,0 +1,35 @@
+services:
+  phoenix:
+    build: .
+    image: bspt-phoenix-api:local
+    container_name: bspt-phoenix-api
+    env_file:
+      - path: .env
+        format: raw
+    restart: unless-stopped
+    expose:
+      - "8093"
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://127.0.0.1:8093/healthz',timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 8s
+    volumes:
+      - /opt/phoenix-data:/data
+      - /opt/phoenix-bot/web:/app/web:ro
+    networks:
+      - caddy-net
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    mem_limit: 768m
+    pids_limit: 100
+networks:
+  caddy-net:
+    external: true

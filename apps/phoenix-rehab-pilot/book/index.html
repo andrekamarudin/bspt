@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#082E24">
+<title>Appointment journey · Phoenix Rehab Pilot</title>
+<link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/book/book.css">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/book/book.mjs"></script>
+</head><body><header class="site-header" id="site-header"></header>
+<main class="container booking-page">
+<div class="booking-hero"><div><div class="kicker">BOOKING JOURNEY · PRIVATE TEST</div>
+<h1>Find a time.<br><span class="highlight">Walk through booking.</span></h1>
+<p class="hand">Live clinic availability. No live bookings, yet.</p></div>
+<div class="booking-mode" aria-live="polite"><strong>TEST MODE</strong><span>No appointment, SMS or payment will be created.</span></div></div>
+<nav class="booking-steps" aria-label="Booking steps" id="step-nav">
+<span class="step current" data-step="1"><i>1</i> Choose a slot</span>
+<span class="step" data-step="2"><i>2</i> Review details</span>
+<span class="step" data-step="3"><i>3</i> Verify</span>
+<span class="step" data-step="4"><i>4</i> Finish</span>
+</nav>
+<div class="booking-layout">
+<div class="booking-workflow">
+<div id="booking-feedback" class="booking-feedback" role="status" aria-live="polite"></div>
+<section class="booking-panel" id="booking-step-1">
+<div class="section-head"><div><span class="kicker">STEP 1</span><h2>Pick an actual opening</h2></div><span class="live-indicator">SGiMED · read-only</span></div>
+<p class="subtle">The times shown are retrieved from Phoenix Rehab's SGiMED calendar. They can change and are not reserved.</p>
+<form id="slot-form" class="slot-form">
+<label for="booking-date">Date in Singapore</label><input id="booking-date" type="date" required>
+<label for="booking-branch">Location</label><select id="booking-branch">
+<option value="">All branches</option>
+<option value="Orchard">Orchard</option><option value="Tampines">Tampines</option>
+<option value="Serangoon">Serangoon</option><option value="Tanjong Pagar">Tanjong Pagar</option>
+<option value="Jurong East">Jurong East</option>
+</select>
+<button class="primary booking-button" type="submit" id="fetch-slots">Find appointments</button>
+</form>
+<div id="slot-info" class="subtle" aria-live="polite"></div><p class="subtle">Need the actual booking service? <a id="early-fallback" href="https://phoenixrehabgroup.com/calendar/" target="_blank" rel="noopener noreferrer">Open the official Phoenix Rehab booking calendars</a>. This is outside the test flow.</p>
+<div id="slot-results" class="slot-results" role="list" aria-label="Available appointment times"></div>
+</section>
+<section class="booking-panel hidden" id="booking-step-2">
+<span class="kicker">STEP 2</span><h2>Review the selected opening</h2>
+<div id="chosen-slot" class="chosen-slot"></div>
+<p class="booking-warning">This is a simulation. The selected slot has not been held. Use fictional details only; no real patient information is needed.</p>
+<form id="review-form">
+<div class="booking-field-grid">
+<label>Sample patient name<input id="sample-name" type="text" value="Demo Patient" maxlength="60" required placeholder="Demo Patient"></label>
+<label>Sample email<input id="sample-email" type="email" value="test.patient@example.com" maxlength="100" required></label>
+<label>Sample mobile<input id="sample-phone" type="text" value="00000000" inputmode="numeric" maxlength="12" required></label>
+</div>
+<p class="subtle">These sample fields are validated in your browser only. Phoenix does not transmit or store them.</p>
+<div class="booking-actions"><button class="secondary" type="button" id="back-to-slots">Change slot</button><button class="primary" type="submit">Continue to demo verification</button></div>
+</form>
+</section>
+<section class="booking-panel hidden" id="booking-step-3">
+<span class="kicker">STEP 3</span><h2>Try the verification step</h2>
+<p>SGiMED's actual checkout requires identity verification and may require payment. This pilot uses a local demonstration code instead.</p>
+<form id="otp-form"><label for="demo-otp">Simulated one-time code</label>
+<div class="demo-otp"><span>DEMO CODE</span><strong>000000</strong><small>No text message is sent</small></div>
+<input id="demo-otp" type="text" inputmode="numeric" autocomplete="off" maxlength="6" pattern="[0-9]{6}" required placeholder="Enter the code above">
+<div class="booking-actions"><button class="secondary" id="back-to-review" type="button">Back</button><button class="primary" type="submit">Verify demo code</button></div></form>
+</section>
+<section class="booking-panel hidden" id="booking-step-4">
+<span class="kicker">STEP 4</span><h2>Complete the simulation</h2>
+<div id="verified-slot" class="chosen-slot"></div>
+<p class="booking-warning">You are not confirming a real appointment. No provider booking record, verification SMS or payment will be made.</p>
+<form id="complete-form"><label class="booking-check"><input type="checkbox" id="test-confirm" required><span>I understand this is a test run and does not create or reserve an appointment.</span></label>
+<div class="booking-actions"><button class="secondary" type="button" id="back-to-otp">Back</button><button class="primary" type="submit">Complete test run</button></div></form>
+</section>
+<section class="booking-panel hidden" id="booking-complete">
+<div class="kicker">SIMULATION COMPLETE</div><h2>Journey tested. No appointment created.</h2>
+<p class="sim-ref-label">Test reference (not a booking number)</p><strong class="sim-ref" id="simulation-ref"></strong>
+<div id="finished-slot" class="chosen-slot"></div>
+<p class="booking-warning">SGiMED has not received any booking request. The opening may no longer be available.</p>
+<div class="booking-actions"><button type="button" id="start-over" class="secondary">Test another booking</button><a id="fallback-booking" class="booking-real-link" href="#" target="_blank" rel="noopener noreferrer">Continue in official SGiMED booking page</a></div>
+</section>
+</div>
+<aside class="booking-aside">
+<div class="paper booking-paper"><img class="clip" src="/paperclip.svg" alt="">
+<div class="kicker">HOW WE'LL SHIP IT</div><h3>One journey, two providers.</h3>
+<p><strong>Official SGiMED API:</strong> will handle appointment writes once approved and tested.</p>
+<p><strong>Public booking fallback:</strong> if the official service fails, users can finish on SGiMED's booking page without an unsafe duplicate submission.</p>
+<div class="subtle">No patient data should be entered during this pilot test.</div>
+</div>
+<a href="/chat" class="aside-link">Back to chatbot</a>
+</aside>
+</div>
+</main><footer class="site-footer"><span>Built by ByteSize ProTip · Live SGiMED availability, simulation-only checkout</span><a href="/about">About the pilot</a></footer>
+</body></html>

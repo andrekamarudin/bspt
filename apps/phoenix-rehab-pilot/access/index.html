@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#082E24">
+<title>Internal access · Phoenix Rehab</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/site.css"><script type="module" src="/shared/header.mjs"></script>
+</head><body><header class="site-header" id="site-header"></header>
+<main class="container" style="max-width:710px;min-height:75vh"><div class="kicker">INVITATION-ONLY EVALUATION</div><h1>Step inside<span class="highlight">.</span></h1><p class="lead">Phoenix Rehab’s working AI assistant is being evaluated internally using real clinic information. Enter your test-access password to continue.</p>
+<section class="paper" style="padding:29px 38px;max-width:520px;margin:34px 0"><img class="clip" src="/paperclip.svg" alt=""><h2 style="margin:0 0 12px">Internal access</h2><form id="access-form"><label for="password">Pilot password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button id="unlock" class="primary" type="submit">Continue to chat</button></div><p id="message" class="status" role="status" aria-live="polite"></p></form><span class="hand">Private by design.</span></section>
+<p class="muted">The clinic administrator and developer areas require additional, separate credentials. Booking enquiries do not submit appointments.</p></main>
+<footer class="site-footer"><span>ByteSize ProTip × Phoenix Rehab · Internal pilot</span><a href="/about">About the pilot</a></footer>
+<script type="module">
+const $=id=>document.getElementById(id);
+$('access-form').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const btn=$('unlock');btn.disabled=true;$('message').textContent='Checking access…';
+ try{
+  const result=await fetch('/api/access',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify({password:$('password').value})});
+  const data=await result.json();
+  if(!result.ok)throw Error(data.error||data.detail||'Access could not be verified');
+  $('password').value='';const target=new URLSearchParams(location.search).get('next');const destination=['/chat','/book','/admin','/dev'].includes(target)?target:'/chat';
+ const claim=location.hash.match(/^#claim=([A-Za-z0-9_-]{30,96})$/);
+ location.replace(destination+(claim?'#claim='+claim[1]:''));
+ }catch(err){$('message').textContent=err.message;btn.disabled=false}
+});
+</script>
+</body></html>

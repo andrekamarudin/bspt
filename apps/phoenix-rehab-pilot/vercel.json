@@ -27,5 +27,18 @@
         }
       ]
     }
-  ]
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://phoenix.bytesizeprotip.com/about",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://phoenix.bytesizeprotip.com/:path*",
+      "permanent": false
+    }
+  ],
+  "trailingSlash": false
 }

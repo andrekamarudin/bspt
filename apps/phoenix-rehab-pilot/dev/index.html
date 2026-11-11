@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
+<title>Developer safeguards · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-modelpicker-v2">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-modelpicker-v2"></script>
+</head><body data-console="dev"><header class="site-header" id="site-header"></header>
+<main class="container dashboard">
+<section class="hero-compact"><div><div class="kicker">DEVELOPER CONTROL / PASSWORD + TOTP</div><h1>Guardrail <span class="highlight">control.</span></h1><span class="hand">Spend only when the request fits.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
+<div id="flash" class="status" role="status" aria-live="polite"></div>
+<section class="gate panel" id="auth-panel"><h2>Developer authentication</h2><p class="muted">Separate developer credentials. TOTP (authenticator app) is mandatory before unlocking operational controls. Enrolment is permitted once after password verification.</p>
+<form id="login-form" autocomplete="on"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="200">
+<label for="otp">One-time password (2FA)</label><input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="6-digit code from your authenticator" aria-describedby="otp-help"><p class="muted" id="otp-help">Enter the current 6-digit TOTP code. If your password manager supports OTP autofill, it can fill this field.</p>
+<div class="actions"><button type="submit" class="primary">Unlock developer console</button></div></form></section>
+<section class="panel hidden" id="totp-panel"><h2>Set up your authenticator</h2><p class="note">Scan this QR with your authenticator app after unlocking with the developer password. The TOTP seed lives in Infisical. This QR is shown only during password-authenticated setup; do not photograph or share it.</p>
+<img id="totp-qr" alt="Scan the authenticator QR" width="205" height="205"><div class="note"><label for="totp-manual">Manual authenticator setup code</label><code id="totp-manual" class="totp-manual">Available after password verification</code><div class="actions"><button id="copy-totp" type="button" class="secondary">Copy setup code</button></div><p class="muted">Use a time-based 6-digit code, refreshed every 30 seconds. Issuer: ByteSize ProTip. Account: Phoenix Developer.</p></div><p class="muted">If the QR cannot be scanned, use a compatible authenticator app and complete the code challenge on this page.</p>
+<form id="totp-form"><label for="totp-code">One-time password (2FA)</label><input id="totp-code" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required><div class="actions"><button class="primary" type="submit">Verify and activate TOTP</button></div></form></section>
+<section class="hidden" id="console-panel">
+<div class="grid two">
+<section class="panel"><div class="kicker">MODEL ROUTING</div><h2>Optional model decision</h2><div class="note">On: the selected model suggests ANSWER, ASK, or OUT_OF_SCOPE, then re-evaluates that suggestion when answering. Off: one model call uses the same scope principles in its system instructions. Neither mode uses keyword-based question blocking. Authentication and rate limits remain active.</div><form id="dev-form">
+<label for="model-search">AI model for chatbot and decision calls</label>
+<div class="model-picker" id="model-picker">
+<svg class="model-search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+<input id="model-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="model-list" aria-describedby="model-hint" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Search by model, provider or ID">
+<div id="model-list" class="model-list hidden" role="listbox" aria-label="Available text chat models"></div>
+</div>
+<p id="model-hint" class="model-hint" role="status" aria-live="polite">Loading current model…</p>
+<p class="muted">Available models are fetched from Vercel AI Gateway. Only text-chat models marked as no-training across all providers are offered. Indicative prices are USD per 1M tokens; model changes take effect after Save.</p>
+<label class="switchline"><input id="decision" type="checkbox"><span><strong>Separate scope decision</strong><small>On: three-way advisory decision plus answer (two calls). Off: one answering call with scope guardrails included.</small></span></label>
+<label for="max-day">Global pilot conversations per day</label><input type="number" min="1" max="500" id="max-day">
+<label for="max-ip">Conversations per IP per day</label><input type="number" min="1" max="60" id="max-ip">
+<label for="max-tokens">Max output tokens per answer</label><input type="number" min="80" max="1400" id="max-tokens">
+<label for="extra-policy">Additional developer restrictions</label><textarea id="extra-policy" rows="5" maxlength="2800" placeholder="Optional additional prohibited content or scope limits."></textarea>
+<button class="primary" type="submit">Save safeguard controls</button></form></section>
+<section class="panel"><div class="kicker">NON-NEGOTIABLE SYSTEM POLICY</div><h2>Guardrails</h2><p class="muted">These instructions are supplied to the selected model on every request. Clinic administrators cannot override them.</p><pre id="policy" class="policy"></pre><div class="divider"></div><div class="kicker">ACTIVE MODEL</div><strong id="model">openai/gpt-6-luna</strong></section>
+</div>
+<section class="panel" id="wa-webhook-setup">
+<div class="kicker">WHATSAPP TEST CONNECTION</div>
+<h2>Connect Meta to GreenCloud</h2>
+<p class="muted">Use these two fields in Meta &gt; WhatsApp &gt; Step 2 Production setup &gt; Configure Webhooks. This only verifies where Meta can deliver messages. Outbound replies remain switched off until app credentials and signed-message testing are complete.</p>
+<label for="wa-callback">Callback URL</label>
+<input id="wa-callback" type="text" readonly value="https://phoenix.bytesizeprotip.com/api/whatsapp">
+<div class="actions"><button type="button" class="secondary" id="wa-copy-url">Copy callback URL</button></div>
+<label for="wa-verify">Verify token (not your Meta API access token)</label>
+<input id="wa-verify" type="text" readonly autocomplete="off" spellcheck="false" placeholder="Only visible after developer TOTP authentication">
+<div class="actions"><button type="button" class="primary" id="wa-copy-verify">Copy verify token</button><button type="button" class="secondary" id="wa-refresh">Refresh</button><button type="button" class="danger" id="wa-regenerate">Rotate token</button></div>
+<div id="wa-status" class="note" role="status" aria-live="polite">Checking webhook configuration...</div>
+<form id="wa-credentials-form" autocomplete="off">
+<h3>Finish the private Meta test connection</h3>
+<p class="muted">These settings are kept encrypted on GreenCloud. Leave a previously saved field blank to keep its existing value. They are never displayed again.</p>
+<label for="wa-app-secret">Meta App Secret</label>
+<input id="wa-app-secret" type="password" autocomplete="new-password" spellcheck="false" placeholder="Meta App Settings → Basic → App secret → Show" minlength="32" maxlength="32">
+<label for="wa-access-token">WhatsApp Cloud API access token</label>
+<input id="wa-access-token" type="password" autocomplete="new-password" spellcheck="false" placeholder="Paste the Meta API token you stored in Vault">
+<label for="wa-phone-id">Meta test Phone Number ID</label>
+<input id="wa-phone-id" type="text" readonly value="1455443810979099">
+<label for="wa-testers">Approved tester numbers (with country codes)</label>
+<input id="wa-testers" type="text" autocomplete="off" placeholder="Two numbers only, separated by a comma">
+<p class="muted">Only the two approved testers. No real patient traffic. Saving credentials will <strong>not</strong> enable replies.</p>
+<button class="primary" type="submit">Save encrypted Meta configuration</button>
+</form>
+
+<p class="muted">After Meta verifies the webhook, subscribe to the <code>messages</code> event. Do not enable customer messaging or use real patient details.</p>
+</section>
+<section class="panel"><h2>Test intent with selected model</h2><p class="muted">Get the selected model's advisory ANSWER / ASK / OUT_OF_SCOPE classification. The answering model can override it; this test uses no conversation history.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Ask model to decide</button></form><div id="test-result" class="status"></div></section>
+</section>
+</main><footer class="site-footer"><span>Developer access requires password and TOTP · All changes audited</span><a href="/about">Pilot overview</a></footer></body></html>

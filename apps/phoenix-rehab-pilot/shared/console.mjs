@@ -1,0 +1,213 @@
+const $=id=>document.getElementById(id);
+const scope=document.body.dataset.console,route=scope==='admin'?'/api/admin':'/api/dev';
+const flash=$('flash');const stamp=(value)=>{try{return new Date(value).toLocaleString('en-SG',{timeZone:'Asia/Singapore',dateStyle:'medium',timeStyle:'short'})}catch{return String(value||'')}};
+function report(text,good=true){flash.className='status '+(good?'success':'error');flash.textContent=text||''}
+function ensureData(result){if(!result||typeof result!=='object')throw Error('Unexpected server response.');return result}
+async function request(path,body){const resp=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify(body)});const data=ensureData(await resp.json().catch(()=>({error:'Invalid server response.'})));if(!resp.ok||data.ok===false)throw Error(data.error||data.detail||'Operation failed.');return data}
+function el(tag,text,cls){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node}
+let loadAdmin=async()=>{},loadDev=async()=>{};
+function showConsole(){ $('auth-panel').classList.add('hidden');$('totp-panel')?.classList.add('hidden');$('console-panel').classList.remove('hidden');$('logout').classList.remove('hidden');scope==='admin'?loadAdmin():loadDev() }
+function showLogin(){$('auth-panel').classList.remove('hidden');$('console-panel').classList.add('hidden');$('totp-panel')?.classList.add('hidden');$('logout').classList.add('hidden')}
+async function showTotpSetup(){
+ $('auth-panel').classList.add('hidden');$('console-panel').classList.add('hidden');$('totp-panel').classList.remove('hidden');
+ const data=await request('/api/auth',{action:'totp_setup',role:'dev'});
+ if(!data.qr||!data.qr.startsWith('data:image/png;base64,'))throw Error('TOTP QR unavailable. Contact the developer.');
+ $('totp-qr').src=data.qr;
+ if(!/^[A-Z2-7]+=*$/.test(data.manual||''))throw Error('Manual setup code unavailable.');
+ $('totp-manual').textContent=data.manual;
+}
+$('login-form').addEventListener('submit',async e=>{
+ e.preventDefault();const password=$('password').value;const otp=$('otp')?.value||'';
+ try{const result=await request('/api/auth',{action:'login',role:scope,password,otp});$('password').value='';if($('otp'))$('otp').value='';
+   if(result.status==='setup_required'){report('Password verified. Scan your new TOTP QR to activate second factor.');await showTotpSetup()}
+   else if(result.status==='totp_required'){report('Enter the six-digit authenticator code.',false)}
+   else{report('Access granted.');showConsole()}
+ }catch(err){report(err.message,false)}
+});
+$('logout').addEventListener('click',async()=>{try{await request('/api/auth',{action:'logout',role:scope});report('Console locked.')}catch(err){report(err.message,false)}showLogin()});
+if(scope==='dev')$('copy-totp').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('totp-manual').textContent);report('Setup code copied.')}catch{report('Select the code and copy manually.',false)}});
+if(scope==='dev')$('totp-form').addEventListener('submit',async e=>{e.preventDefault();try{const r=await request('/api/auth',{action:'totp_confirm',role:'dev',otp:$('totp-code').value});if(r.status!=='ok')throw Error('TOTP not verified');$('totp-code').value='';report('Authenticator enabled. Developer console unlocked.');showConsole()}catch(err){report(err.message,false)}});
+(async()=>{try{const r=await request('/api/auth',{action:'session',role:scope});if(r.status==='ok')showConsole();else if(r.status==='setup_required')await showTotpSetup();else showLogin()}catch{showLogin()}})();
+if(scope==='admin'){
+ let config={schedules:[],docs:[]};
+ const panels=[...document.querySelectorAll('[data-panel]')];
+ document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===button));panels.forEach(p=>p.classList.toggle('hidden',p.dataset.panel!==button.dataset.tab));if(button.dataset.tab==='audit')loadAudit()}));
+ const activeOpts=()=>config.schedules.filter(s=>!s.end_at||new Date(s.end_at)>new Date());
+ loadAdmin=async function(){try{const data=await request(route,{action:'state'});if(typeof window?.CustomEvent==='function')window.dispatchEvent(new window.CustomEvent('phoenix-admin-ready'));config=data;$('tone').value=data.tone||'warm-professional';$('special').value=data.special||'';renderDocs(data.docs||[]);renderSchedules(data.schedules||[]);report('Clinic settings loaded.')}catch(err){report(err.message,false)}}
+ $('settings-form').addEventListener('submit',async e=>{e.preventDefault();try{await request(route,{action:'save_settings',tone:$('tone').value,special:$('special').value});report('Clinic instructions saved.')}catch(err){report(err.message,false)}});
+ $('upload-form').addEventListener('submit',async e=>{e.preventDefault();const file=$('file').files[0];if(!file)return;if(!$('attest').checked)return report('You must confirm there is no patient data.',false);if(file.size>1024*1024)return report('File exceeds 1 MB limit.',false);
+ try{const encoded=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('File read failed'));r.readAsDataURL(file)});
+ await request(route,{action:'upload',filename:file.name,data:encoded,attest:true});$('upload-form').reset();report('Uploaded as draft. Approval is required before the model can use it.');await loadAdmin()}catch(err){report(err.message,false)}});
+ $('schedule-form').addEventListener('submit',async e=>{e.preventDefault();try{const start=$('starts').value,end=$('ends').value;if(!start||!end||new Date(end)<=new Date(start))throw Error('End must be after start.');
+ const toIso=x=>new Date(x).toISOString();
+ await request(route,{action:'schedule',text:$('announcement').value,start_at:toIso(start),end_at:toIso(end)});
+ $('schedule-form').reset();report('Timed instruction scheduled. It will expire automatically.');await loadAdmin()}catch(err){report(err.message,false)}});
+ function renderDocs(items){
+  const list=$('docs-list');list.replaceChildren();if(!items.length){list.append(el('p','No documents uploaded yet.','muted'));return}
+  items.forEach(doc=>{const item=el('div',undefined,'data-entry');const title=el('strong',doc.name);item.append(title,el('span','Uploaded '+stamp(doc.created_at)+(doc.approved?' · APPROVED':' · DRAFT')+' · '+(doc.characters||0)+' chars'));
+   const buttons=el('div',undefined,'actions');if(!doc.approved){const b=el('button','Approve for answers','secondary');b.type='button';b.addEventListener('click',async()=>{if(!confirm('Approve this document for public chatbot answers? Ensure it contains no patient or confidential details.'))return;try{await request(route,{action:'approve',id:doc.id});report('Document approved.');await loadAdmin()}catch(err){report(err.message,false)}});buttons.append(b)}
+   const remove=el('button','Delete','danger');remove.type='button';remove.addEventListener('click',async()=>{if(!confirm('Permanently delete this uploaded context?'))return;try{await request(route,{action:'remove',id:doc.id});report('Document deleted.');await loadAdmin()}catch(err){report(err.message,false)}});buttons.append(remove);
+   item.append(buttons);list.append(item)});
+ }
+ function renderSchedules(items){
+  const list=$('scheduled-list');list.replaceChildren();const future=items.filter(s=>new Date(s.end_at)>new Date());
+  if(!future.length){list.append(el('p','No active or upcoming announcements.','muted'));return}
+  future.forEach(entry=>{const item=el('div',undefined,'data-entry');item.append(el('strong',entry.text));item.append(el('span',stamp(entry.start_at)+' → '+stamp(entry.end_at)));const del=el('button','Remove','danger');del.type='button';del.addEventListener('click',async()=>{try{await request(route,{action:'unschedule',id:entry.id});report('Announcement removed.');await loadAdmin()}catch(err){report(err.message,false)}});const bar=el('div',undefined,'actions');bar.append(del);item.append(bar);list.append(item)})
+ }
+ let currentAudit=[];
+ const usd=value=>value===null||value===undefined?'Unpriced':'US$'+Number(value).toFixed(value>=.01?4:7).replace(/0+$/,'').replace(/\.$/,'');
+ async function loadAudit(selectId=null){
+  try{
+   const r=await request(route,{action:'audit'});currentAudit=r.sessions||[];
+   const list=$('audit-list');list.replaceChildren();
+   if(!currentAudit.length){list.append(el('p','No conversations yet.','muted'));return}
+   for(const session of currentAudit){
+    const item=el('button',undefined,'data-entry');
+    item.type='button';item.style.textAlign='left';
+    const headline=el('strong',session.id.slice(0,8)+' · '+session.count+' messages');
+    const cost=el('span',usd(session.cost_usd)+' · '+(session.cost_calls||0)+' model calls'+
+      (session.unpriced_calls?' · '+session.unpriced_calls+' unpriced':''));
+    const meta=el('span',stamp(session.last_at)+' · '+(session.status||'reviewable'));
+    item.append(headline,meta,cost);
+    item.addEventListener('click',()=>loadTranscript(session.id));
+    list.append(item);
+   }
+   if(selectId)await loadTranscript(selectId);
+  }catch(err){report(err.message,false)}
+ }
+ async function loadTranscript(id){
+  try{
+   const r=await request(route,{action:'transcript',id});
+   const item=currentAudit.find(row=>row.id===id);
+   const thread=$('audit-thread');thread.replaceChildren();
+   thread.append(el('h3','Transcript · '+id.slice(0,8)));
+   if(item){
+    thread.append(el('p','Estimated AI cost: '+usd(item.cost_usd)+' · '+item.cost_calls+
+       ' model calls'+(item.unpriced_calls?' · '+item.unpriced_calls+' without price':''),'muted'));
+   }
+   for(const msg of r.messages||[]){
+    const p=el('p',(msg.role==='user'?'TESTER · ':'ASSISTANT · ')+stamp(msg.at)+'\n'+msg.text);
+    p.style.whiteSpace='pre-wrap';p.style.overflowWrap='anywhere';
+    p.style.borderBottom='1px solid #d5dfd5';p.style.paddingBottom='13px';
+    thread.append(p);
+   }
+  }catch(err){report(err.message,false)}
+ }
+ window.addEventListener('phoenix-open-conversation',async event=>{
+  const id=event.detail?.id;if(!id)return;
+  document.querySelectorAll('[data-tab]').forEach(button=>{
+   button.classList.toggle('active',button.dataset.tab==='audit');
+  });
+  panels.forEach(panel=>panel.classList.toggle('hidden',panel.dataset.panel!=='audit'));
+  await loadAudit(id);
+  $('audit-thread').scrollIntoView({behavior:'smooth',block:'nearest'});
+ });
+ $('refresh-audit').addEventListener('click',loadAudit);
+ }else{
+ // The catalog and the selected model are kept separate: typing alone cannot
+ // change the active server-side model until an exact option is selected + saved.
+ let gatewayModels=[],chosenModel='openai/gpt-6-luna',modelRows=[],highlighted=-1;
+ const modelInput=$('model-search'),modelList=$('model-list'),modelHint=$('model-hint');
+ const modelBox=$('model-picker');
+ const money=n=>Number.isFinite(n)?('$'+(n===0?'0':n<1?n.toFixed(3):n.toFixed(2)).replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1')):'n/a';
+ function modelHintFor(model){
+  const found=gatewayModels.find(m=>m.id===model);
+  if(!found)return 'Current model: '+model+'. The catalog may be unavailable; previous configuration is retained.';
+  return 'Selected: '+found.name+' ('+found.id+'). Input '+money(found.input_per_m)+'/M; output '+money(found.output_per_m)+'/M. Zero-data-retention availability: '+(found.zdr||'unknown')+'. Changes require Save.';
+ }
+ function closeModelList(){modelList.classList.add('hidden');modelInput.setAttribute('aria-expanded','false');modelInput.removeAttribute('aria-activedescendant');highlighted=-1}
+ function chooseModel(model){
+  chosenModel=model.id;modelInput.value=model.id;modelHint.textContent=modelHintFor(model.id);closeModelList();
+ }
+ function focusModelRow(){
+  [...modelList.querySelectorAll('[role="option"]')].forEach((item,i)=>{
+   item.dataset.active=String(i===highlighted);
+  });
+  const row=modelList.querySelectorAll('[role="option"]')[highlighted];
+  if(row){modelInput.setAttribute('aria-activedescendant',row.id);row.scrollIntoView({block:'nearest'})}
+  else modelInput.removeAttribute('aria-activedescendant');
+ }
+ function showModelList(){
+  const q=modelInput.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const matches=gatewayModels.filter(m=>q.every(x=>(m.id+' '+m.name+' '+m.provider).toLowerCase().includes(x)));
+  modelRows=matches.slice(0,20);
+  modelList.replaceChildren();highlighted=-1;
+  const heading=el('div',undefined,'model-list-heading');
+  heading.append(el('span',matches.length?(modelRows.length===matches.length?matches.length+' matching models':'Showing '+modelRows.length+' of '+matches.length+' models'):'No matching models'),
+                 el('span','USD / 1M tokens','model-list-unit'));
+  modelList.append(heading);
+  if(modelRows.length===0){modelList.append(el('div',gatewayModels.length?'Try a different name, provider or model ID.':'Model catalog unavailable.','model-empty'))}
+  else modelRows.forEach((m,i)=>{
+   const btn=el('button',undefined,'model-option');btn.type='button';btn.id='model-option-'+i;btn.setAttribute('role','option');btn.setAttribute('aria-selected',String(m.id===chosenModel));btn.tabIndex=-1;
+   const identity=el('span',undefined,'model-identity');
+   identity.append(el('span',m.name,'model-name'),el('span',m.id,'model-id'));
+   if(m.id===chosenModel)identity.append(el('span','Currently selected','model-selected-label'));
+   const prices=el('span',undefined,'model-prices');
+   const input=el('span',undefined,'model-price-row'),output=el('span',undefined,'model-price-row');
+   input.append(el('span','In','model-price-label'),el('span',money(m.input_per_m),'model-price-value'));
+   output.append(el('span','Out','model-price-label'),el('span',money(m.output_per_m),'model-price-value'));
+   prices.append(input,output);
+   btn.append(identity,prices);
+   btn.addEventListener('mousedown',event=>event.preventDefault());
+   btn.addEventListener('click',()=>chooseModel(m));modelList.append(btn);
+  });
+  modelList.classList.remove('hidden');modelInput.setAttribute('aria-expanded','true');
+ }
+ modelInput.addEventListener('focus',()=>{modelInput.select();showModelList()});
+ modelInput.addEventListener('input',showModelList);
+ modelInput.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){closeModelList();return}
+  if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+   event.preventDefault();if(modelList.classList.contains('hidden'))showModelList();
+   if(modelRows.length){highlighted=event.key==='ArrowDown'?(highlighted+1)%modelRows.length:(highlighted-1+modelRows.length)%modelRows.length;focusModelRow()}
+  }else if(event.key==='Enter'&&!modelList.classList.contains('hidden')){
+   event.preventDefault();if(highlighted>=0)chooseModel(modelRows[highlighted]);
+   else if(modelRows.length===1)chooseModel(modelRows[0]);
+  }
+ });
+ document.addEventListener('pointerdown',event=>{if(!modelBox.contains(event.target))closeModelList()});
+ async function loadGatewayModels(){
+  try{
+   const data=await request(route,{action:'models'});gatewayModels=Array.isArray(data.models)?data.models:[];
+   modelHint.textContent=modelHintFor(chosenModel)+' '+gatewayModels.length+' available text-chat models.';
+  }catch(err){
+   gatewayModels=[];modelHint.textContent='Current model: '+chosenModel+'. Catalog unavailable: '+err.message+'. Existing model can still be kept.';
+  }
+ }
+ const waLoad=async()=>{const data=await request(route,{action:'wa_webhook_info'});$('wa-verify').value=data.verify_token||'';$('wa-callback').value=data.callback||'https://phoenix.bytesizeprotip.com/api/whatsapp';$('wa-status').textContent=data.verification_ready?[
+ 'Webhook verified: ready',
+ 'Meta app signing: '+(data.signature_ready?'configured':'missing'),
+ 'Cloud API token: '+(data.access_token_ready?'configured':'missing'),
+ 'Test phone ID: '+(data.phone_id_ready?'configured':'missing'),
+ 'Approved recipients: '+(data.tester_allowlist_ready?'configured':'missing'),
+ 'Outbound replies: '+(data.outbound_enabled?'enabled':'disabled')
+].join(' · '):'Generate a verification token to begin.';};
+ $('wa-copy-url').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('wa-callback').value);report('Callback URL copied.')}catch{report('Select and copy the URL manually.',false)}});
+ $('wa-copy-verify').addEventListener('click',async()=>{const value=$('wa-verify').value;if(!value)return report('Verification token is not configured.',false);try{await navigator.clipboard.writeText(value);report('Meta Verify token copied. Do not share it.')}catch{report('Select the token and copy it manually.',false)}});
+ $('wa-credentials-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  try{
+   const body={action:'wa_credentials_store'};
+   const props=[
+    ['wa-app-secret','PHOENIX_WA_META_APP_SECRET'],
+    ['wa-access-token','PHOENIX_WA_ACCESS_TOKEN'],
+    ['wa-testers','PHOENIX_WA_ALLOWED_TEST_NUMBERS']
+   ];
+   for(const [id,key] of props){
+     const value=$(id).value.trim();
+     if(value)body[key]=value;
+   }
+   if(Object.keys(body).length===1)throw Error('Enter a missing credential or tester number.');
+   body.PHOENIX_WA_PHONE_NUMBER_ID=$('wa-phone-id').value;
+   await request(route,body);
+   for(const [id] of props)$(id).value='';
+   report('Meta settings encrypted and saved. WhatsApp replies are still disabled.');
+   await waLoad();
+  }catch(err){report(err.message,false)}
+ });
+ $('wa-refresh').addEventListener('click',()=>waLoad().catch(e=>report(e.message,false)));
+ $('wa-regenerate').addEventListener('click',async()=>{if(!confirm('Generate a NEW Meta verify token? The old Meta webhook will fail verification until updated.'))return;try{const data=await request(route,{action:'wa_generate_verify'});$('wa-verify').value=data.verify_token;report('New verification token ready. Update the Meta Verify token field.');await waLoad()}catch(e){report(e.message,false)}});
+ loadDev=async function(){try{const data=await request(route,{action:'state'});const s=data.settings||{};chosenModel=data.model||s.model||'openai/gpt-6-luna';modelInput.value=chosenModel;$('decision').checked=s.decision!==false;$('max-day').value=s.max_day||80;$('max-ip').value=s.max_ip||12;$('max-tokens').value=s.max_tokens||460;$('extra-policy').value=s.extra_policy||'';$('policy').textContent=data.baseline||'Baseline unavailable';$('model').textContent=chosenModel;report('Developer settings loaded.');await loadGatewayModels();try{await waLoad()}catch(err){report('Settings loaded. WhatsApp status unavailable: '+err.message,false)}}catch(err){report(err.message,false)}}
+ $('dev-form').addEventListener('submit',async e=>{e.preventDefault();try{if(modelInput.value.trim()!==chosenModel)throw Error('Choose a model from the search results before saving.');const saved=await request(route,{action:'save',model:chosenModel,decision:$('decision').checked,max_day:Number($('max-day').value),max_ip:Number($('max-ip').value),max_tokens:Number($('max-tokens').value),extra_policy:$('extra-policy').value});$('model').textContent=saved.model||chosenModel;modelHint.textContent=modelHintFor(chosenModel);closeModelList();report('Developer settings and active model saved.')}catch(err){report(err.message,false)}});
+ $('test-form').addEventListener('submit',async e=>{e.preventDefault();try{const r=await request(route,{action:'test',message:$('test-prompt').value});$('test-result').textContent=r.reason||('Model suggested '+String(r.decision||'unavailable').toUpperCase());$('test-result').className='status '+(r.decision==='out_of_scope'?'error':'success')}catch(err){report(err.message,false)}});
+}
