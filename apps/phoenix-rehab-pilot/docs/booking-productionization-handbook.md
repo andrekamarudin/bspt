@@ -117,3 +117,11 @@ These are **frontend route signatures**, not an official authenticated partner A
 **Success means:** a consenting real patient can select an actual opening, verify identity, complete required payment, receive SGiMED's actual booking reference, and find that exact appointment in the clinic system; duplicate retries and outage fallbacks are safe; staff can update policies without engineering; all necessary contract/privacy/security/operational sign-offs exist.
 
 **Current phase:** engineering prototype only. Do not claim live booking, do not process patient details and do not enable live writes.
+
+## 8. Native chat booking tools (11 November test release)
+
+The chatbot, not a separate booking page, is the intended primary patient experience. The gateway now offers native JSON function tools: `search_appointments`, `prepare_appointment`, `confirm_appointment`, and `check_appointment`. The tool schema is provider-independent and remains consistent whether the backend uses a mock pilot provider or an officially approved SGiMED integration.
+
+During the pilot, `search_appointments` queries real SGiMED public availability, while `prepare_appointment` and `confirm_appointment` write **only** to the isolated demo CRM `crm_bot_bookings`. Writes are permitted only for authenticated demo tester identities; the preparation checks an exact currently offered slot, and confirmation requires an unambiguous statement from the tester independently of the model's tool arguments. Confirmation returns `SIM-` and never a vendor appointment ID. The server appends an unmistakable customer-facing simulation disclosure to booking responses. The LLM is not asked to manufacture a fake tool call or simulate the booking workflow itself. Meta WhatsApp outgoing is separately gated and not yet enabled.
+
+The provider swap in production must preserve the exact tool API and use a separate officially authorized SGiMED adapter with idempotency, verified contact ownership, OTP/payment, audit, and rollback. No automatic write fallback after an ambiguous provider request.

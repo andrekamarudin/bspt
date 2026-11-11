@@ -75,3 +75,18 @@ The password-and-TOTP-protected `/dev` console now accepts the test Meta app sec
 ## Booking journey / productionization (11 Nov)
 
 Open the private [booking test journey](/book) on GreenCloud. It reads real SGiMED public openings and completes a **simulation only**; it does not contact SGiMED booking creation or collect patient contact details. The commercial launch checklist, vendor API contract gaps, failover safety and rollout gates are documented at [docs/booking-productionization-handbook.md](docs/booking-productionization-handbook.md).
+
+## Internal dummy CRM and cross-channel identity, 11 Nov 2026
+
+Use **/admin → Demo CRM** to inspect two isolated test customers (Andre and Nigel) and four explicitly fictional appointment records. CRM schema/field provenance and production checklist are documented in [CRM data model and identity handbook](docs/crm-data-model-and-identity-handbook.md).
+
+- The CRM uses a **separate encrypted SQLite database** under the private GreenCloud /data volume (`phoenix_crm_demo.db` by default). It contains no real SGiMED patient/appointment records.
+- **WhatsApp recognition:** only a verified Meta webhook sender matching an authorized test phone number can resolve a CRM identity; no matching by message content or WhatsApp display name.
+- **Web chat recognition:** an admin generates a personal one-use link (15-minute expiration) in the CRM tab; the tester opens the link after the pilot login. The browser's pilot session is bound for 12 hours; the admin can revoke it.
+- The bot's context receives first name and up to three explicitly fictional appointments only. Never transmit the actual phone number, all customers' profiles or clinical records to the model.
+- Seeding is an **explicit runtime operation**: `seed_test_person(code,name,phone,role)`. Phone numbers are not checked into Git. Only the two authorized test identities can be created.
+- Meta test-number outbound replies are separately gated by the encrypted credentials and `PHOENIX_WA_SEND_ENABLED`. Until actual signed delivery is verified, cross-channel recognition is a **tested integration**, not an end-to-end live WhatsApp result.
+
+### Native booking tools in chatbot (test only)
+
+The chatbot can now invoke actual tool calls for `search_appointments`, `prepare_appointment`, `confirm_appointment`, and `check_appointment`. The tool contract is provider-neutral; its active implementation is an **isolated mock CRM booking provider**. On user confirmation it persists a `SIM-` test record, never an SGiMED booking ID. The UI and final response always disclose simulation. Real SGiMED booking writes remain absent. The matching tool path is wired in the WhatsApp handler, whose outbound sending is still disabled pending Meta credentials.

@@ -160,6 +160,25 @@ test('clinic admin costs tab uses separate authenticated usage endpoint',()=>{
  assert.match(css,/costs-kpis/);
 });
 
+test('demo CRM identity requires a one-use owner claim, never a typed name or phone',()=>{
+ const html=text('admin/index.html');
+ const chat=text('chat/index.html');
+ const script=text('chat/chat.mjs');
+ const admin=text('shared/crm-admin.mjs');
+ assert.match(html,/data-tab="crm"/);
+ assert.match(html,/id="crm-customers"/);
+ assert.match(html,/shared\/crm-admin\.mjs/);
+ assert.match(chat,/id="crm-identity-status"/);
+ assert.match(chat,/id="crm-link-form"/);
+ assert.match(script,/action:'claim'/);
+ assert.match(script,/action:'unlink'/);
+ assert.match(script,/#claim=/);
+ assert.match(script,/history\.replaceState/);
+ assert.match(admin,/action:'invite'/);
+ assert.match(admin,/action:'revoke'/);
+ assert.doesNotMatch(script,/profile_from_whatsapp_sender/);
+});
+
 test('QA and reviewed few-shot workspaces are protected, isolated and accessible',()=>{
  const html=text('admin/index.html');
  const js=text('shared/reviews.mjs');

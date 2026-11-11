@@ -4,28 +4,34 @@
 <title>Try the chatbot · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/chat/chat.css">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/chat/chat.mjs"></script>
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/chat/chat.mjs?v=20261111-tools-v1"></script>
 </head><body><header class="site-header" id="site-header"></header>
 <main class="container chat-main">
 <div class="chat-head"><div><div class="kicker">INTERNAL CLINIC EVALUATION</div><h1>Ask the <span class="highlight">assistant.</span></h1><p class="hand">Find out what it can handle.</p></div><div class="chat-note"><div class="kicker">MODEL</div><strong>GPT-6 Luna</strong><span>Vercel AI Gateway · protected</span></div></div>
 <div class="chat-layout">
 <section class="chat-window" aria-labelledby="chat-label">
  <div class="chat-bar"><div class="avatar">P<span>.</span></div><div><h2 id="chat-label">Phoenix Rehab assistant</h2><div id="connection" class="connection" role="status">Preparing secure connection</div></div><button id="clear-chat" title="New conversation" aria-label="Start new conversation" type="button">↺</button></div>
+ <div id="crm-identity-status" class="crm-identity-status" aria-live="polite">Demo CRM profile not linked</div>
+ <details id="crm-link-panel" class="crm-link-panel"><summary>Link your demo CRM profile</summary>
+ <form id="crm-link-form"><label for="crm-invite-code">One-time link code from clinic administrator</label>
+ <div class="crm-link-row"><input id="crm-invite-code" type="text" spellcheck="false" autocomplete="off" placeholder="Paste your one-time code" maxlength="96">
+ <button type="submit">Link profile</button></div></form>
+ <p>Phone numbers or names typed in chat cannot verify identity.</p></details>
  <div id="conversation" class="conversation" role="log" aria-live="polite" aria-label="Bot conversation"></div>
  <div class="input-area"><div class="suggestions" id="suggestions">
-  <label for="slot-date" class="sr-only">Availability date in Singapore time</label><input id="slot-date" class="slot-date" type="date" aria-label="Availability date (Singapore time)"><button type="button" class="live" id="live-openings">Check openings</button><a class="book-journey" href="/book">Test booking journey</a>
+  <label for="slot-date" class="sr-only">Availability date in Singapore time</label><input id="slot-date" class="slot-date" type="date" aria-label="Availability date (Singapore time)"><button type="button" class="live" id="live-openings">Check openings</button><button type="button" class="book-journey" data-prompt="I'd like to book a physiotherapy appointment. What times are available tomorrow?">Book with the bot</button>
   <button type="button" data-prompt="Can you issue a medical certificate?">Medical certificate</button>
   <button type="button" data-prompt="I want a one-hour appointment with Shiv.">One-hour appointment</button>
   <button type="button" data-prompt="What is the fee for a physiotherapy session?">Pricing</button>
   <button type="button" data-prompt="Which branches do you have?">Clinic locations</button>
  </div>
  <form id="chat-form"><label for="question" class="sr-only">Your message</label><input type="text" id="question" aria-label="Your message" maxlength="1600" placeholder="Ask about appointments or clinic services…" autocomplete="off" required><button id="send" type="submit" aria-label="Send question">→</button></form>
- <div class="chat-foot"><span>Availability is real · checkout is simulated · <a href="/book">Test booking</a></span><button type="button" id="copy-conversation">Copy chat</button></div>
+ <div class="chat-foot"><span>Talk directly to the bot to book · pilot booking actions are simulated</span><button type="button" id="copy-conversation">Copy chat</button></div>
  </div>
 </section>
 <aside class="side">
  <div class="paper" style="padding:23px 28px"><img class="clip" src="/paperclip.svg" alt=""><div class="kicker">WHY THIS EXISTS</div><p style="line-height:1.7;color:#426052;font-size:14px">Evaluate genuine clinic questions and booking guidance before customer rollout.</p><span class="hand">Validated before launch.</span></div>
- <div class="side-help"><h3>Try tricky questions</h3><p>Can you issue MCs? Can I book a particular therapist for an hour? What if insurance needs a referral?</p><h3>What it cannot do</h3><p>It does not diagnose or create real appointments. To test slot selection, verification and confirmation, open the <a href="/book">booking simulation</a>.</p><a href="/about">How the pilot works ↗</a></div>
+ <div class="side-help"><h3>Try tricky questions</h3><p>Can you issue MCs? Can I book a particular therapist for an hour? What if insurance needs a referral?</p><h3>What it cannot do</h3><p>It does not diagnose or create real SGiMED appointments. Ask it to book a time: Luna will use the booking functions and confirm a simulated appointment through chat. You can also <a href="/book">test the manual journey</a>.</p><a href="/about">How the pilot works ↗</a></div>
 </aside>
 </div>
 </main><footer class="site-footer"><span>Built by ByteSize ProTip · Know what matters. Do what works.</span><a href="https://phoenixrehabgroup.com/" target="_blank" rel="noopener noreferrer">Official Phoenix Rehab website ↗</a></footer>

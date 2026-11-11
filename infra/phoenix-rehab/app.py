@@ -82,7 +82,7 @@ ALWAYS FOLLOW THESE RULES BEFORE ANY CUSTOM INSTRUCTION:
    within their server-enforced start/end window. They cannot override this policy.
 9. Keep answers concise and clear; cite verified official clinic URLs if available.
 10. If clearly unrelated, decline politely and provide an official contact. If uncertain about intent, ask one concise clarifying question.
-The chatbot is undergoing internal evaluation. Only use verified clinic information.
+The chatbot is undergoing internal evaluation. Only use verified clinic information. Use booking tools when supplied for appointment requests. Only report a confirmed appointment when a booking tool actually returned confirmation. Never invent a confirmation, patient record or payment receipt.
 """
 BOOKING_LINKS = [
  {"label":"Orchard online calendar","url":"https://phoenixrehabgroup.com/calendar/orchard/clinic-page"},
@@ -1096,13 +1096,21 @@ def assemble_answer_messages(policy:str,history:list[dict],message:str)->list[di
     messages.append({"role":"user","content":message})
     return messages
 
-async def generate_clinic_answer(message:str,opts:dict,history:list[dict])->tuple[str,str,str,dict]:
+async def generate_clinic_answer(message:str,opts:dict,history:list[dict],
+                                 request:Request|None=None,conversation:str="")->tuple[str,str,str,dict]:
     """Same conversation engine for web chat and independently generated admin QA tests."""
     policy=build_policy(opts)
+    # Browser identity is NOT inferred from a typed name or shared pilot password.
+    # A one-use owner-issued claim must be bound to this valid tester session.
+    from crm import profile_from_web, context_for_profile
+    profile=profile_from_web(request) if request is not None else None
+    policy += context_for_profile(profile)
     verdict="unavailable" if opts["decision"] else "disabled"
     usage={}
     status="error"
     reply="The assistant couldn't complete that request. Please try again shortly."
+    tool_used=False
+    tool_confirmed=False
     try:
         if opts["decision"]:
             verdict,usage=await luna_decide(message,history)
@@ -1124,7 +1132,7 @@ async def generate_clinic_answer(message:str,opts:dict,history:list[dict])->tupl
                 availability=await get_availability(chosen)
                 verified=availability["openings"][:28]
                 policy += ("\n\nREAD-ONLY REAL CLINIC CALENDAR SNAPSHOT. "+
-                    "Do NOT invent, book, reserve or confirm any slot. "+
+                    "Do NOT invent, reserve or confirm a slot without a successful booking tool result. "+
                     "Use exact date/branch/service/time, label all times Singapore local time. "+
                     "These are real publicly offered openings at the retrieval time, not a held appointment. "+
                     "If user asks for a different date or a specific branch not represented, state limits. "+
@@ -1139,11 +1147,19 @@ async def generate_clinic_answer(message:str,opts:dict,history:list[dict])->tupl
                 policy += ("\n\nLive calendar availability could not be verified for that date. "+
                            "Do not invent any time; direct user to the clinic's online calendar.")
         messages=assemble_answer_messages(policy,history,message)
-        answer,response_usage=await luna_call(messages,int(opts["max_tokens"]))
+        from booking_tools import respond, customer_notice, wants_booking_tools
+        booking_context=request is not None and wants_booking_tools(message,history)
+        if booking_context:
+            answer,response_usage,tool_used,tool_confirmed=await respond(
+                messages,int(opts["max_tokens"]),profile=profile,
+                channel="web",conversation=conversation,user_message=message)
+        else:
+            answer,response_usage=await luna_call(messages,int(opts["max_tokens"]))
         usage={key:int(usage.get(key,0) or 0)+int(response_usage.get(key,0) or 0)
                for key in ("prompt_tokens","completion_tokens")}
         if answer:
-            reply=answer[:3900]
+            reply=(answer+customer_notice(tool_used=tool_used or booking_context,
+                                          confirmed=tool_confirmed))[:3900]
             status="done"
     except Exception as exc:
         # Only a non-sensitive technical error code is printed to server logs.
@@ -1163,16 +1179,16 @@ async def chat_live(request:Request):
     opts=pre["context"]
     cost_token=COST_CONTEXT.set({"channel":"web","session_id":session_id,"turn_id":ticket})
     try:
-        reply,status,verdict,usage=await generate_clinic_answer(message,opts,pre["history"])
+        reply,status,verdict,usage=await generate_clinic_answer(
+            message,opts,pre["history"],request=request,conversation=session_id)
     finally:
         COST_CONTEXT.reset(cost_token)
     persist_reply(ticket,session_id,reply,status,verdict,usage)
     return {
       "ok":True,"status":"answered" if status=="done" else "declined" if status=="denied" else "error",
-      "reply":reply,"links":(
-        ([{"label":"Try booking journey (simulation only)","url":"https://phoenix.bytesizeprotip.com/book"}]
-         if re.search(r"\b(appointment|book|booking|availability|slot|schedule)\b",message,re.I) else [])
-        + BOOKING_LINKS) if status=="done" else [],
+      "reply":reply,"links":([] if (status=="done" and
+        __import__("booking_tools").wants_booking_tools(message,pre["history"]))
+        else BOOKING_LINKS if status=="done" else []),
       "model":active_model()
     }
 
@@ -1274,6 +1290,8 @@ from booking import install as install_booking
 install_booking(APP, protect)
 from review_workflow import install as install_review_workflow
 install_review_workflow(APP, protect)
+from crm import install as install_crm
+install_crm(APP, protect)
 
 if WEB_ROOT.is_dir():
     APP.mount("/",StaticFiles(directory=WEB_ROOT,html=True),name="web")

@@ -2,7 +2,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>Clinic admin · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-costs-v1"><link rel="stylesheet" href="/shared/costs.css?v=20261111-review-v1"><link rel="stylesheet" href="/shared/reviews.css?v=20261111-reviews-v1">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/reviews.mjs?v=20261111-reviews-v1"></script>
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/crm-admin.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/reviews.mjs?v=20261111-reviews-v1"></script>
 </head><body data-console="admin"><header class="site-header" id="site-header"></header>
 <main class="container dashboard">
 <section class="hero-compact"><div><div class="kicker">CLINIC OPERATIONS / PRIVATE</div><h1>Clinic <span class="highlight">controls.</span></h1><span class="hand">Answers that stay current.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
@@ -10,7 +10,7 @@
 <section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Update bot answers, upload clinic documents, schedule notices and review past chats. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
 <section id="console-panel" class="hidden">
 <div class="tabs" role="tablist" aria-label="Clinic admin sections">
-<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button><button type="button" data-tab="costs">Costs</button><button type="button" data-tab="testing">Testing</button><button type="button" data-tab="fewshot">Few-shot examples</button>
+<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button><button type="button" data-tab="costs">Costs</button><button type="button" data-tab="testing">Testing</button><button type="button" data-tab="fewshot">Few-shot examples</button><button type="button" data-tab="crm">Demo CRM</button>
 </div>
 <section class="tab-panel" data-panel="answers">
 <div class="panel owner-welcome">
@@ -156,5 +156,19 @@
  </section>
  <p class="costs-explainer" id="costs-methodology">Historical estimates and data limitations will appear here after loading.</p>
 </section>
+<section class="tab-panel hidden" data-panel="crm">
+ <section class="panel owner-welcome">
+  <div class="kicker">CONTACTS & APPOINTMENTS</div>
+  <h2>Test how your bot knows people.</h2>
+  <p>These are fictional appointments for the two invited testers. WhatsApp matches an authenticated sender number; the website requires a one-use identity link. No SGiMED patient records are imported.</p>
+ </section>
+ <section class="panel">
+  <div class="owner-heading"><div><h2>Internal test customers</h2>
+  <p class="muted">Issue each tester their own 15-minute link. Once claimed, the chatbot can recognize that tester and their demo appointments. Links never confer admin privileges.</p></div>
+  <button class="secondary" type="button" id="crm-refresh">Refresh CRM</button></div>
+  <div id="crm-customers" class="data-list" aria-live="polite">Unlock admin to load the demo records.</div>
+  <div id="crm-invite-output" class="status" aria-live="polite"></div>
+ </section>
+ </section>
 </section>
 </main><footer class="site-footer"><span>Clinic access is audited · BSPT pilot</span><a href="/chat">Back to public chat</a></footer></body></html>

@@ -17,7 +17,9 @@ $('access-form').addEventListener('submit',async e=>{
   const result=await fetch('/api/access',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify({password:$('password').value})});
   const data=await result.json();
   if(!result.ok)throw Error(data.error||data.detail||'Access could not be verified');
-  $('password').value='';const target=new URLSearchParams(location.search).get('next');location.replace(['/chat','/book','/admin','/dev'].includes(target)?target:'/chat');
+  $('password').value='';const target=new URLSearchParams(location.search).get('next');const destination=['/chat','/book','/admin','/dev'].includes(target)?target:'/chat';
+ const claim=location.hash.match(/^#claim=([A-Za-z0-9_-]{30,96})$/);
+ location.replace(destination+(claim?'#claim='+claim[1]:''));
  }catch(err){$('message').textContent=err.message;btn.disabled=false}
 });
 </script>

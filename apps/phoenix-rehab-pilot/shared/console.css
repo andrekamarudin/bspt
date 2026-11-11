@@ -89,3 +89,11 @@
  .model-prices{min-width:73px}
  .model-price-row{gap:5px;font-size:11px}
 }
+
+/* Clinic-owner nav stays usable on smaller viewports even with CRM. */
+.tabs{display:flex;overflow-x:auto;max-width:100%;gap:8px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.tabs button{white-space:nowrap;flex-shrink:0}
+#crm-invite-output:not(:empty){margin-top:12px;padding:12px;border:1px solid #b9ceb9;border-radius:9px}
+#crm-invite-output input{padding:11px;border:1px solid #b9ceb9;border-radius:9px;font:12px ui-monospace,monospace}
+#crm-invite-output button{margin-top:10px}
+.crm-customer-card p{overflow-wrap:anywhere}

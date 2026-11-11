@@ -88,10 +88,20 @@ def install(app):
             verdict = "disabled"
             if config["decision"]:
                 verdict, _ = await luna_decide(message,[])
+            from crm import profile_from_whatsapp_sender, context_for_profile
+            profile=profile_from_whatsapp_sender(sender)
             policy = (build_policy(config)+decision_guidance(verdict)+
-                      "\nOnly respond to public clinic questions. Never ask for patient information, make bookings, or imply a booking is confirmed.")
-            reply, _ = await luna_call(assemble_answer_messages(policy,[],message),
-                                       int(config["max_tokens"]))
+                      context_for_profile(profile)+
+                      "\nOnly respond to public clinic questions; do not ask for clinical details or invent an appointment.")
+            messages=assemble_answer_messages(policy,[],message)
+            from booking_tools import respond, customer_notice, wants_booking_tools
+            if wants_booking_tools(message,[]):
+                reply,_,used,confirmed=await respond(
+                    messages,int(config["max_tokens"]),profile=profile,channel="whatsapp",
+                    conversation=sender,user_message=message)
+                reply+=customer_notice(tool_used=used,confirmed=confirmed)
+            else:
+                reply,_=await luna_call(messages,int(config["max_tokens"]))
             token = read_credential("PHOENIX_WA_ACCESS_TOKEN")
             if not token or os.getenv("PHOENIX_WA_SEND_ENABLED") != "true":
                 status = "disabled"
@@ -152,7 +162,7 @@ def install(app):
             return Response("Invalid JSON",status_code=400)
         if data.get("object")!="whatsapp_business_account":
             return Response("EVENT_RECEIVED",media_type="text/plain")
-        if not os.getenv("PHOENIX_WA_ACCESS_TOKEN") or os.getenv("PHOENIX_WA_SEND_ENABLED")!="true":
+        if not read_credential("PHOENIX_WA_ACCESS_TOKEN") or os.getenv("PHOENIX_WA_SEND_ENABLED")!="true":
             return Response("EVENT_RECEIVED",media_type="text/plain")
         phone=read_credential("PHOENIX_WA_PHONE_NUMBER_ID")
         for entry in (data.get("entry") or [])[:2]:
