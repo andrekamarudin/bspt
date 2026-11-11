@@ -437,6 +437,79 @@ class APIFlows(unittest.TestCase):
                 con.execute("DELETE FROM turns WHERE session_id=?",(session_id,))
                 con.execute("DELETE FROM sessions WHERE id=?",(session_id,))
 
+    def test_admin_batch_testing_review_and_approved_few_shot_lifecycle(self):
+        from app import build_policy,public_context,assemble_answer_messages
+        from review_workflow import published_examples_snapshot
+        with self.client() as c:
+            self.pilot(c)
+            self.assertEqual(c.post('/api/reviews',json={'action':'list'}).status_code,401)
+            self.assertEqual(c.post('/api/auth',json={'role':'admin','action':'login',
+                             'password':'A'*40}).status_code,200)
+            q='How much for therapy?'
+            queued=c.post('/api/reviews',json={'action':'batch',
+                     'messages':q+'\nCan I visit on Saturday?'})
+            self.assertEqual(queued.status_code,200,queued.text[:150])
+            ids=queued.json()['ids'];self.assertEqual(len(ids),2)
+            response='The published standard consultation is 45 minutes; confirm current pricing.'
+            seen=[]
+            async def fake_model(messages,tokens=500):
+                seen.append(messages)
+                if 'Output only ANSWER, ASK or OUT_OF_SCOPE' in messages[0]['content']:
+                    return 'ANSWER',{'prompt_tokens':8,'completion_tokens':1}
+                return response,{'prompt_tokens':20,'completion_tokens':10}
+            with patch('app.luna_call',side_effect=fake_model):
+                for id in ids:
+                    r=c.post('/api/reviews',json={'action':'run','id':id})
+                    self.assertEqual(r.status_code,200,r.text[:150])
+                self.assertEqual(len(seen),4)
+                for messages in seen:
+                    self.assertEqual(messages[-1]['role'],'user')
+                    self.assertNotIn('Previously asked',str(messages))
+            self.assertEqual(c.post('/api/reviews',json={'action':'run','id':ids[0]}).status_code,409)
+            refused=c.post('/api/reviews',json={'action':'review','id':ids[0],
+                 'rating':1,'feedback':'Wrong answer','draft_example':True})
+            self.assertEqual(refused.status_code,422)
+            self.assertFalse(any(x['question']==q for x in published_examples_snapshot()))
+            improved='The verified public rate is S$230 nett for a 45-minute consultation.'
+            review=c.post('/api/reviews',json={'action':'review','id':ids[0],
+              'rating':2,'feedback':'Confused hour with standard visit',
+              'preferred':improved,'draft_example':True})
+            self.assertEqual(review.status_code,200,review.text[:150])
+            example=review.json()['example_id'];self.assertTrue(example)
+            self.assertFalse(any(x['question']==q for x in published_examples_snapshot()))
+            self.assertEqual(c.post('/api/reviews',json={'action':'example_publish',
+                'id':example}).status_code,422)
+            published=c.post('/api/reviews',json={'action':'example_publish',
+                'id':example,'attest':True})
+            self.assertEqual(published.status_code,200)
+            self.assertTrue(any(x['answer']==improved for x in published_examples_snapshot()))
+            messages=assemble_answer_messages(build_policy(public_context()),[],q)
+            self.assertTrue(any(m['role']=='assistant' and m['content']==improved for m in messages))
+            self.assertNotIn(improved,messages[0]['content'])  # not system authority
+            amended='Phoenix Rehab publishes a standard 45-minute fee, not an hourly fee.'
+            edited=c.post('/api/reviews',json={'action':'example_save','id':example,
+               'question':q,'ideal':amended})
+            self.assertEqual(edited.status_code,200)
+            self.assertTrue(any(x['answer']==improved for x in published_examples_snapshot()))
+            self.assertFalse(any(x['answer']==amended for x in published_examples_snapshot()))
+            c.post('/api/reviews',json={'action':'example_publish','id':example,'attest':True})
+            self.assertTrue(any(x['answer']==amended for x in published_examples_snapshot()))
+            archived=c.post('/api/reviews',json={'action':'example_archive','id':example})
+            self.assertEqual(archived.status_code,200)
+            self.assertFalse(any(x['question']==q for x in published_examples_snapshot()))
+
+    def test_admin_testing_checks_pii_limits_and_no_unapproved_examples(self):
+        with self.client() as c:
+            self.pilot(c)
+            c.post('/api/auth',json={'role':'admin','action':'login','password':'A'*40})
+            too_many='\n'.join('Question '+str(i)+' about clinic pricing' for i in range(21))
+            self.assertEqual(c.post('/api/reviews',json={'action':'batch','messages':too_many}).status_code,422)
+            self.assertEqual(c.post('/api/reviews',json={'action':'batch',
+                             'messages':'Patient email fake@sample.test is private'}).status_code,422)
+            invalid=c.post('/api/reviews',json={'action':'example_save',
+                            'question':'How much?','ideal':'Contact me at fake@sample.test'})
+            self.assertEqual(invalid.status_code,422)
+
     def test_calendar_projection_cannot_book(self):
         with self.client() as c:
             self.pilot(c)

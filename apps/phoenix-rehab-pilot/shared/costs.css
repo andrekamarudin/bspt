@@ -47,3 +47,6 @@
  .costs-conversation-row{gap:10px}
  .costs-conversation-amount{min-width:88px}
 }
+
+.costs-conversation-link{width:100%;border-left:0;border-right:0;border-top:0;background:transparent;text-align:left;font:inherit;cursor:pointer;border-radius:0;color:inherit}
+.costs-conversation-link:hover,.costs-conversation-link:focus-visible{background:#eef6ef;outline:2px solid #bad4c0;outline-offset:0}

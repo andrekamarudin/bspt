@@ -54,9 +54,54 @@ if(scope==='admin'){
   if(!future.length){list.append(el('p','No active or upcoming announcements.','muted'));return}
   future.forEach(entry=>{const item=el('div',undefined,'data-entry');item.append(el('strong',entry.text));item.append(el('span',stamp(entry.start_at)+' → '+stamp(entry.end_at)));const del=el('button','Remove','danger');del.type='button';del.addEventListener('click',async()=>{try{await request(route,{action:'unschedule',id:entry.id});report('Announcement removed.');await loadAdmin()}catch(err){report(err.message,false)}});const bar=el('div',undefined,'actions');bar.append(del);item.append(bar);list.append(item)})
  }
- async function loadAudit(){try{const r=await request(route,{action:'audit'});const list=$('audit-list');list.replaceChildren();if(!(r.sessions||[]).length){list.append(el('p','No conversations yet.','muted'));return}
- for(const session of r.sessions){const item=el('button',undefined,'data-entry');item.type='button';item.style.textAlign='left';item.append(el('strong',session.id.slice(0,8)+' · '+session.count+' messages'),el('span',stamp(session.last_at)+' · '+(session.status||'reviewable')));item.addEventListener('click',()=>loadTranscript(session.id));list.append(item)}}catch(err){report(err.message,false)}}
- async function loadTranscript(id){try{const r=await request(route,{action:'transcript',id});const thread=$('audit-thread');thread.replaceChildren();thread.append(el('h3','Transcript · '+id.slice(0,8)));for(const msg of r.messages||[]){const p=el('p',(msg.role==='user'?'TESTER · ':'ASSISTANT · ')+stamp(msg.at)+'\n'+msg.text);p.style.whiteSpace='pre-wrap';p.style.overflowWrap='anywhere';p.style.borderBottom='1px solid #d5dfd5';p.style.paddingBottom='13px';thread.append(p)}}catch(err){report(err.message,false)}}
+ let currentAudit=[];
+ const usd=value=>value===null||value===undefined?'Unpriced':'US$'+Number(value).toFixed(value>=.01?4:7).replace(/0+$/,'').replace(/\.$/,'');
+ async function loadAudit(selectId=null){
+  try{
+   const r=await request(route,{action:'audit'});currentAudit=r.sessions||[];
+   const list=$('audit-list');list.replaceChildren();
+   if(!currentAudit.length){list.append(el('p','No conversations yet.','muted'));return}
+   for(const session of currentAudit){
+    const item=el('button',undefined,'data-entry');
+    item.type='button';item.style.textAlign='left';
+    const headline=el('strong',session.id.slice(0,8)+' · '+session.count+' messages');
+    const cost=el('span',usd(session.cost_usd)+' · '+(session.cost_calls||0)+' model calls'+
+      (session.unpriced_calls?' · '+session.unpriced_calls+' unpriced':''));
+    const meta=el('span',stamp(session.last_at)+' · '+(session.status||'reviewable'));
+    item.append(headline,meta,cost);
+    item.addEventListener('click',()=>loadTranscript(session.id));
+    list.append(item);
+   }
+   if(selectId)await loadTranscript(selectId);
+  }catch(err){report(err.message,false)}
+ }
+ async function loadTranscript(id){
+  try{
+   const r=await request(route,{action:'transcript',id});
+   const item=currentAudit.find(row=>row.id===id);
+   const thread=$('audit-thread');thread.replaceChildren();
+   thread.append(el('h3','Transcript · '+id.slice(0,8)));
+   if(item){
+    thread.append(el('p','Estimated AI cost: '+usd(item.cost_usd)+' · '+item.cost_calls+
+       ' model calls'+(item.unpriced_calls?' · '+item.unpriced_calls+' without price':''),'muted'));
+   }
+   for(const msg of r.messages||[]){
+    const p=el('p',(msg.role==='user'?'TESTER · ':'ASSISTANT · ')+stamp(msg.at)+'\n'+msg.text);
+    p.style.whiteSpace='pre-wrap';p.style.overflowWrap='anywhere';
+    p.style.borderBottom='1px solid #d5dfd5';p.style.paddingBottom='13px';
+    thread.append(p);
+   }
+  }catch(err){report(err.message,false)}
+ }
+ window.addEventListener('phoenix-open-conversation',async event=>{
+  const id=event.detail?.id;if(!id)return;
+  document.querySelectorAll('[data-tab]').forEach(button=>{
+   button.classList.toggle('active',button.dataset.tab==='audit');
+  });
+  panels.forEach(panel=>panel.classList.toggle('hidden',panel.dataset.panel!=='audit'));
+  await loadAudit(id);
+  $('audit-thread').scrollIntoView({behavior:'smooth',block:'nearest'});
+ });
  $('refresh-audit').addEventListener('click',loadAudit);
  }else{
  // The catalog and the selected model are kept separate: typing alone cannot

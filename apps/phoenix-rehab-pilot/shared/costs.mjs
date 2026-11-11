@@ -40,7 +40,7 @@ if($('costs-panel')){
  function renderChannels(channels){
   const root=$('costs-channels');root.replaceChildren();
   if(!channels.length){root.append(element('p','No usage by channel yet.','muted'));return}
-  const names={web:'Web chat',whatsapp:'WhatsApp',dev:'Developer tests',unattributed:'Unattributed'};
+  const names={web:'Web chat',whatsapp:'WhatsApp',dev:'Developer tests',testing:'Admin testing',unattributed:'Unattributed'};
   for(const row of channels){
    const item=element('div',undefined,'costs-channel-row');
    const label=element('div',undefined,'costs-channel-label');
@@ -53,7 +53,10 @@ if($('costs-panel')){
  function showConversationPage(){
   const root=$('costs-conversations');
   for(const row of conversations.slice(offset,offset+20)){
-   const item=element('div',undefined,'costs-conversation-row');
+   const item=element('button',undefined,'costs-conversation-row costs-conversation-link');item.type='button';
+   item.title='Open this transcript in Conversation audit';
+   item.setAttribute('aria-label','Open transcript and AI costs for conversation '+row.id.slice(0,8));
+   item.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('phoenix-open-conversation',{detail:{id:row.id}})));
    const summary=element('div',undefined,'costs-conversation-main');
    const date=new Date(row.last_at).toLocaleString('en-SG',{
     timeZone:'Asia/Singapore',month:'short',day:'numeric',year:'numeric',

@@ -80,7 +80,7 @@ def install(app):
         return digest
 
     async def answer(digest, sender, message):
-        from app import db, luna_decide, decision_guidance, public_context, build_policy, luna_call, COST_CONTEXT
+        from app import db, luna_decide, decision_guidance, public_context, build_policy, luna_call, COST_CONTEXT, assemble_answer_messages
         status = "failed"
         cost_token=COST_CONTEXT.set({"channel":"whatsapp","session_id":None,"turn_id":digest})
         try:
@@ -90,10 +90,8 @@ def install(app):
                 verdict, _ = await luna_decide(message,[])
             policy = (build_policy(config)+decision_guidance(verdict)+
                       "\nOnly respond to public clinic questions. Never ask for patient information, make bookings, or imply a booking is confirmed.")
-            reply, _ = await luna_call([
-                {"role":"system","content":policy},
-                {"role":"user","content":message}
-            ], int(config["max_tokens"]))
+            reply, _ = await luna_call(assemble_answer_messages(policy,[],message),
+                                       int(config["max_tokens"]))
             token = read_credential("PHOENIX_WA_ACCESS_TOKEN")
             if not token or os.getenv("PHOENIX_WA_SEND_ENABLED") != "true":
                 status = "disabled"

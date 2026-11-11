@@ -151,11 +151,34 @@ test('clinic admin costs tab uses separate authenticated usage endpoint',()=>{
  assert.match(html,/id="costs-days"/);
  assert.match(html,/id="costs-conversations"/);
  assert.match(html,/id="costs-channels"/);
- assert.match(html,/costs\.mjs\?v=20261111-costs-v1/);
+ assert.match(html,/costs\.mjs\?v=20261111-review-v1/);
  assert.match(js,/action:'costs'/);
  assert.match(js,/credentials:'same-origin'/);
  assert.match(js,/timeZone:'Asia\/Singapore'/);
  assert.match(js,/unpriced_requests/);
  assert.match(js,/showConversationPage/);
  assert.match(css,/costs-kpis/);
+});
+
+test('QA and reviewed few-shot workspaces are protected, isolated and accessible',()=>{
+ const html=text('admin/index.html');
+ const js=text('shared/reviews.mjs');
+ const css=text('shared/reviews.css');
+ const app=readFileSync(new URL('../../../infra/phoenix-rehab/review_workflow.py',import.meta.url),'utf8');
+ assert.match(html,/data-tab="testing"/);
+ assert.match(html,/data-tab="fewshot"/);
+ assert.match(html,/id="testing-rows"/);
+ assert.match(html,/id="test-feedback"/);
+ assert.match(html,/id="test-rating"/);
+ assert.match(html,/id="fewshot-list"/);
+ assert.match(html,/id="fewshot-ideal"/);
+ assert.match(js,/action:'batch'/);
+ assert.match(js,/action:'run'/);
+ assert.match(js,/action:'review'/);
+ assert.match(js,/action:'example_publish'/);
+ assert.match(js,/action:'example_archive'/);
+ assert.match(js,/credentials:'same-origin'/);
+ assert.match(js,/for\(const \[idx,id\] of batch\.ids\.entries\(\)\)/);
+ assert.match(css,/review-table-wrap/);
+ assert.match(app,/authed\(request,"admin"\)/);
 });

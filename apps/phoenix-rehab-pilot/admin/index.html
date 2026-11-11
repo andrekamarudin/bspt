@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>Clinic admin · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-costs-v1"><link rel="stylesheet" href="/shared/costs.css?v=20261111-costs-v1">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-costs-v1"></script>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-costs-v1"><link rel="stylesheet" href="/shared/costs.css?v=20261111-review-v1"><link rel="stylesheet" href="/shared/reviews.css?v=20261111-reviews-v1">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-review-v1"></script><script type="module" src="/shared/reviews.mjs?v=20261111-reviews-v1"></script>
 </head><body data-console="admin"><header class="site-header" id="site-header"></header>
 <main class="container dashboard">
 <section class="hero-compact"><div><div class="kicker">CLINIC OPERATIONS / PRIVATE</div><h1>Clinic <span class="highlight">controls.</span></h1><span class="hand">Answers that stay current.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
@@ -10,7 +10,7 @@
 <section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Update bot answers, upload clinic documents, schedule notices and review past chats. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
 <section id="console-panel" class="hidden">
 <div class="tabs" role="tablist" aria-label="Clinic admin sections">
-<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button><button type="button" data-tab="costs">Costs</button>
+<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button><button type="button" data-tab="costs">Costs</button><button type="button" data-tab="testing">Testing</button><button type="button" data-tab="fewshot">Few-shot examples</button>
 </div>
 <section class="tab-panel" data-panel="answers">
 <div class="panel owner-welcome">
@@ -61,6 +61,67 @@
 <div class="date-grid"><div><label for="starts">Starts</label><input id="starts" type="datetime-local" required></div><div><label for="ends">Ends (exclusive)</label><input id="ends" type="datetime-local" required></div></div><div class="actions"><button type="submit" class="primary">Schedule instruction</button></div></form></div>
 <div class="panel"><h2>Active and upcoming</h2><div id="scheduled-list" class="data-list"></div><p class="muted">Expired announcements are retained for audit but no longer added to the chatbot's live instructions.</p></div></section>
 <section class="tab-panel hidden" data-panel="audit"><div class="panel"><h2>Past conversations</h2><p class="muted">Encrypted records of chatbot testing, accessible only to clinic administrators. Do not forward identifiable patient data. Records expire according to the retention setting.</p><button class="secondary" type="button" id="refresh-audit">Refresh</button><div class="audit-layout"><div id="audit-list" class="data-list"></div><div id="audit-thread" class="thread"><p class="muted">Select a conversation to inspect its transcript.</p></div></div></div></section>
+<section class="tab-panel hidden" data-panel="testing" id="testing-panel">
+ <div class="panel">
+  <div class="review-head"><div><div class="kicker">QUALITY / ADMIN EVALUATION</div><h2>Test patient questions</h2>
+   <p class="muted">Paste one question per line. Every line runs in a fresh, independent chat using the same answering engine, active model, system safeguards and approved examples.</p></div>
+  <span class="review-note">Internal read-only testing; model usage is charged</span></div>
+  <label for="batch-questions">Questions to simulate (up to 20)</label>
+  <textarea id="batch-questions" rows="7" maxlength="35000" placeholder="Pricing?&#10;Can I see a physio on Saturday?&#10;How long is a typical consultation?&#10;Can you interpret my MRI?"></textarea>
+  <div class="actions"><button type="button" id="run-tests" class="primary">Generate independent chats</button>
+  <button type="button" id="stop-tests" class="secondary hidden">Stop after current</button>
+  <button type="button" id="refresh-tests" class="secondary">Refresh testing table</button></div>
+  <p class="review-note" id="test-progress" role="status" aria-live="polite">No test batch running.</p>
+ </div>
+ <div class="panel">
+  <div class="review-head"><div><h2>Response review</h2><p class="muted">Select a row to examine the full response, rate it, and provide an improved answer. Reviewed answers become drafts, never automatically published.</p></div><span id="test-count"></span></div>
+  <div class="review-table-wrap"><table class="review-table">
+   <thead><tr><th>Question</th><th>Answer preview</th><th>Rating</th><th>State</th><th></th></tr></thead>
+   <tbody id="testing-rows"><tr><td colspan="5">Run a batch to see responses.</td></tr></tbody>
+  </table></div>
+  <section class="review-detail hidden" id="test-detail">
+   <div class="review-head"><h3>Review selected response</h3><button class="secondary" type="button" id="close-test-detail">Close</button></div>
+   <div class="review-q"><strong>Question</strong><p id="detail-question"></p></div>
+   <div class="review-a"><strong>Generated answer</strong><p id="detail-answer"></p></div>
+   <div class="review-meta" id="detail-model"></div>
+   <label for="test-rating">Quality rating</label>
+   <select id="test-rating"><option value="">Choose a rating</option><option value="5">5 · Excellent</option><option value="4">4 · Good</option><option value="3">3 · Needs improvement</option><option value="2">2 · Poor</option><option value="1">1 · Incorrect / unsafe</option></select>
+   <label for="test-feedback">Reviewer feedback</label>
+   <textarea id="test-feedback" rows="3" maxlength="1300" placeholder="What was good, missing, wrong, or misleading?"></textarea>
+   <label for="test-preferred">Preferred answer for few-shot example</label>
+   <textarea id="test-preferred" rows="5" maxlength="2500" placeholder="Write the response the assistant should give next time."></textarea>
+   <label class="check"><input type="checkbox" id="draft-fewshot" checked> Create or update a draft few-shot example from this review</label>
+   <p class="review-note">Only explicitly published examples influence future replies. Ratings and feedback alone do not override safety policy.</p>
+   <div class="actions"><button type="button" class="primary" id="save-test-review">Save review and draft</button><button type="button" class="secondary" id="retry-test">Rerun failed test</button><button type="button" class="secondary" id="delete-test">Delete test</button></div>
+  </section>
+ </div>
+</section>
+<section class="tab-panel hidden" data-panel="fewshot" id="fewshot-panel">
+ <div class="panel">
+  <div class="review-head"><div><div class="kicker">REVIEWED TRAINING EXAMPLES</div><h2>Few-shot library</h2>
+   <p class="muted">Edit responses one by one, approve them, or archive them. Only published examples appear in the chatbot prompt. Draft changes do not replace previously approved versions until republished.</p></div>
+  <button type="button" class="secondary" id="refresh-fewshot">Refresh examples</button></div>
+  <div class="review-architecture">
+   <div><strong>System instructions</strong><p>Non-negotiable scope, clinical safety, privacy, security and truthfulness. Not editable from Admin.</p></div>
+   <div><strong>Task skills</strong><p>Reusable procedures for appointment availability, pricing, admin enquiries and safe handoffs. Applied only when relevant, never higher priority than safety.</p></div>
+   <div><strong>Few-shot examples</strong><p>Human-approved question/ideal-answer demonstrations. Improve tone and answers without becoming system instructions.</p></div>
+  </div>
+ </div>
+ <div class="review-cols">
+  <section class="panel"><div class="review-head"><h2>Approved &amp; draft examples</h2><span id="fewshot-count"></span></div>
+   <div id="fewshot-list" class="review-library"><p class="muted">No examples loaded.</p></div>
+  </section>
+  <section class="panel">
+   <h2 id="fewshot-edit-title">Create example</h2>
+   <form id="fewshot-form"><input type="hidden" id="fewshot-id">
+    <label for="fewshot-question">User question</label><textarea id="fewshot-question" rows="4" maxlength="1600" required></textarea>
+    <label for="fewshot-ideal">Ideal assistant answer</label><textarea id="fewshot-ideal" rows="8" maxlength="2500" required></textarea>
+    <p class="review-note">Use only correct public clinic information. Do not include patient identifiers or instructions to override the system policy.</p>
+    <div class="actions"><button type="submit" class="primary">Save draft</button><button type="button" class="secondary" id="fewshot-clear">New example</button></div>
+   </form>
+  </section>
+ </div>
+</section>
 <section class="tab-panel hidden" data-panel="costs" id="costs-panel">
  <div class="panel costs-panel">
   <div class="costs-heading">
