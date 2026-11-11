@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>Developer safeguards · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-modelpicker-v2">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs?v=20261111-modelpicker-v2"></script>
 </head><body data-console="dev"><header class="site-header" id="site-header"></header>
 <main class="container dashboard">
 <section class="hero-compact"><div><div class="kicker">DEVELOPER CONTROL / PASSWORD + TOTP</div><h1>Guardrail <span class="highlight">control.</span></h1><span class="hand">Spend only when the request fits.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
@@ -19,7 +19,8 @@
 <section class="panel"><div class="kicker">MODEL ROUTING</div><h2>Optional model decision</h2><div class="note">On: the selected model suggests ANSWER, ASK, or OUT_OF_SCOPE, then re-evaluates that suggestion when answering. Off: one model call uses the same scope principles in its system instructions. Neither mode uses keyword-based question blocking. Authentication and rate limits remain active.</div><form id="dev-form">
 <label for="model-search">AI model for chatbot and decision calls</label>
 <div class="model-picker" id="model-picker">
-<input id="model-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="model-list" aria-describedby="model-hint" autocomplete="off" spellcheck="false" placeholder="Search models by provider or name">
+<svg class="model-search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+<input id="model-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="model-list" aria-describedby="model-hint" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Search by model, provider or ID">
 <div id="model-list" class="model-list hidden" role="listbox" aria-label="Available text chat models"></div>
 </div>
 <p id="model-hint" class="model-hint" role="status" aria-live="polite">Loading current model…</p>

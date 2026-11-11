@@ -75,20 +75,34 @@ if(scope==='admin'){
   chosenModel=model.id;modelInput.value=model.id;modelHint.textContent=modelHintFor(model.id);closeModelList();
  }
  function focusModelRow(){
-  [...modelList.querySelectorAll('[role="option"]')].forEach((item,i)=>item.setAttribute('aria-selected',String(i===highlighted)));
+  [...modelList.querySelectorAll('[role="option"]')].forEach((item,i)=>{
+   item.dataset.active=String(i===highlighted);
+  });
   const row=modelList.querySelectorAll('[role="option"]')[highlighted];
   if(row){modelInput.setAttribute('aria-activedescendant',row.id);row.scrollIntoView({block:'nearest'})}
   else modelInput.removeAttribute('aria-activedescendant');
  }
  function showModelList(){
   const q=modelInput.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-  modelRows=gatewayModels.filter(m=>q.every(x=>(m.id+' '+m.name+' '+m.provider).toLowerCase().includes(x))).slice(0,20);
+  const matches=gatewayModels.filter(m=>q.every(x=>(m.id+' '+m.name+' '+m.provider).toLowerCase().includes(x)));
+  modelRows=matches.slice(0,20);
   modelList.replaceChildren();highlighted=-1;
-  if(modelRows.length===0){modelList.append(el('div',gatewayModels.length?'No matching models.':'Model catalog unavailable.','model-empty'))}
+  const heading=el('div',undefined,'model-list-heading');
+  heading.append(el('span',matches.length?(modelRows.length===matches.length?matches.length+' matching models':'Showing '+modelRows.length+' of '+matches.length+' models'):'No matching models'),
+                 el('span','USD / 1M tokens','model-list-unit'));
+  modelList.append(heading);
+  if(modelRows.length===0){modelList.append(el('div',gatewayModels.length?'Try a different name, provider or model ID.':'Model catalog unavailable.','model-empty'))}
   else modelRows.forEach((m,i)=>{
-   const btn=el('button',undefined,'model-option');btn.type='button';btn.id='model-option-'+i;btn.setAttribute('role','option');btn.setAttribute('aria-selected','false');btn.tabIndex=-1;
-   const left=el('span');left.append(el('span',m.name,'model-name'),el('span',m.id,'model-id'));
-   btn.append(left,el('span',money(m.input_per_m)+' in / '+money(m.output_per_m)+' out per M','model-price'));
+   const btn=el('button',undefined,'model-option');btn.type='button';btn.id='model-option-'+i;btn.setAttribute('role','option');btn.setAttribute('aria-selected',String(m.id===chosenModel));btn.tabIndex=-1;
+   const identity=el('span',undefined,'model-identity');
+   identity.append(el('span',m.name,'model-name'),el('span',m.id,'model-id'));
+   if(m.id===chosenModel)identity.append(el('span','Currently selected','model-selected-label'));
+   const prices=el('span',undefined,'model-prices');
+   const input=el('span',undefined,'model-price-row'),output=el('span',undefined,'model-price-row');
+   input.append(el('span','In','model-price-label'),el('span',money(m.input_per_m),'model-price-value'));
+   output.append(el('span','Out','model-price-label'),el('span',money(m.output_per_m),'model-price-value'));
+   prices.append(input,output);
+   btn.append(identity,prices);
    btn.addEventListener('mousedown',event=>event.preventDefault());
    btn.addEventListener('click',()=>chooseModel(m));modelList.append(btn);
   });

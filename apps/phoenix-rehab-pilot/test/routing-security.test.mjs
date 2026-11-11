@@ -110,3 +110,19 @@ test('developer OTP form exposes standard autofill-compatible semantics',()=>{
  assert.match(html,/<input id="totp-code" name="otp" type="text"[^>]*autocomplete="one-time-code"/);
  assert.match(html,/<input id="otp"[^>]*pattern="\[0-9\]\{6\}"/);
 });
+
+
+test('model picker loads cache-busted theme and uses structured separated rows',()=>{
+ const html=text('dev/index.html');
+ const js=text('shared/console.mjs'),css=text('shared/console.css');
+ assert.match(html,/console\.css\?v=20261111-modelpicker-v2/);
+ assert.match(html,/console\.mjs\?v=20261111-modelpicker-v2/);
+ assert.match(html,/autocorrect="off"/);
+ assert.match(html,/id="model-search" type="search"/);
+ assert.match(js,/model-list-heading/);
+ assert.match(js,/model-identity/);
+ assert.match(js,/model-prices/);
+ assert.match(js,/model-price-row/);
+ assert.match(css,/grid-template-columns:minmax\(0,1fr\) auto/);
+ assert.match(css,/\.model-list \.model-option/);
+});
