@@ -16,8 +16,8 @@
 <form id="totp-form"><label for="totp-code">Enter your current 6-digit code</label><input id="totp-code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required><div class="actions"><button class="primary" type="submit">Verify and activate TOTP</button></div></form></section>
 <section class="hidden" id="console-panel">
 <div class="grid two">
-<section class="panel"><div class="kicker">MODEL ROUTING</div><h2>Optional Luna decision</h2><div class="note">On: a separate Luna call rejects only clearly unrelated requests; uncertain requests reach the answering Luna for clarification. Off: one Luna call uses the same scope principles in its system instructions. Neither mode uses keyword-based question blocking. Authentication and rate limits remain active.</div><form id="dev-form">
-<label class="switchline"><input id="decision" type="checkbox"><span><strong>Separate Luna decision</strong><small>On: decision plus answer. Off: one answering call with scope guardrails included.</small></span></label>
+<section class="panel"><div class="kicker">MODEL ROUTING</div><h2>Optional Luna decision</h2><div class="note">On: Luna first suggests ANSWER, ASK, or OUT_OF_SCOPE, then the answering Luna can follow or override that suggestion. Off: one Luna call uses the same scope principles in its system instructions. Neither mode uses keyword-based question blocking. Authentication and rate limits remain active.</div><form id="dev-form">
+<label class="switchline"><input id="decision" type="checkbox"><span><strong>Separate Luna decision</strong><small>On: three-way advisory decision plus answer (two calls). Off: one answering call with scope guardrails included.</small></span></label>
 <label for="max-day">Global pilot conversations per day</label><input type="number" min="1" max="500" id="max-day">
 <label for="max-ip">Conversations per IP per day</label><input type="number" min="1" max="60" id="max-ip">
 <label for="max-tokens">Max output tokens per answer</label><input type="number" min="80" max="1400" id="max-tokens">
@@ -53,6 +53,6 @@
 
 <p class="muted">After Meta verifies the webhook, subscribe to the <code>messages</code> event. Do not enable customer messaging or use real patient details.</p>
 </section>
-<section class="panel"><h2>Test intent with Luna</h2><p class="muted">Ask Luna to classify a standalone message independently of the chat toggle. This uses model tokens; chat can also use earlier messages.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Ask Luna to decide</button></form><div id="test-result" class="status"></div></section>
+<section class="panel"><h2>Test intent with Luna</h2><p class="muted">Get Luna's advisory ANSWER / ASK / OUT_OF_SCOPE classification. The answering model can override it; this test uses no conversation history.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Ask Luna to decide</button></form><div id="test-result" class="status"></div></section>
 </section>
 </main><footer class="site-footer"><span>Developer access requires password and TOTP · All changes audited</span><a href="/about">Pilot overview</a></footer></body></html>
