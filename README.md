@@ -4,6 +4,13 @@
 
 ## Source of truth
 
+## Application ownership
+
+Production application source, tests, model prompts, QA fixtures and deployments now belong to [BSPT Systems](https://github.com/andrekamarudin/bspt_systems), **not** this corporate brand repository. In particular, [Phoenix Rehab](https://github.com/andrekamarudin/bspt_systems/tree/main/apps/phoenix-rehab-pilot) and its [backend](https://github.com/andrekamarudin/bspt_systems/tree/main/infra/phoenix-rehab) are developed and release-gated there.
+
+The legacy Phoenix source tree and its duplicate CI workflow were retired after source parity, browser-route/role checks and 19-case live-model QA. Reusable corporate brand geometry remains here under logos/, motifs/ and motion/.
+
+
 1. **This repository** is the source of truth for SVG geometry, animation, design tokens, templates, and reproducible exports.
 2. **Figma** is the editable visual design workspace. Do not hand-edit a master SVG in Figma and silently publish a divergent version.
 3. **Cloudflare R2** will hold large, approved binary media after R2 activation. R2 is not active yet.
