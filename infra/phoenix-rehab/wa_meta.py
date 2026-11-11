@@ -80,19 +80,23 @@ def install(app):
         return digest
 
     async def answer(digest, sender, message):
-        from app import db, check_scope, public_context, build_policy, luna_call
+        from app import db, luna_decide, public_context, build_policy, luna_call
         status = "failed"
         try:
-            good, why = check_scope(message)
-            if good:
-                config = public_context()
+            config = public_context()
+            verdict = "disabled"
+            if config["decision"]:
+                verdict, _ = await luna_decide(message,[])
+            if verdict!="denied":
                 policy = build_policy(config) + "\nOnly respond to public clinic questions. Never ask for patient information, make bookings, or imply a booking is confirmed."
                 reply, _ = await luna_call([
                     {"role": "system", "content": policy},
                     {"role": "user", "content": message}
                 ], int(config["max_tokens"]))
             else:
-                reply = why or "Please contact Phoenix Rehab directly."
+                reply = ("I can help with Phoenix Rehab's clinic services and appointments, "
+                         "but not personal medical diagnoses, private records or unrelated topics. "
+                         "For urgent symptoms in Singapore, call 995.")
             token = read_credential("PHOENIX_WA_ACCESS_TOKEN")
             if not token or os.getenv("PHOENIX_WA_SEND_ENABLED") != "true":
                 status = "disabled"
