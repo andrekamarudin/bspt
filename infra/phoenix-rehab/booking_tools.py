@@ -13,6 +13,7 @@ import os
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from typing import Any
 
 import httpx
@@ -25,10 +26,12 @@ TOOLS = [
         "description":"Find actual currently offered Phoenix Rehab appointment times. Search first before selecting a time.",
         "parameters":{"type":"object","additionalProperties":False,
             "properties":{
-                "date":{"type":"string","description":"Singapore local YYYY-MM-DD; ask if missing."},
+                "date":{"type":"string","description":"Optional Singapore local YYYY-MM-DD. For next available, omit date and set next_available true."},
+                "next_available":{"type":"boolean","description":"Search the next seven dates from the provided date or today, stopping at the first date with a matching opening."},
+                "duration_minutes":{"type":"integer","description":"Exact required appointment length in minutes, e.g. 60 for a one-hour appointment."},
                 "branch":{"type":"string","enum":list(BRANCHES),"description":"Optional clinic branch."},
                 "service":{"type":"string","description":"Optional service name."}},
-            "required":["date"]}}},
+            "required":[]}}},
     {"type":"function","function":{
         "name":"prepare_appointment",
         "description":"Start an appointment for the currently authenticated contact at an exact available slot. This requests their explicit confirmation before finalizing.",
@@ -37,7 +40,8 @@ TOOLS = [
                 "date":{"type":"string","description":"YYYY-MM-DD Singapore calendar date."},
                 "branch":{"type":"string","enum":list(BRANCHES)},
                 "service":{"type":"string","description":"Exact service label returned by search_appointments."},
-                "start":{"type":"string","description":"Exact start local timestamp from search_appointments."}},
+                "start":{"type":"string","description":"Exact start local timestamp from search_appointments."},
+                "duration_minutes":{"type":"integer","description":"Exact requested length in minutes. Never silently substitute a shorter appointment."}},
             "required":["date","branch","service","start"]}}},
     {"type":"function","function":{
         "name":"confirm_appointment",
@@ -62,12 +66,26 @@ def wants_booking_tools(message: str, history: list[dict]) -> bool:
 BOOKING_GUIDANCE = (
     "\nYou have tools for searching, preparing, confirming and checking appointment bookings. "
     "Use them whenever the person asks about booking; don't just redirect them to another booking page. "
-    "Ask only for missing branch, date or service. If someone says tomorrow, calculate the Singapore local date. "
+    "If someone asks for 'next available', search starting today across branches and dates; do not ask for a date or branch unnecessarily. "
+    "If the person specifies one hour, search and prepare only 60-minute appointments. Never offer a 45-minute appointment as equivalent. "
+    "If someone says tomorrow, calculate the Singapore local date. "
     "Search for real openings before preparing. Always ask the person to explicitly confirm the selected "
     "branch, service and exact time; confirm_appointment is only for an explicit confirmation reply. "
     "A contact must be securely linked to the clinic account to place an appointment. "
     "Trust actual tool results, never invent booking status, slots or confirmation numbers."
 )
+def requested_duration_minutes(messages: list[dict]) -> int | None:
+    """Extract explicit duration requirements independently of model tool args."""
+    # Last 8 messages include the current turn and its booking-related context.
+    texts=[str(m.get("content","")) for m in messages[-8:] if m.get("role")=="user"]
+    for message in reversed(texts):
+        if re.search(r"(?i)\b(?:1\s*(?:h|hr|hrs|hour)|one[- ]hour|60\s*(?:min|mins|minutes))\b",message):
+            return 60
+        if re.search(r"(?i)\b(?:45\s*(?:min|mins|minutes)|three[- ]quarters of an hour)\b",message):
+            return 45
+    return None
+
+
 ACK = re.compile(r"(?i)^\s*(?:yes|yes please|confirm|confirm booking|confirm appointment|book it|please book it|go ahead|proceed|ok|okay|sounds good|do it|yes confirm)\s*[.!]?\s*$")
 
 
@@ -114,7 +132,8 @@ def _minimal_result(row) -> dict:
 
 
 async def run_tool(name: str, args: dict, *, profile: dict | None, channel: str,
-                   conversation: str, user_message: str) -> tuple[dict,bool]:
+                   conversation: str, user_message: str,
+                   required_minutes: int | None = None) -> tuple[dict,bool]:
     """Return (model-facing response, mutation_success). No vendor mutations."""
     if name not in {t["function"]["name"] for t in TOOLS}:
         return {"error":"Unknown appointment tool."},False
@@ -122,20 +141,37 @@ async def run_tool(name: str, args: dict, *, profile: dict | None, channel: str,
         return {"error":"Invalid appointment parameters."},False
     if name=="search_appointments":
         try:
-            target=validate_date(str(args.get("date","")))
+            from_date=str(args.get("date","")).strip()
+            target=validate_date(from_date or datetime.now(ZoneInfo("Asia/Singapore")).date().isoformat())
             branch=args.get("branch","")
             service=str(args.get("service",""))[:100].lower().strip()
+            duration=int(args.get("duration_minutes") or 0)
+            if required_minutes:
+                duration=required_minutes  # User's constraint outranks model-supplied arguments.
+            if duration and not 15<=duration<=240:
+                return {"error":"Invalid appointment duration."},False
             if branch and branch not in BRANCHES:
                 return {"error":"Unknown branch."},False
-            availability=await get_availability(target)
-            openings=[{"branch":x["branch"],"service":x["service"],
-                       "start":x["start"],"end":x["end"],"minutes":x["minutes"]}
-                      for x in availability["openings"] if x["remaining"]>0
-                      and (not branch or branch==x["branch"])
-                      and (not service or service in x["service"].lower())][:12]
-            return {"date":target,"openings":openings,
-                    "verified_at":availability["checked_at"],
-                    "message":"These times are currently offered, not held."},False
+            search_days=7 if args.get("next_available") is True or not from_date else 1
+            openings=[]
+            checked=[]
+            for offset in range(search_days):
+                day=validate_date((datetime.fromisoformat(target).date()+timedelta(days=offset)).isoformat())
+                availability=await get_availability(day)
+                checked.append(day)
+                openings=sorted([{
+                    "branch":x["branch"],"service":x["service"],
+                    "start":x["start"],"end":x["end"],"minutes":x["minutes"]}
+                    for x in availability["openings"] if x["remaining"]>0
+                    and (not branch or branch==x["branch"])
+                    and (not service or service in x["service"].lower())
+                    and (not duration or int(x["minutes"])==duration)
+                ],key=lambda x:(x["start"],x["branch"]))[:12]
+                if openings:break
+            return {"checked_dates":checked,"openings":openings,
+                    "required_minutes":duration or None,
+                    "message":("These are the earliest matching publicly offered times and are not held."
+                               if openings else "No matching openings in the checked period. Do not substitute another duration.")},False
         except Exception:
             return {"error":"Live calendar unavailable. Ask the customer to try another date."},False
 
@@ -148,7 +184,7 @@ async def run_tool(name: str, args: dict, *, profile: dict | None, channel: str,
     key=_conversation_key(customer_id,channel,conversation)
 
     if name=="prepare_appointment":
-        if set(args) - {"date","branch","service","start"}:
+        if set(args) - {"date","branch","service","start","duration_minutes"}:
             return {"error":"Unexpected booking fields."},False
         try:
             date=validate_date(str(args.get("date","")))
@@ -163,6 +199,9 @@ async def run_tool(name: str, args: dict, *, profile: dict | None, channel: str,
                        and x["start"]==start and x["remaining"]>0),None)
             if not slot:
                 return {"error":"That slot is not currently offered. Search again."},False
+            duration=required_minutes or int(args.get("duration_minutes") or 0)
+            if duration and int(slot["minutes"])!=duration:
+                return {"error":"The selected opening is not the requested duration. Search again; never substitute 45 minutes for one hour."},False
             initialize()
             now=datetime.now(timezone.utc)
             existing=_active(customer_id,key)
@@ -265,6 +304,7 @@ async def respond(messages: list[dict], tokens: int, *, profile: dict | None,
     request[0]["content"] += BOOKING_GUIDANCE
     tool_used=False
     confirmed=False
+    duration_constraint=requested_duration_minutes(messages)
     usage={"prompt_tokens":0,"completion_tokens":0}
     for round_index in range(3):
         result=await completion(request,tokens,TOOLS)
@@ -301,7 +341,8 @@ async def respond(messages: list[dict], tokens: int, *, profile: dict | None,
                                       for ident,name,args in clean_calls]})
         for ident,name,args in clean_calls:
             response,done=await run_tool(name,args,profile=profile,channel=channel,
-                                         conversation=conversation,user_message=user_message)
+                                         conversation=conversation,user_message=user_message,
+                                         required_minutes=duration_constraint)
             tool_used=True
             confirmed|=done
             request.append({"role":"tool","tool_call_id":ident,

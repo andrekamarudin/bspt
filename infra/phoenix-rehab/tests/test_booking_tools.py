@@ -7,7 +7,7 @@ from unittest.mock import patch
 from test_security import sandbox
 from crm import seed_test_person, profile_from_whatsapp_sender, _db
 from booking_tools import (TOOLS, run_tool, respond, wants_booking_tools,
-                           customer_notice, initialize)
+                           customer_notice, initialize, requested_duration_minutes)
 from test_booking import synthetic_openings, SLOT, DAY
 
 
@@ -56,6 +56,46 @@ class BookingToolTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(row["status"],"confirmed_simulation")
             self.assertTrue(row["is_demo"])
             self.assertIsNone(row["sgimed_booking_id"])
+
+    async def test_next_available_one_hour_filters_45_minute_slots_and_preserves_duration(self):
+        from datetime import datetime,timedelta
+        from zoneinfo import ZoneInfo
+        today=datetime.now(ZoneInfo('Asia/Singapore')).date()
+        searched=[]
+        async def calendar(day):
+            searched.append(day)
+            service='Synthetic Physiotherapy Test'
+            duration=45 if day==today.isoformat() else 60
+            slot={**SLOT,'start':day+' 14:00','end':day+(' 14:45' if duration==45 else ' 15:00'),
+                  'minutes':duration,'service':service}
+            return {'date':day,'checked_at':datetime.now(ZoneInfo('Asia/Singapore')).isoformat(),
+                    'checked_branches':['Orchard'],'unavailable_branches':[],
+                    'openings':[slot],'transactional':False}
+        self.assertEqual(requested_duration_minutes([{'role':'user','content':'book next available 1hr anywhere'}]),60)
+        with patch('booking_tools.get_availability',side_effect=calendar):
+            found,changed=await run_tool('search_appointments',{'next_available':True},
+                profile=self.profile,channel='web',conversation=self.chat_id,
+                user_message='book next available 1hr anywhere',required_minutes=60)
+            self.assertFalse(changed)
+            self.assertEqual(len(searched),2)
+            self.assertEqual(found['required_minutes'],60)
+            self.assertEqual(len(found['openings']),1)
+            self.assertEqual(found['openings'][0]['minutes'],60)
+            bad,created=await run_tool('prepare_appointment',{
+                'date':today.isoformat(),'branch':'Orchard','service':'Synthetic Physiotherapy Test',
+                'start':today.isoformat()+' 14:00','duration_minutes':45},
+                profile=self.profile,channel='web',conversation=self.chat_id,
+                user_message='book next available 1hr anywhere',required_minutes=60)
+            self.assertFalse(created)
+            self.assertIn('not the requested duration',bad['error'])
+            selected=found['openings'][0]
+            good,created=await run_tool('prepare_appointment',{
+                'date':selected['start'][:10],'branch':'Orchard','service':selected['service'],
+                'start':selected['start'],'duration_minutes':60},
+                profile=self.profile,channel='web',conversation=self.chat_id,
+                user_message='select this hour',required_minutes=60)
+            self.assertFalse(created)
+            self.assertEqual(good['status'],'pending_confirmation')
 
     async def test_cannot_claim_another_customers_draft(self):
         other=profile_from_whatsapp_sender("6592222222")
