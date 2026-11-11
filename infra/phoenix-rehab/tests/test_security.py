@@ -18,7 +18,7 @@ class SecurityTests(unittest.TestCase):
   self.assertEqual(decrypt(cipher),raw)
  def test_scope_is_semantic_and_decision_optional(self):
   from app import DECISION_PROMPT, SCOPE_GUARDRAILS
-  self.assertIn('OBVIOUSLY',DECISION_PROMPT)
+  self.assertIn('OUT_OF_SCOPE',DECISION_PROMPT)
   self.assertIn('clarifying question',SCOPE_GUARDRAILS)
   self.assertNotIn('check_scope',Path(__file__).resolve().parents[1].joinpath('app.py').read_text())
  def test_rate_limit(self):
@@ -85,8 +85,8 @@ class APIFlows(unittest.TestCase):
             self.pilot(c)
             session=str(uuid.uuid4())
             async def stub(messages,tokens=500):
-                if 'ALLOW or DENY' in messages[0]['content']:
-                    return 'ALLOW',{'prompt_tokens':12,'completion_tokens':1}
+                if 'Output only ANSWER, ASK or OUT_OF_SCOPE' in messages[0]['content']:
+                    return 'ANSWER',{'prompt_tokens':12,'completion_tokens':1}
                 return 'Our synthetic test fee is S$230.',{'prompt_tokens':26,'completion_tokens':10}
             with patch('app.luna_call',side_effect=stub):
                 r=c.post('/api/chat',json={'message':'What is the standard consultation fee?',
@@ -108,8 +108,8 @@ class APIFlows(unittest.TestCase):
             calls=[]
             async def stub(messages,tokens=500):
                 calls.append(messages)
-                if 'Return only ALLOW or DENY' in messages[0]['content']:
-                    return 'ALLOW',{'prompt_tokens':12,'completion_tokens':1}
+                if 'Output only ANSWER, ASK or OUT_OF_SCOPE' in messages[0]['content']:
+                    return 'ANSWER',{'prompt_tokens':12,'completion_tokens':1}
                 return 'Standard 45-minute consultation: S$230 nett.',{'prompt_tokens':26,'completion_tokens':10}
             with patch('app.luna_call',side_effect=stub):
                 r=c.post('/api/chat',json={'message':'Pricing?','sessionId':session})
@@ -118,7 +118,7 @@ class APIFlows(unittest.TestCase):
             self.assertIn('S$230',r.json()['reply'])
             self.assertEqual(len(calls),2)
             self.assertIn('Pricing?',calls[0][-1]['content'])
-            self.assertIn('even if unclear',calls[0][0]['content'])
+            self.assertIn('PRELIMINARY',calls[0][0]['content'])
 
     def test_typos_and_out_of_scope_use_luna_not_regex(self):
         with db() as con:
@@ -126,22 +126,50 @@ class APIFlows(unittest.TestCase):
         with self.client() as c:
             self.pilot(c)
             for msg,verdict,expected in (
-                ('hw much 4 1hr??','ALLOW','answered'),
-                ('Pls evalute my MRI results','ALLOW','answered'),
-                ('Tell me a joke about crypto','DENY','declined'),
-                ('pryce?','ALLOW','answered'),
+                ('hw much 4 1hr??','ANSWER','answered'),
+                ('Pls evalute my MRI results','ANSWER','answered'),
+                ('Tell me a joke about crypto','OUT_OF_SCOPE','answered'),
+                ('pryce?','ASK','answered'),
             ):
                 calls=[]
                 async def stub(messages,tokens=500):
                     calls.append(messages)
-                    if 'Return only ALLOW or DENY' in messages[0]['content']:
+                    if 'Output only ANSWER, ASK or OUT_OF_SCOPE' in messages[0]['content']:
                         return verdict,{'prompt_tokens':12,'completion_tokens':1}
                     return 'Synthetic clinic answer.',{'prompt_tokens':18,'completion_tokens':7}
                 with patch('app.luna_call',side_effect=stub):
                     response=c.post('/api/chat',json={'sessionId':str(uuid.uuid4()),'message':msg})
                 self.assertEqual(response.status_code,200,response.text[:180])
                 self.assertEqual(response.json()['status'],expected,msg)
-                self.assertEqual(len(calls),2 if verdict=='ALLOW' else 1,msg)
+                self.assertEqual(len(calls),2,msg)
+
+    def test_three_paths_are_advisory_and_answerer_can_override(self):
+        from app import set_setting
+        before=setting('dev')
+        try:
+            set_setting('dev',{**before,'decision':True})
+            with self.client() as c:
+                self.pilot(c)
+                for choice,response_text in (
+                    ('ANSWER','Standard consultation pricing is listed by the clinic.'),
+                    ('ASK','Which clinic branch did you mean?'),
+                    ('OUT_OF_SCOPE','Phoenix offers physiotherapy at several locations.'),
+                ):
+                    calls=[]
+                    async def stub(messages,tokens=500):
+                        calls.append(messages)
+                        return (choice if len(calls)==1 else response_text),{}
+                    with patch('app.luna_call',side_effect=stub):
+                        response=c.post('/api/chat',json={'sessionId':str(uuid.uuid4()),
+                                                         'message':'could you help with that?'})
+                    self.assertEqual(response.json()['status'],'answered')
+                    self.assertEqual(response.json()['reply'],response_text)
+                    self.assertEqual(len(calls),2)
+                    self.assertIn('PRELIMINARY ROUTING ADVICE',calls[1][0]['content'])
+                    self.assertIn(choice,calls[1][0]['content'])
+                    self.assertIn('Override this preliminary decision',calls[1][0]['content'])
+        finally:
+            set_setting('dev',before)
 
     def test_bad_model_result_does_not_fall_through(self):
         with db() as con:
@@ -187,12 +215,12 @@ class APIFlows(unittest.TestCase):
                 calls=[]
                 async def stub(messages,tokens=500):
                     calls.append(messages)
-                    return ('ALLOW' if len(calls)==1 else 'What would you like to know?'),{}
+                    return ('ANSWER' if len(calls)==1 else 'What would you like to know?'),{}
                 with patch('app.luna_call',side_effect=stub):
                     response=c.post('/api/chat',json={'sessionId':str(uuid.uuid4()),'message':'huh for tmrw??'})
                 self.assertEqual(response.json()['status'],'answered')
                 self.assertEqual(len(calls),2)
-                self.assertIn('OBVIOUSLY',calls[0][0]['content'])
+                self.assertIn('OUT_OF_SCOPE',calls[0][0]['content'])
                 self.assertNotIn('separate Luna decision is disabled',calls[1][0]['content'])
         finally:
             set_setting('dev',prior)
