@@ -25,7 +25,7 @@ def published_owner_knowledge_snapshot():
     return out
 
 def install(app, protect):
-    from app import db, crypt, decrypt, authed, audit, PRIVATE_RE, check_scope
+    from app import db, crypt, decrypt, authed, audit, PRIVATE_RE
     with db() as con:
         con.executescript("""
         CREATE TABLE IF NOT EXISTS owner_knowledge(
