@@ -56,6 +56,10 @@ class OwnerAndWhatsapp(unittest.TestCase):
                 self.assertEqual(generated.headers.get("cache-control"),"no-store, private")
                 token=generated.json()["verify_token"]
                 self.assertGreaterEqual(len(token),30)
+                state=c.post("/api/dev",json={"action":"wa_credentials_state"})
+                self.assertEqual(state.status_code,200)
+                self.assertIs(state.json()["outbound_enabled"],False)
+                self.assertNotIn("verify_token",state.json())
                 info=c.post("/api/dev",json={"action":"wa_webhook_info"})
                 self.assertEqual(info.json()["verify_token"],token)
                 self.assertFalse(info.json()["outbound_enabled"])

@@ -36,6 +36,21 @@
 <input id="wa-verify" type="text" readonly autocomplete="off" spellcheck="false" placeholder="Only visible after developer TOTP authentication">
 <div class="actions"><button type="button" class="primary" id="wa-copy-verify">Copy verify token</button><button type="button" class="secondary" id="wa-refresh">Refresh</button><button type="button" class="danger" id="wa-regenerate">Rotate token</button></div>
 <div id="wa-status" class="note" role="status" aria-live="polite">Checking webhook configuration...</div>
+<form id="wa-credentials-form" autocomplete="off">
+<h3>Finish the private Meta test connection</h3>
+<p class="muted">These settings are kept encrypted on GreenCloud. Leave a previously saved field blank to keep its existing value. They are never displayed again.</p>
+<label for="wa-app-secret">Meta App Secret</label>
+<input id="wa-app-secret" type="password" autocomplete="new-password" spellcheck="false" placeholder="Meta App Settings → Basic → App secret → Show" minlength="32" maxlength="32">
+<label for="wa-access-token">WhatsApp Cloud API access token</label>
+<input id="wa-access-token" type="password" autocomplete="new-password" spellcheck="false" placeholder="Paste the Meta API token you stored in Vault">
+<label for="wa-phone-id">Meta test Phone Number ID</label>
+<input id="wa-phone-id" type="text" readonly value="1455443810979099">
+<label for="wa-testers">Approved tester numbers (with country codes)</label>
+<input id="wa-testers" type="text" autocomplete="off" placeholder="Two numbers only, separated by a comma">
+<p class="muted">Only the two approved testers. No real patient traffic. Saving credentials will <strong>not</strong> enable replies.</p>
+<button class="primary" type="submit">Save encrypted Meta configuration</button>
+</form>
+
 <p class="muted">After Meta verifies the webhook, subscribe to the <code>messages</code> event. Do not enable customer messaging or use real patient details.</p>
 </section>
 <section class="panel"><h2>Test a prompt without spending tokens</h2><p class="muted">Run deterministic scope and privacy checks before testing the actual Luna decision flow in /chat.</p><form id="test-form"><label for="test-prompt">Sample user message</label><textarea id="test-prompt" rows="3" maxlength="1600" placeholder="Can you tell me your pricing and book Shiv for one hour?"></textarea><button class="secondary" type="submit">Check non-LLM gate</button></form><div id="test-result" class="status"></div></section>

@@ -59,9 +59,37 @@ if(scope==='admin'){
  async function loadTranscript(id){try{const r=await request(route,{action:'transcript',id});const thread=$('audit-thread');thread.replaceChildren();thread.append(el('h3','Transcript · '+id.slice(0,8)));for(const msg of r.messages||[]){const p=el('p',(msg.role==='user'?'TESTER · ':'ASSISTANT · ')+stamp(msg.at)+'\n'+msg.text);p.style.whiteSpace='pre-wrap';p.style.overflowWrap='anywhere';p.style.borderBottom='1px solid #d5dfd5';p.style.paddingBottom='13px';thread.append(p)}}catch(err){report(err.message,false)}}
  $('refresh-audit').addEventListener('click',loadAudit);
 }else{
- const waLoad=async()=>{const data=await request(route,{action:'wa_webhook_info'});$('wa-verify').value=data.verify_token||'';$('wa-callback').value=data.callback||'https://phoenix.bytesizeprotip.com/api/whatsapp';$('wa-status').textContent=data.verification_ready?'Verification token ready. Meta app signature: '+(data.signature_ready?'configured':'not configured')+'. Outbound replies: '+(data.outbound_enabled?'enabled':'disabled')+'.':'Generate a verification token to begin.';};
+ const waLoad=async()=>{const data=await request(route,{action:'wa_webhook_info'});$('wa-verify').value=data.verify_token||'';$('wa-callback').value=data.callback||'https://phoenix.bytesizeprotip.com/api/whatsapp';$('wa-status').textContent=data.verification_ready?[
+ 'Webhook verified: ready',
+ 'Meta app signing: '+(data.signature_ready?'configured':'missing'),
+ 'Cloud API token: '+(data.access_token_ready?'configured':'missing'),
+ 'Test phone ID: '+(data.phone_id_ready?'configured':'missing'),
+ 'Approved recipients: '+(data.tester_allowlist_ready?'configured':'missing'),
+ 'Outbound replies: '+(data.outbound_enabled?'enabled':'disabled')
+].join(' · '):'Generate a verification token to begin.';};
  $('wa-copy-url').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('wa-callback').value);report('Callback URL copied.')}catch{report('Select and copy the URL manually.',false)}});
  $('wa-copy-verify').addEventListener('click',async()=>{const value=$('wa-verify').value;if(!value)return report('Verification token is not configured.',false);try{await navigator.clipboard.writeText(value);report('Meta Verify token copied. Do not share it.')}catch{report('Select the token and copy it manually.',false)}});
+ $('wa-credentials-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  try{
+   const body={action:'wa_credentials_store'};
+   const props=[
+    ['wa-app-secret','PHOENIX_WA_META_APP_SECRET'],
+    ['wa-access-token','PHOENIX_WA_ACCESS_TOKEN'],
+    ['wa-testers','PHOENIX_WA_ALLOWED_TEST_NUMBERS']
+   ];
+   for(const [id,key] of props){
+     const value=$(id).value.trim();
+     if(value)body[key]=value;
+   }
+   if(Object.keys(body).length===1)throw Error('Enter a missing credential or tester number.');
+   body.PHOENIX_WA_PHONE_NUMBER_ID=$('wa-phone-id').value;
+   await request(route,body);
+   for(const [id] of props)$(id).value='';
+   report('Meta settings encrypted and saved. WhatsApp replies are still disabled.');
+   await waLoad();
+  }catch(err){report(err.message,false)}
+ });
  $('wa-refresh').addEventListener('click',()=>waLoad().catch(e=>report(e.message,false)));
  $('wa-regenerate').addEventListener('click',async()=>{if(!confirm('Generate a NEW Meta verify token? The old Meta webhook will fail verification until updated.'))return;try{const data=await request(route,{action:'wa_generate_verify'});$('wa-verify').value=data.verify_token;report('New verification token ready. Update the Meta Verify token field.');await waLoad()}catch(e){report(e.message,false)}});
  loadDev=async function(){try{await waLoad();const data=await request(route,{action:'state'});const s=data.settings||{};$('decision').checked=s.decision!==false;$('max-day').value=s.max_day||80;$('max-ip').value=s.max_ip||12;$('max-tokens').value=s.max_tokens||460;$('extra-policy').value=s.extra_policy||'';$('policy').textContent=data.baseline||'Baseline unavailable';$('model').textContent=data.model||'openai/gpt-6-luna';report('Developer guardrails loaded.')}catch(err){report(err.message,false)}}

@@ -13,6 +13,30 @@ PHONE = re.compile(r"^[1-9]\d{7,14}$")
 SIG = re.compile(r"^sha256=[0-9a-f]{64}$")
 LIMIT = 262144
 
+
+def read_credential(name):
+    """Server-only Meta credentials, encrypted before SQLite persistence."""
+    from app import setting, decrypt
+    # Deploy-time environment values take precedence over the developer console.
+    direct=os.getenv(name,"")
+    if direct:return direct
+    secure=setting("wa_meta_credentials") or {}
+    if not isinstance(secure,dict):return ""
+    value=secure.get(name,"")
+    if not isinstance(value,str):return ""
+    result=decrypt(value.encode("ascii")) if value else ""
+    if result.startswith("[Encrypted record could not be decrypted."):return ""
+    return result
+
+def credential_status():
+    return {
+        "signature_ready":bool(read_credential("PHOENIX_WA_META_APP_SECRET")),
+        "access_token_ready":bool(read_credential("PHOENIX_WA_ACCESS_TOKEN")),
+        "phone_id_ready":bool(read_credential("PHOENIX_WA_PHONE_NUMBER_ID")),
+        "tester_allowlist_ready":bool(read_credential("PHOENIX_WA_ALLOWED_TEST_NUMBERS")),
+        "outbound_enabled":os.getenv("PHOENIX_WA_SEND_ENABLED")=="true"
+    }
+
 def read_verify_token():
     """Return only the active verifier; its encrypted DB copy never reaches logs."""
     from app import setting, decrypt
@@ -38,7 +62,7 @@ def install(app):
         return datetime.now(timezone.utc).isoformat()
 
     def allowed(sender):
-        numbers = [v.strip().lstrip("+") for v in os.getenv("PHOENIX_WA_ALLOWED_TEST_NUMBERS","").split(",") if v.strip()]
+        numbers = [v.strip().lstrip("+") for v in read_credential("PHOENIX_WA_ALLOWED_TEST_NUMBERS").split(",") if v.strip()]
         return bool(PHONE.fullmatch(sender)) and 0 < len(numbers) <= 5 and sender in numbers
 
     def claim(message_id):
@@ -69,14 +93,14 @@ def install(app):
                 ], int(config["max_tokens"]))
             else:
                 reply = why or "Please contact Phoenix Rehab directly."
-            token = os.getenv("PHOENIX_WA_ACCESS_TOKEN","")
+            token = read_credential("PHOENIX_WA_ACCESS_TOKEN")
             if not token or os.getenv("PHOENIX_WA_SEND_ENABLED") != "true":
                 status = "disabled"
                 return
             version = os.getenv("PHOENIX_WA_GRAPH_VERSION", "v25.0")
             if not re.fullmatch(r"v\d{1,2}\.0", version):
                 return
-            url = "https://graph.facebook.com/" + version + "/" + os.environ["PHOENIX_WA_PHONE_NUMBER_ID"] + "/messages"
+            url = "https://graph.facebook.com/" + version + "/" + read_credential("PHOENIX_WA_PHONE_NUMBER_ID") + "/messages"
             async with httpx.AsyncClient(timeout=15) as client:
                 r = await client.post(url, headers={"Authorization":"Bearer "+token},
                     json={"messaging_product":"whatsapp","recipient_type":"individual",
@@ -105,7 +129,7 @@ def install(app):
 
     @app.post("/api/whatsapp")
     async def event(request:Request,background:BackgroundTasks):
-        secret=os.getenv("PHOENIX_WA_META_APP_SECRET","")
+        secret=read_credential("PHOENIX_WA_META_APP_SECRET")
         if not secret:
             return Response("Not configured",status_code=503)
         if not request.headers.get("content-type","").startswith("application/json"):
@@ -130,7 +154,7 @@ def install(app):
             return Response("EVENT_RECEIVED",media_type="text/plain")
         if not os.getenv("PHOENIX_WA_ACCESS_TOKEN") or os.getenv("PHOENIX_WA_SEND_ENABLED")!="true":
             return Response("EVENT_RECEIVED",media_type="text/plain")
-        phone=os.getenv("PHOENIX_WA_PHONE_NUMBER_ID","")
+        phone=read_credential("PHOENIX_WA_PHONE_NUMBER_ID")
         for entry in (data.get("entry") or [])[:2]:
             for change in (entry.get("changes") or [])[:2]:
                 value=change.get("value") or {}

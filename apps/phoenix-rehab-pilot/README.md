@@ -65,3 +65,9 @@ Server-only required Meta variables:
 - Optional `PHOENIX_WA_GRAPH_VERSION` (default `v25.0`)
 
 All Meta secrets and allowlisted phone numbers belong in the private GreenCloud runtime/Infisical secret store, never in GitHub, frontend source or server logs. The sender and message bodies are discarded after responding; only a keyed message-id hash and delivery status are retained for deduplication.
+
+### 11 Nov: Meta WABA subscription and developer credential setup
+
+The Meta test WABA has been subscribed to the BSPT Phoenix WA Test app using the official `/{WABA-ID}/subscribed_apps` endpoint, independently confirmed by listing subscriptions. The Cloudflare-fronted GET verification returns the exact challenge. **This does not mean signed POST events have been delivered or outbound replies are active.** The Meta app remains in its test/development state.
+
+The password-and-TOTP-protected `/dev` console now accepts the test Meta app secret, WhatsApp API access token and up to two approved tester numbers, and restricts the phone ID to the provisioned Meta sandbox asset. The server encrypts these values in its existing private database and returns only configured/not-configured indicators. Saving credentials never enables sends. It is not a substitute for eventual Infisical configuration or a documented credential rotation procedure. Real patient numbers and documents are prohibited from internal testing.

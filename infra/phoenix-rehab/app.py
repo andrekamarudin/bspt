@@ -520,9 +520,51 @@ async def dev_ops(request:Request):
         return JSONResponse({"ok":True,"callback":"https://phoenix.bytesizeprotip.com/api/whatsapp",
                              "verify_token":token,
                              "verification_ready":len(token)>=30,
-                             "outbound_enabled":os.getenv("PHOENIX_WA_SEND_ENABLED")=="true",
-                             "signature_ready":bool(os.getenv("PHOENIX_WA_META_APP_SECRET"))},
+                             **__import__("wa_meta").credential_status()},
                             headers={"Cache-Control":"no-store, private","Pragma":"no-cache"})
+    if action=="wa_credentials_state":
+        from wa_meta import credential_status
+        return JSONResponse({"ok":True,**credential_status()},
+                            headers={"Cache-Control":"no-store, private"})
+    if action=="wa_credentials_store":
+        # Only password+TOTP-authenticated developers may submit Meta secrets.
+        # Store encrypted values; never echo, log, or put them in source code.
+        from wa_meta import PHONE, credential_status
+        from wa_meta import read_credential
+        fields=("PHOENIX_WA_META_APP_SECRET","PHOENIX_WA_ACCESS_TOKEN",
+                "PHOENIX_WA_PHONE_NUMBER_ID","PHOENIX_WA_ALLOWED_TEST_NUMBERS")
+        values={}
+        for field in fields:
+            raw=body.get(field)
+            if raw is None: continue
+            if not isinstance(raw,str):fail(422,"Invalid WhatsApp configuration.")
+            value=raw.strip()
+            if not value: continue
+            if field=="PHOENIX_WA_META_APP_SECRET":
+                if not re.fullmatch(r"[A-Fa-f0-9]{32}",value):fail(422,"Meta App Secret should be 32 hexadecimal characters.")
+            elif field=="PHOENIX_WA_ACCESS_TOKEN":
+                if not 40<=len(value)<=4096 or any(c.isspace() for c in value):
+                    fail(422,"Paste the entire unmodified Meta API access token.")
+            elif field=="PHOENIX_WA_PHONE_NUMBER_ID":
+                if not re.fullmatch(r"\d{12,20}",value):
+                    fail(422,"Provide a valid Meta phone number ID.")
+                # This pilot is deliberately bound to the test asset only.
+                if value!="1455443810979099":
+                    fail(403,"Only the provisioned Meta test number is permitted.")
+            elif field=="PHOENIX_WA_ALLOWED_TEST_NUMBERS":
+                cleaned=[x.strip().lstrip("+") for x in value.replace(";",",").split(",") if x.strip()]
+                if not 1<=len(cleaned)<=2 or len(set(cleaned))!=len(cleaned) or any(not PHONE.fullmatch(x) for x in cleaned):
+                    fail(422,"Use up to two unique verified tester numbers with country code.")
+                value=",".join(cleaned)
+            values[field]=crypt(value).decode("ascii")
+        if not values:fail(422,"Provide at least one new credential or tester number.")
+        existing=setting("wa_meta_credentials") or {}
+        if not isinstance(existing,dict):existing={}
+        existing.update(values)
+        set_setting("wa_meta_credentials",existing)
+        audit("dev","meta_credentials_updated",",".join(sorted(values)))
+        return JSONResponse({"ok":True,**credential_status()},
+                            headers={"Cache-Control":"no-store, private"})
     if action=="wa_generate_verify":
         token=secrets.token_urlsafe(32)
         set_setting("wa_meta_verify_encrypted",crypt(token).decode("ascii"))

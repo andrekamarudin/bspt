@@ -76,3 +76,12 @@ test('developer can copy GreenCloud Meta webhook verification token after secure
  assert.match(script,/wa_generate_verify/);
  assert.match(script,/navigator\.clipboard\.writeText/);
 });
+
+test('Meta credential submission is available only in the developer console',()=>{
+ const html=text('dev/index.html');
+ const js=text('shared/console.mjs');
+ assert.match(html,/id="wa-credentials-form"/);
+ assert.match(html,/id="wa-app-secret"/);
+ assert.match(html,/id="wa-access-token"/);
+ assert.match(js,/wa_credentials_store/);
+});
