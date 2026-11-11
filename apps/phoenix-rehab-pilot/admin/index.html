@@ -18,7 +18,6 @@
 <nav class="workspace-tasks" data-tasks="teach" aria-label="Improve answers actions">
 <button type="button" data-workflow="answers" aria-current="page">Fix an answer</button>
 <button type="button" data-workflow="context">Upload documents</button>
-<button type="button" data-workflow="fewshot">Reviewed examples</button>
 </nav>
 <nav class="workspace-tasks hidden" data-tasks="review" aria-label="Review and test actions">
 <button type="button" data-workflow="audit">Conversations</button>
@@ -89,7 +88,8 @@
 <section class="tab-panel hidden" data-panel="testing" id="testing-panel">
  <div class="panel">
   <div class="review-head"><div><div class="kicker">QUALITY / ADMIN EVALUATION</div><h2>Test patient questions</h2>
-   <p class="muted">Paste one question per line. Every line runs in a fresh, independent chat using the same answering engine, active model, system safeguards and approved examples.</p></div>
+   <p class="muted">Paste one question per line. Every line runs in a fresh, independent chat using the same answering engine, active model, system safeguards and approved examples.</p>
+   <button type="button" class="review-library-link" data-workflow="fewshot">Manage approved response examples</button></div>
   <span class="review-note">Internal read-only testing; model usage is charged</span></div>
   <label for="batch-questions">Questions to simulate (up to 20)</label>
   <textarea id="batch-questions" rows="7" maxlength="35000" placeholder="Pricing?&#10;Can I see a physio on Saturday?&#10;How long is a typical consultation?&#10;Can you interpret my MRI?"></textarea>
@@ -122,6 +122,7 @@
  </div>
 </section>
 <section class="tab-panel hidden" data-panel="fewshot" id="fewshot-panel">
+ <button type="button" class="review-library-link" data-workflow="testing">Back to response testing</button>
  <div class="panel">
   <div class="review-head"><div><div class="kicker">APPROVED RESPONSE EXAMPLES</div><h2>Examples your bot can learn from</h2>
    <p class="muted">Save a good example, review it, and publish it when ready. Unpublished changes won't affect the bot.</p></div>

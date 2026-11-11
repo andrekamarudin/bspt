@@ -28,3 +28,7 @@
  .owner-intro{align-items:flex-start;flex-direction:column;gap:10px}
 }
 @media(max-width:370px){.workspaces button{font-size:12px;padding:9px}.workspaces button{font-size:12px}}
+
+.review-library-link{display:inline-flex;align-items:center;gap:6px;margin:10px 0 14px;padding:0;border:0;background:transparent;color:#104937;font:700 12px/1.5 'DM Sans',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.review-library-link:hover{color:#b84d2d}
+.review-library-link:focus-visible{outline:3px solid #ff6433;outline-offset:3px}

@@ -214,11 +214,13 @@ test('clinic admin reduces nine feature tabs to four task-first workspaces',()=>
  assert.match(html,/data-workspace="customers"/);
  assert.match(html,/class="legacy-tabs hidden" aria-hidden="true"/);
  assert.match(html,/class="owner-import-details"/);
+ assert.match(html,/data-workflow="fewshot"/);
+ assert.match(html,/data-workflow="testing">Back to response testing/);
  assert.match(html,/<summary>Have several past answers\? Import them together<\/summary>/);
  assert.doesNotMatch(html,/class="owner-grid"/);
  assert.doesNotMatch(html,/class="review-architecture"/);
  assert.match(nav,/\bcontext:'teach'/);
- assert.match(nav,/\bfewshot:'teach'/);
+ assert.match(nav,/\bfewshot:'review'/);
  assert.match(nav,/\btesting:'review'/);
  assert.match(nav,/\bcosts:'review'/);
  assert.match(nav,/\bsettings:'clinic'/);

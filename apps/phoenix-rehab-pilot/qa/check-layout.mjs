@@ -79,6 +79,12 @@ try{
      await admin.locator('[data-workflow="testing"]').click();
      assert.equal(await admin.locator('[data-panel="testing"]:visible').count(),1,
                   'Testing reachable from Review & test');
+     await admin.locator('[data-panel="testing"] [data-workflow="fewshot"]').click();
+     assert.equal(await admin.locator('[data-panel="fewshot"]:visible').count(),1,
+                  'Advanced reviewed examples reachable from testing');
+     await admin.locator('[data-panel="fewshot"] [data-workflow="testing"]').click();
+     assert.equal(await admin.locator('[data-panel="testing"]:visible').count(),1,
+                  'Reviewed examples can return to testing');
      await admin.locator('[data-workspace="clinic"]').click();
      assert.equal(await admin.locator('[data-panel="schedule"]:visible').count(),1,
                   'Time-limited clinic notices reachable from Clinic setup');

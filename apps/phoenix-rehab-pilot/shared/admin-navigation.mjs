@@ -1,8 +1,8 @@
 /** Four human-task workspaces, preserving existing secured feature routes. */
 if(document.body.dataset.console==='admin'){
  const map={
-  answers:'teach',context:'teach',fewshot:'teach',
-  audit:'review',testing:'review',costs:'review',
+  answers:'teach',context:'teach',
+  audit:'review',testing:'review',fewshot:'review',costs:'review',
   schedule:'clinic',settings:'clinic',
   crm:'customers'
  };
