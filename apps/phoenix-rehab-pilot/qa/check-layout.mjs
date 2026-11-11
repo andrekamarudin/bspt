@@ -49,7 +49,7 @@ try{
      if(size.name==='android-landscape')assert.ok(metrics.bottom<=size.height+15,'Landscape composer clipped');
    }
    assert.equal(await chat.locator('.turn.bot').count(),1,'Welcome message visible');
-   assert.equal(await chat.locator('button[data-prompt]').count(),4,'Four clickable starter prompts visible');
+   assert.equal(await chat.locator('button[data-prompt]').count(),5,'Five clickable starter prompts including native booking visible');
    // Keep model/API calls disabled in UI QA. Verify interaction without posting to production.
    await chat.screenshot({path:resolve(output,size.name+'.png'),fullPage:true,animations:'disabled'});
    if(size.name==='iphone-portrait'||size.name==='desktop'){
