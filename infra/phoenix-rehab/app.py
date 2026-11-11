@@ -6,6 +6,7 @@ Runtime secret values are injected from Infisical, never committed.
 """
 from __future__ import annotations
 import asyncio
+from contextvars import ContextVar
 import base64
 import hashlib
 import hmac
@@ -52,6 +53,9 @@ COOKIE = "phx_session"
 PILOT_COOKIE = "phx_pilot"
 DATABASE_VERSION = "2026-11-10.v1"
 MODEL = "openai/gpt-6-luna"
+# This context exists only in the current async request. Never log prompt text
+# or contact details in the anonymous model-spend ledger.
+COST_CONTEXT = ContextVar("phoenix_cost_context",default=None)
 MODEL_CATALOG_URL = "https://ai-gateway.vercel.sh/v1/models"
 MODEL_CATALOG_TTL_SECONDS = 3600
 _MODEL_CATALOG_CACHE = {"checked":0.0,"models":None}
@@ -153,6 +157,17 @@ def initialize():
         );
         CREATE INDEX IF NOT EXISTS turns_session_idx ON turns(session_id,created);
         CREATE INDEX IF NOT EXISTS turns_created_idx ON turns(created);
+        -- Retain anonymized token-cost data when transcript retention expires.
+        -- A single web turn may involve two independently billed model calls.
+        CREATE TABLE IF NOT EXISTS model_usage (
+            id TEXT PRIMARY KEY, channel TEXT NOT NULL,
+            session_id TEXT, turn_id TEXT,
+            model TEXT NOT NULL, input_tokens INTEGER NOT NULL,
+            output_tokens INTEGER NOT NULL, actual_usd REAL,
+            created TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS model_usage_time_idx ON model_usage(created);
+        CREATE INDEX IF NOT EXISTS model_usage_turn_idx ON model_usage(turn_id);
         CREATE TABLE IF NOT EXISTS actions (
             id TEXT PRIMARY KEY, role TEXT NOT NULL, type TEXT NOT NULL, at TEXT NOT NULL,
             context TEXT NOT NULL
@@ -236,6 +251,141 @@ async def supported_chat_models()->list[dict]:
         if _MODEL_CATALOG_CACHE["models"] is not None:
             return _MODEL_CATALOG_CACHE["models"]
         raise HTTPException(503,detail="Model catalog temporarily unavailable. Current model is unchanged.") from None
+
+def extract_gateway_actual_cost(body:dict)->float|None:
+    """Use direct gateway response cost only when explicitly provided.
+
+    Do not mistake token count or market rate for a billed amount.
+    """
+    if not isinstance(body,dict):return None
+    usages=body.get("usage")
+    contexts=[body.get("providerMetadata"),body.get("provider_metadata")]
+    for source in contexts:
+        if isinstance(source,dict):
+            gateway=source.get("gateway")
+            if isinstance(gateway,dict):
+                raw=gateway.get("cost")
+                if type(raw) in (int,float) and 0<=float(raw)<100000:
+                    return float(raw)
+    if isinstance(usages,dict):
+        raw=usages.get("cost")
+        if type(raw) in (int,float) and 0<=float(raw)<100000:
+            return float(raw)
+    return None
+
+def record_model_call(model:str,usage:dict,body:dict):
+    """One durable, non-content ledger row per successful gateway response."""
+    info=COST_CONTEXT.get() or {}
+    if not isinstance(usage,dict):usage={}
+    def token(name,alternate):
+        raw=usage.get(name,usage.get(alternate,0))
+        try:return max(0,min(100_000_000,int(raw or 0)))
+        except (ValueError,TypeError,OverflowError):return 0
+    try:
+        with db() as con:
+            con.execute("""INSERT INTO model_usage
+                       (id,channel,session_id,turn_id,model,input_tokens,output_tokens,actual_usd,created)
+                       VALUES (?,?,?,?,?,?,?,?,?)""",(
+                str(uuid.uuid4()),
+                info.get("channel","unattributed"),
+                info.get("session_id"),
+                info.get("turn_id"),
+                model,token("prompt_tokens","input_tokens"),
+                token("completion_tokens","output_tokens"),
+                extract_gateway_actual_cost(body),now()
+            ))
+    except Exception as exc:
+        # Never fail the chat after a provider has already billed the call.
+        import logging
+        logging.getLogger("phoenix.costs").warning("Model spend ledger unavailable: %s",type(exc).__name__)
+
+async def build_cost_report()->dict:
+    """Admin-only usage view; no message content or patient identifiers."""
+    try:
+        catalog=await supported_chat_models()
+    except HTTPException:
+        catalog=[]
+    rates={m["id"]:(m["input_per_m"],m["output_per_m"]) for m in catalog}
+    with db() as con:
+        fresh=con.execute("""SELECT channel,session_id,turn_id,model,input_tokens,
+                             output_tokens,actual_usd,created FROM model_usage
+                             ORDER BY created ASC""").fetchall()
+        # Old saved turns have token counts but no model field or request ledger.
+        # Estimate these using the pilot's original default and label the assumption.
+        legacy=con.execute("""SELECT t.session_id,t.id,t.usage_in,t.usage_out,t.created
+                              FROM turns t WHERE NOT EXISTS
+                              (SELECT 1 FROM model_usage u WHERE u.turn_id=t.id)
+                              ORDER BY t.created ASC""").fetchall()
+    items=[]
+    for row in fresh:
+        items.append(dict(channel=row["channel"],session_id=row["session_id"],
+                          model=row["model"],input_tokens=row["input_tokens"],
+                          output_tokens=row["output_tokens"],actual_usd=row["actual_usd"],
+                          created=row["created"],historical=False))
+    for row in legacy:
+        items.append(dict(channel="web",session_id=row["session_id"],
+                          model=MODEL,input_tokens=row["usage_in"],
+                          output_tokens=row["usage_out"],actual_usd=None,
+                          created=row["created"],historical=True))
+    by_day={};by_conversation={};by_channel={}
+    totals={"cost_usd":0.0,"actual_usd":0.0,"estimated_usd":0.0,
+            "requests":0,"costed_requests":0,"unpriced_requests":0,
+            "historical_requests":0,"input_tokens":0,"output_tokens":0}
+    def aggregate(bucket,item):
+        bucket["cost_usd"]+=item["cost_usd"] or 0
+        bucket["requests"]+=1
+        bucket["input_tokens"]+=item["input_tokens"]
+        bucket["output_tokens"]+=item["output_tokens"]
+        if item["cost_usd"] is None:bucket["unpriced_requests"]+=1
+        else:bucket["costed_requests"]+=1
+        if item["historical"]:bucket["historical_requests"]+=1
+    def fresh_bucket():
+        return {"cost_usd":0.0,"requests":0,"costed_requests":0,
+                "unpriced_requests":0,"historical_requests":0,
+                "input_tokens":0,"output_tokens":0}
+    for item in items:
+        unit=rates.get(item["model"])
+        tracked=bool(item["input_tokens"] or item["output_tokens"])
+        actual=item["actual_usd"] if item["actual_usd"] is not None else None
+        estimated=(sum([item["input_tokens"]*unit[0],item["output_tokens"]*unit[1]])/1_000_000
+                   if tracked and unit and None not in unit else None)
+        item["cost_usd"]=actual if actual is not None else estimated
+        item["source"]=("actual" if actual is not None else
+                        "historical_estimate" if item["historical"] and estimated is not None else
+                        "catalog_estimate" if estimated is not None else "unpriced")
+        day=datetime.fromisoformat(item["created"].replace("Z","+00:00")).astimezone(SG).date().isoformat()
+        item["day"]=day
+        aggregate(totals,item)
+        if actual is not None:totals["actual_usd"]+=actual
+        elif estimated is not None:totals["estimated_usd"]+=estimated
+        d=by_day.setdefault(day,{"day":day,**fresh_bucket()})
+        aggregate(d,item)
+        ch=by_channel.setdefault(item["channel"],{"channel":item["channel"],**fresh_bucket()})
+        aggregate(ch,item)
+        # Link to conversation UUID only while the chat transcript exists.
+        if item["channel"]=="web" and item["session_id"]:
+            id=item["session_id"]
+            g=by_conversation.setdefault(id,{"id":id,"last_at":item["created"],
+                                               "models":set(),"estimated_rows":0,**fresh_bucket()})
+            aggregate(g,item)
+            g["models"].add(item["model"])
+            if item["historical"]:g["estimated_rows"]+=1
+            if item["created"]>g["last_at"]:g["last_at"]=item["created"]
+    def cleaned(row):
+        result={k:(round(v,9) if k=="cost_usd" else v) for k,v in row.items()}
+        if "models" in result:result["models"]=sorted(result["models"])
+        return result
+    totals=cleaned(totals)
+    totals["actual_usd"]=round(totals["actual_usd"],9)
+    totals["estimated_usd"]=round(totals["estimated_usd"],9)
+    return {"ok":True,"currency":"USD","timezone":"Asia/Singapore",
+            "summary":totals,
+            "days":[cleaned(row) for _,row in sorted(by_day.items(),reverse=True)],
+            "conversations":[cleaned(row) for row in
+                             sorted(by_conversation.values(),key=lambda x:x["last_at"],reverse=True)[:200]],
+            "channels":[cleaned(row) for _,row in sorted(by_channel.items())],
+            "prices_available":len(rates)>0,
+            "assumptions":"Cost estimates use current Vercel AI Gateway list prices, not historical invoices. Legacy chat turns assume the original GPT-6 Luna model. Usage-free turns and unavailable prices are excluded from priced totals. Billing discounts, cached tokens, tools and gateway/provider charges may differ. Pre-ledger developer tests and WhatsApp calls are not reconstructable."}
 
 def crypt(text:str)->bytes:
     return CIPHER.encrypt(text.encode("utf-8"))
@@ -460,6 +610,8 @@ async def admin_ops(request:Request):
     action=str(body.get("action",""))
     if action=="state":
         return {"ok":True,**setting("admin"),"docs":all_docs(),"schedules":all_schedules()}
+    if action=="costs":
+        return await build_cost_report()
     if action=="save_settings":
         tone=str(body.get("tone",""))
         special=str(body.get("special","")).strip()
@@ -643,10 +795,13 @@ async def dev_ops(request:Request):
         if not 1<=len(msg)<=1600:fail(400,"Questions must be 1 to 1,600 characters.")
         allowed,_=count_and_limit("dev-luna-check:"+ip_key(request),20,3600)
         if not allowed:fail(429,"Developer Luna test limit reached for this hour.")
+        token=COST_CONTEXT.set({"channel":"dev","session_id":None,"turn_id":None})
         try:
             verdict,_=await luna_decide(msg,[])
         except Exception:
             fail(503,"Model decision unavailable. Please retry later.")
+        finally:
+            COST_CONTEXT.reset(token)
         return {"ok":True,"decision":verdict,
                 "reason":"Preliminary model suggestion: "+verdict.upper()+" (single-message context)."}
     fail(400,"Unsupported developer action.")
@@ -684,6 +839,7 @@ def purge_old_conversations():
     with db() as con:
         con.execute("DELETE FROM turns WHERE created<?",(cutoff,))
         con.execute("DELETE FROM sessions WHERE last_at<?",(cutoff,))
+        con.execute("UPDATE model_usage SET session_id=NULL,turn_id=NULL WHERE session_id IS NOT NULL AND session_id NOT IN (SELECT id FROM sessions)")
         con.execute("DELETE FROM wa_events WHERE created<?",(cutoff,))
         # Non-PII synthetic drafts have a shorter retention than conversations.
         con.execute("DELETE FROM booking_drafts WHERE expires<?",((datetime.now(timezone.utc)-timedelta(days=1)).isoformat(),))
@@ -845,7 +1001,9 @@ async def luna_call(messages:list[dict],tokens:int=500)->tuple[str,dict]:
         message=choice.get("content") or ""
         if isinstance(message,list):
             message="\n".join(str(part.get("text","")) for part in message if isinstance(part,dict))
-        return str(message).strip(),body.get("usage",{})
+        usage=body.get("usage",{})
+        record_model_call(model,usage,body)
+        return str(message).strip(),usage
     except (ValueError,TypeError,KeyError,IndexError):
         raise RuntimeError("Invalid AI Gateway response format") from None
 
@@ -931,6 +1089,7 @@ async def chat_live(request:Request):
     usage={}
     status="error"
     reply="The assistant couldn't complete that request. Please try again shortly."
+    cost_token=COST_CONTEXT.set({"channel":"web","session_id":session_id,"turn_id":ticket})
     try:
         if opts["decision"]:
             verdict,usage=await luna_decide(message,pre["history"])
@@ -981,6 +1140,8 @@ async def chat_live(request:Request):
         # Only a non-sensitive technical error code is printed to server logs.
         import logging
         logging.getLogger("phoenix.inference").warning("Model unavailable: %s",type(exc).__name__)
+    finally:
+        COST_CONTEXT.reset(cost_token)
     persist_reply(ticket,session_id,reply,status,verdict,usage)
     return {
       "ok":True,"status":"answered" if status=="done" else "declined" if status=="denied" else "error",

@@ -142,3 +142,20 @@ test('booking pilot is separate and cannot be presented as a live reservation',(
  assert.doesNotMatch(script,/fetch\(['"]https:\/\/api\.hb\.sgimed\.com/);
  assert.match(text('chat/index.html'),/href="\/book"/);
 });
+
+test('clinic admin costs tab uses separate authenticated usage endpoint',()=>{
+ const html=text('admin/index.html'),js=text('shared/costs.mjs'),css=text('shared/costs.css');
+ assert.match(html,/data-tab="costs"/);
+ assert.match(html,/data-panel="costs"/);
+ assert.match(html,/id="costs-total"/);
+ assert.match(html,/id="costs-days"/);
+ assert.match(html,/id="costs-conversations"/);
+ assert.match(html,/id="costs-channels"/);
+ assert.match(html,/costs\.mjs\?v=20261111-costs-v1/);
+ assert.match(js,/action:'costs'/);
+ assert.match(js,/credentials:'same-origin'/);
+ assert.match(js,/timeZone:'Asia\/Singapore'/);
+ assert.match(js,/unpriced_requests/);
+ assert.match(js,/showConversationPage/);
+ assert.match(css,/costs-kpis/);
+});

@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#082E24"><meta name="robots" content="noindex,nofollow,noarchive">
 <title>Clinic admin · Phoenix Rehab Pilot</title><link rel="icon" href="/brush-slash.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css">
-<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script><script type="module" src="/shared/owner.mjs"></script>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/shared/site.css"><link rel="stylesheet" href="/shared/console.css?v=20261111-costs-v1"><link rel="stylesheet" href="/shared/costs.css?v=20261111-costs-v1">
+<script type="module" src="/shared/header.mjs"></script><script type="module" src="/shared/console.mjs"></script><script type="module" src="/shared/owner.mjs"></script><script type="module" src="/shared/costs.mjs?v=20261111-costs-v1"></script>
 </head><body data-console="admin"><header class="site-header" id="site-header"></header>
 <main class="container dashboard">
 <section class="hero-compact"><div><div class="kicker">CLINIC OPERATIONS / PRIVATE</div><h1>Clinic <span class="highlight">controls.</span></h1><span class="hand">Answers that stay current.</span></div><button class="secondary hidden" id="logout" type="button">Lock console</button></section>
@@ -10,7 +10,7 @@
 <section class="gate panel" id="auth-panel"><h2>Unlock clinic admin</h2><p class="muted">Update bot answers, upload clinic documents, schedule notices and review past chats. Password attempts are rate-limited and recorded.</p><form id="login-form"><label for="password">Admin password</label><input id="password" type="password" autocomplete="current-password" required maxlength="200"><div class="actions"><button type="submit" class="primary">Unlock admin</button></div></form></section>
 <section id="console-panel" class="hidden">
 <div class="tabs" role="tablist" aria-label="Clinic admin sections">
-<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button>
+<button type="button" class="active" data-tab="answers">Teach the bot</button><button type="button" data-tab="settings">Personality</button><button type="button" data-tab="context">Knowledge files</button><button type="button" data-tab="schedule">Timed announcements</button><button type="button" data-tab="audit">Conversation audit</button><button type="button" data-tab="costs">Costs</button>
 </div>
 <section class="tab-panel" data-panel="answers">
 <div class="panel owner-welcome">
@@ -61,5 +61,39 @@
 <div class="date-grid"><div><label for="starts">Starts</label><input id="starts" type="datetime-local" required></div><div><label for="ends">Ends (exclusive)</label><input id="ends" type="datetime-local" required></div></div><div class="actions"><button type="submit" class="primary">Schedule instruction</button></div></form></div>
 <div class="panel"><h2>Active and upcoming</h2><div id="scheduled-list" class="data-list"></div><p class="muted">Expired announcements are retained for audit but no longer added to the chatbot's live instructions.</p></div></section>
 <section class="tab-panel hidden" data-panel="audit"><div class="panel"><h2>Past conversations</h2><p class="muted">Encrypted records of chatbot testing, accessible only to clinic administrators. Do not forward identifiable patient data. Records expire according to the retention setting.</p><button class="secondary" type="button" id="refresh-audit">Refresh</button><div class="audit-layout"><div id="audit-list" class="data-list"></div><div id="audit-thread" class="thread"><p class="muted">Select a conversation to inspect its transcript.</p></div></div></div></section>
+<section class="tab-panel hidden" data-panel="costs" id="costs-panel">
+ <div class="panel costs-panel">
+  <div class="costs-heading">
+   <div><div class="kicker">AI MODEL USAGE / CLINIC CHAT</div><h2>Costs and usage</h2><p class="muted">Recorded provider calls, measured in USD. Times use Singapore local dates.</p></div>
+   <button type="button" class="secondary" id="refresh-costs">Refresh costs</button>
+  </div>
+  <div class="costs-kpis">
+   <div class="costs-total"><span class="costs-label">Estimated tracked AI spend</span><strong id="costs-total">—</strong><small id="costs-accuracy">Includes only priced model calls</small></div>
+   <div class="costs-kpi"><span class="costs-label">Model calls</span><strong id="costs-calls">—</strong><small id="costs-tokens">Input/output tokens</small></div>
+   <div class="costs-kpi"><span class="costs-label">Coverage</span><strong id="costs-coverage">—</strong><small id="costs-unknown">Calls with unavailable prices</small></div>
+  </div>
+  <p id="costs-notice" class="costs-notice" role="status" aria-live="polite">Select Costs to load your usage report.</p>
+ </div>
+ <div class="costs-grid">
+  <section class="panel">
+   <div class="costs-section-head"><h2>Daily spend</h2><span>Asia/Singapore · USD</span></div>
+   <div id="costs-days" class="costs-days"><p class="muted">No usage loaded yet.</p></div>
+  </section>
+  <section class="panel">
+   <div class="costs-section-head"><h2>Where it came from</h2><span>Web · WhatsApp · Developer</span></div>
+   <div id="costs-channels" class="costs-channels"><p class="muted">No channel data yet.</p></div>
+   <p class="costs-explainer">Costs cover model inference only. Hosting, messaging, credits, and taxes are not included.</p>
+  </section>
+ </div>
+ <section class="panel">
+  <div class="costs-section-head">
+   <div><h2>By conversation</h2><p class="muted">Aggregated from individual AI calls. Conversation IDs are abbreviated; no patient messages are shown.</p></div>
+   <span id="costs-conversation-count"></span>
+  </div>
+  <div id="costs-conversations" class="costs-conversations"><p class="muted">No conversations loaded yet.</p></div>
+  <div class="actions"><button type="button" class="secondary hidden" id="costs-more">Show more conversations</button></div>
+ </section>
+ <p class="costs-explainer" id="costs-methodology">Historical estimates and data limitations will appear here after loading.</p>
+</section>
 </section>
 </main><footer class="site-footer"><span>Clinic access is audited · BSPT pilot</span><a href="/chat">Back to public chat</a></footer></body></html>

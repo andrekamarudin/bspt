@@ -80,8 +80,9 @@ def install(app):
         return digest
 
     async def answer(digest, sender, message):
-        from app import db, luna_decide, decision_guidance, public_context, build_policy, luna_call
+        from app import db, luna_decide, decision_guidance, public_context, build_policy, luna_call, COST_CONTEXT
         status = "failed"
+        cost_token=COST_CONTEXT.set({"channel":"whatsapp","session_id":None,"turn_id":digest})
         try:
             config = public_context()
             verdict = "disabled"
@@ -111,6 +112,7 @@ def install(app):
             # Do not log phone numbers, message text, tokens or model output.
             status = "failed"
         finally:
+            COST_CONTEXT.reset(cost_token)
             with db() as con:
                 con.execute("UPDATE wa_events SET status=?,updated=? WHERE message_hash=?",
                             (status,timestamp(),digest))

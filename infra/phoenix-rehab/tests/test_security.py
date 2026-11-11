@@ -352,6 +352,91 @@ class APIFlows(unittest.TestCase):
             self.assertEqual(c.post('/api/admin',json={'action':'remove',
                              'id':row['id']}).status_code,200)
             self.assertNotIn(payload,str(public_context()['references']))
+    def test_cost_reporting_tracks_calls_and_labels_estimates(self):
+        import asyncio
+        from app import record_model_call,COST_CONTEXT,build_cost_report
+        session_id=str(uuid.uuid4());turn_id=str(uuid.uuid4())
+        old_id=str(uuid.uuid4())
+        now_date='2026-11-11T01:20:00+00:00'
+        with db() as con:
+            con.execute("INSERT INTO sessions(id,started,last_at,request_count,ip_hash) VALUES (?,?,?,?,?)",
+                        (session_id,now_date,now_date,1,'a'*64))
+            con.execute("""INSERT INTO turns (id,session_id,status,question,reply,verdict,
+                         usage_in,usage_out,created,finished) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                        (turn_id,session_id,'done',crypt('Synthetic Q'),crypt('Synthetic A'),
+                         'answer',0,0,now_date,now_date))
+        fake_prices=[
+          {'id':'openai/gpt-6-luna','input_per_m':0.1,'output_per_m':0.5},
+          {'id':'anthropic/claude-sonnet-5.5','input_per_m':2.0,'output_per_m':10.0}
+        ]
+        try:
+            token=COST_CONTEXT.set({'channel':'web','session_id':session_id,'turn_id':turn_id})
+            try:
+                record_model_call('openai/gpt-6-luna',
+                                  {'prompt_tokens':10000,'completion_tokens':1000},{})
+                record_model_call('anthropic/claude-sonnet-5.5',
+                                  {'prompt_tokens':1000,'completion_tokens':200},
+                                  {'usage':{'cost':0.003}})
+            finally:COST_CONTEXT.reset(token)
+            with patch('app.supported_chat_models',new=AsyncMock(return_value=fake_prices)):
+                report=asyncio.run(build_cost_report())
+            convo=next(r for r in report['conversations'] if r['id']==session_id)
+            self.assertEqual(convo['requests'],2)
+            self.assertEqual(convo['cost_usd'],0.0045)
+            self.assertEqual(convo['models'],
+                             ['anthropic/claude-sonnet-5.5','openai/gpt-6-luna'])
+            self.assertEqual(report['currency'],'USD')
+            self.assertTrue(any(r['day']=='2026-11-11' for r in report['days']))
+            self.assertGreaterEqual(report['summary']['actual_usd'],0.003)
+            self.assertNotIn('Synthetic Q',str(report))
+            self.assertNotIn('Synthetic A',str(report))
+            with db() as con:
+                rows=con.execute("SELECT model,input_tokens,output_tokens FROM model_usage WHERE turn_id=?",(turn_id,)).fetchall()
+            self.assertEqual(len(rows),2)
+        finally:
+            with db() as con:
+                con.execute("DELETE FROM model_usage WHERE turn_id=?",(turn_id,))
+                con.execute("DELETE FROM turns WHERE session_id=?",(session_id,))
+                con.execute("DELETE FROM sessions WHERE id=?",(session_id,))
+
+    def test_cost_report_legacy_unknown_usage_and_admin_protection(self):
+        import asyncio
+        from app import build_cost_report
+        session_id=str(uuid.uuid4());turn_id=str(uuid.uuid4())
+        stamp='2026-11-10T23:20:00+00:00'
+        with db() as con:
+            con.execute("INSERT INTO sessions(id,started,last_at,request_count,ip_hash) VALUES (?,?,?,?,?)",
+                        (session_id,stamp,stamp,1,'f'*64))
+            con.execute("""INSERT INTO turns (id,session_id,status,question,reply,
+                            usage_in,usage_out,created,finished) VALUES (?,?,?,?,?,?,?,?,?)""",
+                        (turn_id,session_id,'done',crypt('Synthetic prior question'),
+                         crypt('Synthetic response'),0,0,stamp,stamp))
+        try:
+            with patch('app.supported_chat_models',new=AsyncMock(return_value=[
+                {'id':'openai/gpt-6-luna','input_per_m':0.1,'output_per_m':0.5}])):
+                result=asyncio.run(build_cost_report())
+            row=next(r for r in result['conversations'] if r['id']==session_id)
+            self.assertEqual(row['cost_usd'],0)
+            self.assertEqual(row['unpriced_requests'],1)
+            self.assertEqual(row['historical_requests'],1)
+            self.assertTrue(any(r['day']=='2026-11-11' for r in result['days']))
+            with self.client() as c:
+                self.pilot(c)
+                response=c.post('/api/admin',json={'action':'costs'})
+                self.assertEqual(response.status_code,401)
+                login=c.post('/api/auth',json={'role':'admin', 'action':'login',
+                                               'password':'A'*40})
+                self.assertEqual(login.status_code,200)
+                with patch('app.supported_chat_models',new=AsyncMock(return_value=[])):
+                    response=c.post('/api/admin',json={'action':'costs'})
+                self.assertEqual(response.status_code,200)
+                self.assertIn('summary',response.json())
+                self.assertNotIn('question',str(response.json()))
+        finally:
+            with db() as con:
+                con.execute("DELETE FROM turns WHERE session_id=?",(session_id,))
+                con.execute("DELETE FROM sessions WHERE id=?",(session_id,))
+
     def test_calendar_projection_cannot_book(self):
         with self.client() as c:
             self.pilot(c)
