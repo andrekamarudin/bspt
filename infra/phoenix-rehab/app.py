@@ -567,8 +567,8 @@ async def dev_ops(request:Request):
             verdict,_=await luna_decide(msg,[])
         except Exception:
             fail(503,"Luna decision unavailable. Please retry later.")
-        return {"ok":True,"allowed":verdict=="allowed",
-                "reason":"Luna classified this as "+verdict.upper()+" (single-message context)."}
+        return {"ok":True,"decision":verdict,
+                "reason":"Preliminary Luna suggestion: "+verdict.upper()+" (single-message context)."}
     fail(400,"Unsupported developer action.")
 
 def public_context()->dict[str,Any]:
@@ -717,14 +717,19 @@ async def stop_retention():
         _RETENTION_TASK=None
 
 AI_GATEWAY_ENDPOINT = "https://ai-gateway.vercel.sh/v1/chat/completions"
-DECISION_PROMPT = """You classify scope for Phoenix Rehab chat.
-Read the user's intent and conversational context, including typo-filled and
-incomplete messages. Never rely on a fixed vocabulary or phrase matching.
-DENY only messages OBVIOUSLY unrelated to Phoenix Rehab, or direct attempts
-to obtain private records or confidential internal information.
-ALLOW if the question may plausibly relate to the clinic, even if unclear.
-The answering Luna will ask follow-up questions when details are missing
-and enforce clinical safety rules. Return only ALLOW or DENY."""
+DECISION_PROMPT = """You classify conversational intent for Phoenix Rehab.
+Understand typos, shorthand, incomplete questions and the prior conversation.
+Return exactly one label:
+ANSWER: Enough context for the answering assistant to answer directly.
+ASK: A plausible clinic request needs one essential clarification.
+OUT_OF_SCOPE: The message is OBVIOUSLY unrelated to Phoenix Rehab or asks for
+private records, secrets or confidential internal information.
+Do not reject ambiguous questions, imperfect language or symptom questions
+that may require a safe clinical referral.
+This is a PRELIMINARY judgment: the answering Luna can independently override
+it when the context supports a different response.
+Output only ANSWER, ASK or OUT_OF_SCOPE."""
+
 
 SCOPE_GUARDRAILS = """The separate Luna decision is disabled: handle
 scope and answer within this one call. Infer the clinic context from the
@@ -766,10 +771,27 @@ async def luna_decide(message:str,history:list[dict])->tuple[str,dict]:
                              "content":str(turn.get("text",""))[:400]})
     messages.append({"role":"user","content":message})
     result,usage=await luna_call(messages,180)
-    match=re.fullmatch(r"\s*(ALLOW|DENY)\s*\.?\s*",result,re.I)
+    match=re.fullmatch(r"\s*(ANSWER|ASK|OUT_OF_SCOPE)\s*\.?\s*",result,re.I)
     if not match:
         raise RuntimeError("Unexpected Luna decision response")
-    return ("allowed" if match.group(1).upper()=="ALLOW" else "denied"),usage
+    return match.group(1).lower(),usage
+
+def decision_guidance(verdict:str)->str:
+    """Safe advisory for the answering Luna. Model judgment is not a hard gate."""
+    prompts={
+      "answer":"The question appears answerable.",
+      "ask":"A short clarification may be needed before answering.",
+      "out_of_scope":"The question may be outside clinic scope."
+    }
+    if verdict not in prompts:
+        return ""
+    return ("\n\nPRELIMINARY ROUTING ADVICE (not a rule): "+
+            verdict.upper()+". "+prompts[verdict]+
+            " Reassess the user's actual question and conversation independently. "+
+            "Override this preliminary decision when wrong. "+
+            "Answer directly if sufficient context exists; ask ONE clarifying "+
+            "question if an essential fact is missing; decline only when clearly "+
+            "unrelated. Higher-priority clinical safety and privacy rules always apply.")
 
 def persist_reply(ticket:str, session_id:str, reply:str, status:str,
                   verdict:str, usage:dict):
@@ -825,51 +847,49 @@ async def chat_live(request:Request):
     try:
         if opts["decision"]:
             verdict,usage=await luna_decide(message,pre["history"])
-            if verdict=="denied":
-                reply=("I can help with Phoenix Rehab services and appointments, "
-                       "but not unrelated topics or confidential information.")
-                status="denied"
-        if verdict!="denied":
-            # Only a minimal, allowlisted read-only calendar projection reaches the LLM.
-            # No staff personal fields, booking tokens, identifiers or clinical records.
-            if re.search(r"\b(availability|available|free|open slots?|times?|when can|book|booking|appointment|schedule|tomorrow|next week)\b",message,re.I):
-                try:
-                    today=datetime.now(SG).date()
-                    match=re.search(r"\b(20\d{2}-\d{2}-\d{2})\b",message)
-                    if match:
-                        chosen=match.group(1)
-                    elif re.search(r"\btomorrow\b",message,re.I):
-                        chosen=(today+timedelta(days=1)).isoformat()
-                    elif re.search(r"\btoday\b",message,re.I):
-                        chosen=today.isoformat()
-                    else:
-                        chosen=(today+timedelta(days=1)).isoformat()
-                    availability=await get_availability(chosen)
-                    verified=availability["openings"][:28]
-                    policy += ("\n\nREAD-ONLY REAL CLINIC CALENDAR SNAPSHOT. "+
-                        "Do NOT invent, book, reserve or confirm any slot. "+
-                        "Use exact date/branch/service/time, label all times Singapore local time. "+
-                        "These are real publicly offered openings at the retrieval time, not a held appointment. "+
-                        "If user asks for a different date or a specific branch not represented, state limits. "+
-                        "Snapshot: "+json.dumps({
-                          "date":availability["date"],
-                          "checked_at":availability["checked_at"],
-                          "checked_branches":availability["checked_branches"],
-                          "unavailable_branches":availability["unavailable_branches"],
-                          "openings":verified
-                        },ensure_ascii=False))
-                except Exception:
-                    policy += ("\n\nLive calendar availability could not be verified for that date. "+
-                               "Do not invent any time; direct user to the clinic's online calendar.")
-            messages=[{"role":"system","content":policy}]
-            for turn in pre["history"][-6:]:
-                if turn["role"] in ("user","assistant"):
-                    messages.append({"role":turn["role"],"content":str(turn["text"])[:1600]})
-            messages.append({"role":"user","content":message})
-            answer,usage=await luna_call(messages,int(opts["max_tokens"]))
-            if answer:
-                reply=answer[:3900]
-                status="done"
+            policy += decision_guidance(verdict)
+        # Only a minimal, allowlisted read-only calendar projection reaches the LLM.
+        # No staff personal fields, booking tokens, identifiers or clinical records.
+        if re.search(r"\b(availability|available|free|open slots?|times?|when can|book|booking|appointment|schedule|tomorrow|next week)\b",message,re.I):
+            try:
+                today=datetime.now(SG).date()
+                match=re.search(r"\b(20\d{2}-\d{2}-\d{2})\b",message)
+                if match:
+                    chosen=match.group(1)
+                elif re.search(r"\btomorrow\b",message,re.I):
+                    chosen=(today+timedelta(days=1)).isoformat()
+                elif re.search(r"\btoday\b",message,re.I):
+                    chosen=today.isoformat()
+                else:
+                    chosen=(today+timedelta(days=1)).isoformat()
+                availability=await get_availability(chosen)
+                verified=availability["openings"][:28]
+                policy += ("\n\nREAD-ONLY REAL CLINIC CALENDAR SNAPSHOT. "+
+                    "Do NOT invent, book, reserve or confirm any slot. "+
+                    "Use exact date/branch/service/time, label all times Singapore local time. "+
+                    "These are real publicly offered openings at the retrieval time, not a held appointment. "+
+                    "If user asks for a different date or a specific branch not represented, state limits. "+
+                    "Snapshot: "+json.dumps({
+                      "date":availability["date"],
+                      "checked_at":availability["checked_at"],
+                      "checked_branches":availability["checked_branches"],
+                      "unavailable_branches":availability["unavailable_branches"],
+                      "openings":verified
+                    },ensure_ascii=False))
+            except Exception:
+                policy += ("\n\nLive calendar availability could not be verified for that date. "+
+                           "Do not invent any time; direct user to the clinic's online calendar.")
+        messages=[{"role":"system","content":policy}]
+        for turn in pre["history"][-6:]:
+            if turn["role"] in ("user","assistant"):
+                messages.append({"role":turn["role"],"content":str(turn["text"])[:1600]})
+        messages.append({"role":"user","content":message})
+        answer,response_usage=await luna_call(messages,int(opts["max_tokens"]))
+        usage={key:int(usage.get(key,0) or 0)+int(response_usage.get(key,0) or 0)
+               for key in ("prompt_tokens","completion_tokens")}
+        if answer:
+            reply=answer[:3900]
+            status="done"
     except Exception as exc:
         # Only a non-sensitive technical error code is printed to server logs.
         import logging
