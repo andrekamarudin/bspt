@@ -1,0 +1,6 @@
+{
+  "revision": "2026-11-13-chc-genai-source",
+  "purpose": "Trigger Git-based deployment of committed survey + logic explainer",
+  "source": "andrekamarudin/bspt",
+  "slug": "chc-genai"
+}
