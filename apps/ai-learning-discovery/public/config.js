@@ -1,0 +1,1 @@
+window.TRAINING_CONFIG={"url":"https://jgkmjeorlkdpsptatuhc.supabase.co/rest/v1/genai_training_interest","key":"sb_publishable_AQhfnxtDkwoRcbw04csHeA_xcHiez6I"};
