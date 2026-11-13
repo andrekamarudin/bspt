@@ -1,8 +1,4 @@
-/* CHC GenAI: auditable source shared by live survey and HR logic explanation.
- * Earlier topic labels were transcribed from the production survey on 13 Nov 2026.
- * The recommendation matrix is UNCHANGED. Step 3 override selects the Step 4 list.
- * CHC-specific topic IDs avoid collisions with legacy root survey ratings.
- */
+/* Canonical CHC topics. Live survey lets staff choose one level with topics in its description. The previous matrix is retained only to explain Before on /chc-genai/logic. Original labels are archived for provenance. */
 (function(){
 "use strict";
 const ORIGINAL={

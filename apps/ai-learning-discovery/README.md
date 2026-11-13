@@ -6,29 +6,15 @@
 - **HR logic explainer:** https://training.bytesizeprotip.com/chc-genai/logic (two tabs, Before and After)
 - **Original generic survey:** https://training.bytesizeprotip.com/ (intentionally preserved).
 
-## Why two views?
+## Before and After
 
-The original form was designed to showcase assorted AI features. The CHC version tests **which decisions and transferable capabilities employees most want to learn**. It keeps eight intermediate options and combines overlapping beginner/advanced concepts into six each. It does **not** claim the organization has validated these preferences. The before/after page is an explanatory design proposal and includes the exact survey-level matrix.
+**Before**: The previous decision-focused CHC flow combines AI frequency and capability into a suggested level, then asks staff to rate topics individually. The recommendation matrix remains visible only on the comparison page.
 
-## Exact scoring (unchanged)
-
-- Step 1 **frequency**: rarely/never, sometimes, most days. Step 2 **highest capability**: chat/none, files, agents/coding.
-- Step 1 + Step 2 → **Step 3 recommended level**, using the `CHC_MATRIX` in `public/chc-genai/topics.js`.
-- Skipping Step 1 defaults to Intermediate; selecting multiple Step 2 options chooses the highest capability (agents > files > chat).
-- Respondent may override the recommendation at Step 3.
-- The **selected Step 3 level** maps **directly to exactly one Step 4 topic list**. No further algorithm/scoring is applied.
-
-The key change is **topic differentiation**, not recommendation calibration.
-
-| Level | Before | After | Learning decision |
-|---|---:|---:|---|
-| Beginner | 8 feature/tasks | 6 basic capabilities | Can I use AI safely for a real task? |
-| Intermediate | 8 tool labels | 8 transferable work capabilities | Can I delegate work and verify the outcome? |
-| Advanced | 8 implementation topics | 6 leadership decisions | Which initiative merits investment and how is it governed? |
+**After**: The current CHC survey asks staff to choose Beginner, Intermediate or Advanced, with **all topics shown inside each level description**. That is one selection, followed by optional feedback and registration. No matrix or separate topic-rating step. Beginner has six topics, Intermediate eight, Advanced six. This is course preference, not a skills assessment.
 
 ## Data and isolation
 
-The CHC survey uses a separate browser sessionStorage key and prefixed `chc_b*`, `chc_i*`, `chc_a*` topic IDs. It preserves the existing Supabase backend for registration and progress tracking; it **does not create a separate database or claim CHC respondent records are physically isolated**. Before broad distribution, check any HR data-separation or consent requirements. The HR logic page is **static** and collects no answers.
+The CHC survey uses sessionStorage key `ai-discovery-chc-genai-v2` and prefixed `chc_b*`, `chc_i*`, `chc_a*` topic IDs. It preserves the existing Supabase backend for registration and progress tracking; it **does not create a separate database or claim CHC respondent records are physically isolated**. Before broad distribution, check any HR data-separation or consent requirements. The HR logic page is **static** and collects no answers.
 
 ## Build, tests, deployment
 
@@ -40,4 +26,4 @@ No framework/build step; static files under `public/`. Vercel project: `ai-learn
 
 ## Important
 
-The **Before** tab shows the preserved production topic labels and matrix as of 13 November 2026. The **After** tab shows the actual CHC-specific survey options. This is **not** a prediction of staff preference, course enrollment or measured business value.
+The **Before** tab shows the previous CHC matrix-plus-topic-rating flow. **After** matches the current simple three-choice survey. This is **not** a prediction of staff preference, course enrollment or measured business value.

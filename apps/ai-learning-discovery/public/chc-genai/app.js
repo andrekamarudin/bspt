@@ -15,10 +15,9 @@ const hurdles=[
 const ideas=["Show me how to use AI on a task I do every week.","I'd like hands-on practice, not a product demo.","Show me how to handle sensitive information safely.","Help me build a small tool without coding.","Show me a workflow my team could use."];
 const giftPrompt="Explain this idea in plain English, show me an example, and ask one question to check my understanding.";
 const state={step:0,experience:"",capability:"none",capabilities:[],track:"",changed:false,votes:{},cursor:0,hurdle:"",hurdles:[],hurdleOther:"",feedback:"",valuableProblem:"",sending:false,error:""};
-const main=document.getElementById("main"),nav=document.getElementById("nav"),fill=document.getElementById("fill"),stage=document.getElementById("stage"),fraction=document.getElementById("fraction");const pending={};
+const main=document.getElementById("main"),nav=document.getElementById("nav"),fill=document.getElementById("fill"),stage=document.getElementById("stage"),fraction=document.getElementById("fraction");
 function safe(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function tag(v){return '<div class="kicker">'+v+'</div>';}
-function proposed(){return window.CHC_RECOMMEND(state.experience,state.capabilities);}
 function intro(){return '<h1>Which GenAI course is right for you?</h1><p class="lede">See what you will learn at each level, then choose the one that interests you most. No test or scoring needed.</p><p class="progress-disclosure">We keep unfinished survey answers for up to 30 days. If you register, we keep your answers and contact details for up to 12 months. Please leave out confidential information.</p>';}
 function levels(){
  return tag("Step 1 · Choose your course level")+'<h2>Choose the level that fits you</h2><p class="lede">All topics are shown below, so you can make an informed choice. Choose one level.</p>'+
