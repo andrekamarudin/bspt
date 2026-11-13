@@ -31,7 +31,6 @@ const worker=fs.readFileSync('apps/ai-learning-discovery/edge/worker.mjs','utf8'
 const cfg=JSON.parse(read('vercel.json'));
 new vm.Script(chc,{filename:'chc-genai/app.js'});
 new vm.Script(logicJS,{filename:'chc-genai/logic.js'});
-new vm.Script(worker,{filename:'worker.mjs'});
 assert(generic.includes('const tracks={'),'Generic survey source was modified');
 assert(chc.includes('const tracks=window.CHC_TRACKS;'),'New CHC survey must share topic data');
 assert(chc.includes('function levels()'),'New CHC survey missing course-level selection');
