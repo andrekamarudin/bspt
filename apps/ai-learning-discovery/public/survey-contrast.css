@@ -1,0 +1,150 @@
+/* BSPT AI survey contrast correction, Nov 2026.
+ * Applied AFTER style.css and field-notes.css. Scope to the survey only.
+ * Root issue: dark-theme #f3f6ff text and pastel category accents remained on light notebook paper.
+ * Topic groups preserve pink / blue / grey meaning, with dark labels and readable cards.
+ */
+body.bspt-survey {
+  --bspt-text-primary: #082E24;
+  --bspt-text-secondary: #405B50;
+  --bspt-input-bg: #FFFDF8;
+  --bspt-input-border: #B9AB96;
+  --bspt-error: #97351F;
+}
+body.bspt-survey #main .review-group {
+  --review-accent: #445563;
+  --review-surface: #F0F1ED;
+  --review-border: #9CA9AA;
+  border-bottom: 1px solid #C9BCAA;
+}
+body.bspt-survey #main .review-group.review-love {
+  --review-accent: #902950;
+  --review-surface: #FFF0F5;
+  --review-border: #BE6686;
+}
+body.bspt-survey #main .review-group.review-like {
+  --review-accent: #185B7C;
+  --review-surface: #EAF5FA;
+  --review-border: #70A7BE;
+}
+body.bspt-survey #main .review-group.review-nope,
+body.bspt-survey #main .review-group.review-unrated {
+  --review-accent: #455563;
+  --review-surface: #F0F1ED;
+  --review-border: #A1AAA7;
+}
+body.bspt-survey #main .review-group h3 {
+  color: var(--review-accent);
+  font-weight: 800;
+  letter-spacing: 0;
+}
+body.bspt-survey #main .review-group h3 .review-count { color: var(--review-accent); opacity: 1; }
+body.bspt-survey #main .review-symbol { color: var(--review-accent); border-color: var(--review-border); background: var(--review-surface); }
+body.bspt-survey #main .review-group .review-item {
+  color: var(--bspt-text-primary);
+  background: var(--review-surface);
+  border: 1px solid var(--review-border);
+  border-left: 4px solid var(--review-accent);
+  font-weight: 650;
+  line-height: 1.45;
+}
+/* Register: use light paper inputs and dark writing throughout, never legacy midnight blue. */
+body.bspt-survey #main .hurdle-other > span,
+body.bspt-survey #main .thoughts > span {
+  color: var(--bspt-text-secondary);
+}
+body.bspt-survey #main .hurdle-other input,
+body.bspt-survey #main .field input,
+body.bspt-survey #main .field textarea {
+  background: var(--bspt-input-bg);
+  border: 1.5px solid var(--bspt-input-border);
+  color: var(--bspt-text-primary);
+  caret-color: var(--bspt-text-primary);
+}
+body.bspt-survey #main .hurdle-other input::placeholder,
+body.bspt-survey #main .field input::placeholder,
+body.bspt-survey #main .field textarea::placeholder { color: #66766D; opacity: 1; }
+body.bspt-survey #main .hurdle-other input:focus-visible,
+body.bspt-survey #main .field input:focus-visible,
+body.bspt-survey #main .field textarea:focus-visible {
+  outline: 3px solid #B4502B;
+  outline-offset: 2px;
+  border-color: #B4502B;
+}
+body.bspt-survey #main .field-invalid input,
+body.bspt-survey #main .field-invalid textarea {
+  background: #FFFDF8;
+  border: 2px solid #B34225;
+}
+body.bspt-survey #main .field-error {
+  display: block;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid #B34225;
+  border-radius: 2px;
+  color: var(--bspt-error);
+  background: #FFF0E8;
+  font-size: 13px;
+  font-weight: 750;
+}
+body.bspt-survey #main .thought-grid button,
+body.bspt-survey #main .hurdle {
+  color: var(--bspt-text-primary);
+}
+body.bspt-survey #main .hurdle.selected {
+  background: #FFF0DD;
+  border: 2px solid #C64B24;
+  color: var(--bspt-text-primary);
+}
+/* Brand-orange accents are brighter than AA white-on-orange text allows.
+   Use the deeper BSPT shade for action buttons (4.74:1 white text). */
+body.bspt-survey #nav .btn.primary {
+  background: #C64B24;
+  color: #FFFDF7;
+  box-shadow: 0 4px 0 #873018;
+}
+body.bspt-survey #nav .btn.primary:hover { background: #B64220; }
+body.bspt-survey #nav .registration-cta:not(.submit-ready) {
+  background: #153E33;
+  color: #FFFDF7;
+  border: 1px solid #648577;
+  box-shadow: 0 3px 0 #08281F;
+}
+body.bspt-survey #nav .registration-cta.submit-ready {
+  background: #C64B24;
+  color: #FFFDF7;
+  border: 1px solid #C64B24;
+  box-shadow: 0 4px 0 #873018;
+}
+body.bspt-survey #nav .registration-cta.submit-ready:hover {
+  background: #B64220;
+  border-color: #B64220;
+}
+body.bspt-survey #main .check,
+body.bspt-survey #main .field-label,
+body.bspt-survey #main .hurdles h3,
+body.bspt-survey #main .thoughts > strong { color: var(--bspt-text-primary); }
+
+
+/* Course topic voting contrast correction.
+   The original dark-theme swipe labels and neutral ✕ icon were still pastel
+   on cream paper. Keep their semantic grey / blue / pink categories, but use
+   saturated ink that passes WCAG AA for normal text. */
+body.bspt-survey #main .swipe-directions { gap: 8px 12px; font-size: 13px; font-weight: 800; line-height: 1.45; }
+body.bspt-survey #main .swipe-directions .dir-no { color: #455563; }
+body.bspt-survey #main .swipe-directions .dir-yes { color: #185B7C; }
+body.bspt-survey #main .swipe-directions .dir-love { color: #902950; }
+body.bspt-survey #main .vote.no b { color: #455563; }
+body.bspt-survey #main .vote.yes b { color: #185B7C; }
+body.bspt-survey #main .vote.love b { color: #902950; }
+body.bspt-survey #main .vote small { color: #435A50; opacity: 1; }
+body.bspt-survey #main .vote.no { background: #F0F1ED; border-color: #A1AAA7; }
+body.bspt-survey #main .vote.yes { background: #EAF5FA; border-color: #70A7BE; }
+body.bspt-survey #main .vote.love { background: #FFF0F5; border-color: #BE6686; }
+body.bspt-survey #main .swipe[data-direction="nope"] { background: #F0F1ED; border-color: #455563; color: #082E24; }
+body.bspt-survey #main .swipe[data-direction="like"] { background: #EAF5FA; border-color: #185B7C; color: #082E24; }
+body.bspt-survey #main .swipe[data-direction="love"] { background: #FFF0F5; border-color: #902950; color: #082E24; }
+@media (max-width:610px) {
+ body.bspt-survey #main .swipe-directions { font-size: 12px; gap: 8px; }
+ body.bspt-survey #main .swipe-directions span { white-space: normal; }
+}
