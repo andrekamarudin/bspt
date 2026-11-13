@@ -7,8 +7,9 @@ const cases=[
  ['/chc-genai/logic','id="tab-before"',true,'text/html'],
  ['/chc-genai/logic','id="tab-after"',true,'text/html'],
  ['/chc-genai/topics.js','CHC_RECOMMEND',true,'javascript'],
- ['/chc-genai/app.js','ai-discovery-chc-genai-v1',true,'javascript'],
- ['/chc-genai/logic.css','.matrix',true,'text/css']
+ ['/chc-genai/app.js','ai-discovery-chc-genai-v2',true,'javascript'],
+ ['/chc-genai/logic.css','.after-levels',true,'text/css'],
+ ['/chc-genai/levels.css','.course-levels',true,'text/css']
 ];
 for(const [p,content,isNew,type] of cases){
  const r=await fetch(base+p,{redirect:'follow',signal:AbortSignal.timeout(20000)});

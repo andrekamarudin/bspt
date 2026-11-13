@@ -16,6 +16,7 @@ const allowed=new Set([
  "chc-genai/app.js",
  "chc-genai/logic.js",
  "chc-genai/logic.css",
+ "chc-genai/levels.css",
  "chc-genai/build-revision.json"
 ]);
 function select(path){

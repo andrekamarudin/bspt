@@ -21,4 +21,5 @@ jobs:
       - run: node apps/ai-learning-discovery/scripts/verify.mjs
       - run: node --check apps/ai-learning-discovery/edge/worker.mjs
       - run: node apps/ai-learning-discovery/edge/verify.mjs
-      - run: node apps/ai-learning-discovery/scripts/verify-live.mjs
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: node apps/ai-learning-discovery/scripts/verify-live.mjs
