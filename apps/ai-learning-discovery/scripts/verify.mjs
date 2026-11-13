@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Verify the simplified live CHC form, historical comparison, and unchanged legacy root.
+// Verify the CHC public survey, three-way logic comparison, and unchanged legacy root.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -46,9 +46,14 @@ assert(survey.includes('/chc-genai/levels.css'),'Course level styles not loaded'
 assert(levelCSS.includes('.course-level-topic'),'Level topic descriptions have no styles');
 assert(logic.includes('id="before-flow"')&&logic.includes('id="after-flow"'),'Before/After containers missing');
 assert(logic.includes('id="matrix-body"')&&logic.includes('id="after-levels"'),'Historical matrix or new choice missing');
-assert(logic.includes('id="tab-after"')&&logic.includes('aria-selected="true"'),'New After tab should be default');
+assert(/id="tab-final"[^>]*aria-selected="true"/.test(logic),'Final tab should be the default view');
+assert(logic.includes('id="final-flow"')&&logic.includes('id="final-levels"')&&logic.includes('id="final-interest"'),'Final flow or branching topic controls missing');
+for(const name of ['qual-current','qual-ready','qual-wish','qual-block'])assert(logic.includes('id="'+name+'"'),'Final qualitative prompt missing: '+name);
+assert(logic.includes('No scoring matrix or automatic recommendation'),'Final must omit initial scoring step');
+assert(logicJS.includes('renderFinal')&&logicJS.includes('finalChoice')&&logicJS.includes('finalRatings'),'Final interest ratings must depend on level choice');
+assert(logicJS.includes('window.location.hash')&&logicJS.includes('tabOrder'),'Tab navigation must support shareable #final link');
 assert(logicJS.includes('tracks[id]')&&logicJS.includes('course.topics.forEach'),'After not generated from exact live course list');
 assert(logicJS.includes('renderBefore')&&logicJS.includes('renderAfter'),'Both historical and simplified views must work');
 assert(worker.includes('"chc-genai/levels.css"'),'Worker must serve new CSS from reviewed source');
 for(const p of ['/chc-genai/','/chc-genai/logic'])assert((cfg.rewrites||[]).some(r=>r.source===p),'Missing Vercel route '+p);
-console.log('PASS: unchanged root; same 6/8/6 topic data; new direct three-level selection and registration; historical Before matrix; After descriptions; shared GitHub origin.');
+console.log('PASS: unchanged root; canonical 6/8/6 topics; existing Before and After versions; final conditional interest ratings + four use-case questions; deep-linked #final; shared GitHub origin.');
