@@ -1,6 +1,7 @@
 name: Paid AI Mental OS curriculum
 on:
   push:
+    branches: [main]
     paths:
       - 'content/paid-training/**'
       - 'scripts/verify-paid-training.mjs'
@@ -10,6 +11,10 @@ on:
       - 'content/paid-training/**'
       - 'scripts/verify-paid-training.mjs'
       - '.github/workflows/paid-training.yml'
+concurrency:
+  group: bspt-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest

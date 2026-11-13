@@ -1,6 +1,7 @@
 name: Rebuild BSPT AI Mental OS v5
 on:
   push:
+    branches: [main]
     paths:
       - 'training/ai-mental-os/v5/**'
       - 'training/ai-mental-os/v4/base/assets/**'

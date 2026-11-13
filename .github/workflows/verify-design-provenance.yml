@@ -1,6 +1,7 @@
 name: Verify BSPT GitHub/Figma source provenance
 on:
   push:
+    branches: [main]
     paths:
       - 'design/figma-asset-manifest.json'
       - 'docs/source-of-truth.md'
@@ -27,6 +28,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: bspt-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-source:
     runs-on: ubuntu-latest

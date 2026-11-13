@@ -1,6 +1,7 @@
 name: Rebuild AI Mental OS v4 presentation
 on:
   push:
+    branches: [main]
     paths:
       - 'training/ai-mental-os/v4/**'
       - '.github/workflows/build-ai-mental-os-v4.yml'
