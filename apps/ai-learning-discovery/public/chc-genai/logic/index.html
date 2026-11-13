@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#082E24">
-  <meta name="description" content="Interactive explanation of the CHC GenAI survey recommendation matrix and redesigned learning topics.">
-  <title>CHC GenAI: Before &amp; after survey logic | ByteSize ProTip</title>
+  <meta name="description" content="CHC GenAI training survey: previous, simplified and final agreed survey structure.">
+  <title>CHC GenAI: survey logic and final agreed flow | ByteSize ProTip</title>
   <link rel="icon" href="/brand-mark.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -25,20 +25,21 @@
   <main class="wrap">
     <section class="intro">
       <span class="eyebrow">HR briefing · Survey design</span>
-      <h1>Choose a course <em>without extra steps.</em></h1>
-      <p class="lead">The earlier flow recommended a level and asked staff to rate each topic. The new flow shows three course choices with their topics up front.</p>
+      <h1>Choose a course. <em>Find the real needs.</em></h1>
+      <p class="lead">Final agreed design: choose a level, rate interest in that level’s topics, and describe existing and potential AI use cases.</p>
       <div class="formula" aria-label="Survey logic: step one plus step two suggests step three, which selects step four">
         <span><b>1</b> Frequency</span><strong>+</strong><span><b>2</b> Experience</span><strong>→</strong><span><b>3</b> Suggested level</span><strong>→</strong><span><b>4</b> Topics</span>
       </div>
     </section>
-    <section class="sheet" aria-label="Before and after explanation">
+    <section class="sheet" aria-label="Survey design versions">
       <div class="sheet-marks" aria-hidden="true"></div>
       <img class="paperclip" src="/motifs/paperclip.svg" alt="" width="72" height="76">
       <div class="sheet-inner">
-        <div class="section-caption">Compare the two approaches</div>
+        <div class="section-caption">Compare the survey versions</div>
         <div class="tabs" role="tablist" aria-label="Compare survey versions">
           <button type="button" class="tab" role="tab" id="tab-before" aria-controls="before-flow" aria-selected="false" tabindex="-1" data-version="before">Before <small>Recommendation + topic ratings</small></button>
-          <button type="button" class="tab" role="tab" id="tab-after" aria-controls="after-flow" aria-selected="true" tabindex="0" data-version="after">After <small>Choose a course level</small></button>
+          <button type="button" class="tab" role="tab" id="tab-after" aria-controls="after-flow" aria-selected="false" tabindex="-1" data-version="after">After <small>Direct level choice</small></button>
+          <button type="button" class="tab" role="tab" id="tab-final" aria-controls="final-flow" aria-selected="true" tabindex="0" data-version="final">Final <small>Level + interest + use cases</small></button>
         </div>
         <div id="before-flow" role="tabpanel" aria-labelledby="tab-before" tabindex="0" hidden>
           <div class="summary-head">
@@ -92,7 +93,7 @@
             <p class="annotation" id="topic-conclusion"></p>
           </section>
         </div>
-        <section id="after-flow" role="tabpanel" aria-labelledby="tab-after" tabindex="0">
+        <section id="after-flow" role="tabpanel" aria-labelledby="tab-after" tabindex="0" hidden>
           <div class="summary-head"><div><p class="eyebrow">After · Simplified CHC survey</p>
             <h2>One question. Three clear choices.</h2>
             <p class="summary-desc">See every topic within each level, then choose what fits. No skill test, matrix or 20 topic-rating cards.</p>
@@ -107,20 +108,50 @@
             <a class="cta" href="/chc-genai/">Try the simplified survey</a>
           </section>
         </section>
+
+        <section id="final-flow" role="tabpanel" aria-labelledby="tab-final" tabindex="0">
+          <div class="summary-head">
+            <div>
+              <p class="eyebrow">Final · Agreed survey structure</p>
+              <h2>Choose → rate → share what matters.</h2>
+              <p class="summary-desc">Staff choose the most relevant learning level, rate topics within that level, then tell us where AI is helping or could help. No scoring matrix or automatic recommendation.</p>
+            </div>
+            <div class="version-stamp">3 questions</div>
+          </div>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">Q1</span><div><h3>Which training level interests you?</h3><p>Choose Beginner, Intermediate or Advanced. The topics for each level are visible before choosing.</p></div></div>
+            <div id="final-levels" class="after-levels" role="group" aria-label="Preview training-level selection"></div>
+          </section>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">Q2</span><div><h3>How interested are you in each topic?</h3><p>Rate only the topics under your chosen level. The other levels stay hidden.</p></div></div>
+            <div id="final-interest" class="final-interest" aria-live="polite"></div>
+            <p class="annotation"><b>Formstack conditional logic:</b> Q1 controls which topic-rating questions appear in Q2. A suggested simple scale is Not interested / Interested / Very interested.</p>
+          </section>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">Q3</span><div><h3>How could AI make a difference in your work?</h3><p>Four open-ended questions for all participants, regardless of their selected level.</p></div></div>
+            <div class="qual-grid">
+              <label class="qual-question" for="qual-current"><span class="qual-index">01 · Current use</span><strong>What are you already using AI for, and how often?</strong><textarea id="qual-current" rows="2" placeholder="Use cases and frequency"></textarea></label>
+              <label class="qual-question" for="qual-ready"><span class="qual-index">02 · Ready but not started</span><strong>What could you use AI for but haven’t tried yet? What’s stopping you?</strong><textarea id="qual-ready" rows="2" placeholder="Possible use cases and barriers"></textarea></label>
+              <label class="qual-question" for="qual-wish"><span class="qual-index">03 · What you wish AI could do</span><strong>What would you like AI to help with but don’t yet know how? What value or impact would that create?</strong><textarea id="qual-wish" rows="2" placeholder="Desired use cases and potential impact"></textarea></label>
+              <label class="qual-question" for="qual-block"><span class="qual-index">04 · Untapped value</span><strong>Are you getting the most value you can from AI? If not, what’s holding you back?</strong><textarea id="qual-block" rows="2" placeholder="Your assessment and blockers"></textarea></label>
+            </div>
+            <p class="annotation"><b>Preview only:</b> This page does not submit, save or share answers. HR will recreate the agreed questions in Formstack.</p>
+          </section>
+        </section>
       </div>
     </section>
     <section class="takeaway">
-      <div><span class="eyebrow">The design decision</span><h2>Show the topics. Let people choose.</h2></div>
-      <p>Both versions use the same decision-focused topics. The After version removes the unnecessary scoring and individual topic ratings.</p>
+      <div><span class="eyebrow">The final design</span><h2>Keep choice simple. Discover where help matters.</h2></div>
+      <p>The Final version keeps course selection simple while gathering topic-level demand, real use cases, unrealised opportunities and barriers.</p>
     </section>
     <section class="handoff">
       <h3>For recreating this in Formstack</h3>
-      <p>Create one multiple-choice question with three options: Beginner, Intermediate and Advanced. Show each level's topics in its description. Save the selected level, then collect registration details. No lookup matrix or topic-by-topic questions.</p>
-      <a class="cta" href="/chc-genai/">Open the CHC survey</a>
+      <p>Q1: show three levels with their topic lists. Q2: show individual interest ratings only for the level selected in Q1. Q3: ask all four qualitative questions as long-text responses. No initial frequency/experience assessment or automatic level recommendation.</p>
+      <a class="cta" href="#final" id="final-link">Review the agreed flow</a>
       <a class="subtle-link" href="/">Compare with the original survey</a>
     </section>
   </main>
-  <footer class="footer"><span>ByteSize ProTip · Know what matters. Do what works.</span><span>Concept proposal · No survey responses shown</span></footer>
+  <footer class="footer"><span>ByteSize ProTip · Know what matters. Do what works.</span><span>Final agreed specification · Preview only</span></footer>
   <script src="/chc-genai/topics.js"></script>
   <script src="/chc-genai/logic.js"></script>
 </body>
