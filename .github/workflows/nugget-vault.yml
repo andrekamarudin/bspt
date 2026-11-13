@@ -1,6 +1,7 @@
 name: Nugget vault integrity
 on:
   push:
+    branches: [main]
     paths:
       - 'content/nuggets/**'
       - 'scripts/verify-nuggets.mjs'
@@ -10,6 +11,10 @@ on:
       - 'content/nuggets/**'
       - 'scripts/verify-nuggets.mjs'
       - '.github/workflows/nugget-vault.yml'
+concurrency:
+  group: bspt-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-nuggets:
     runs-on: ubuntu-latest
