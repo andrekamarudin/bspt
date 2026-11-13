@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#082E24">
+  <meta name="description" content="Interactive explanation of the CHC GenAI survey recommendation matrix and redesigned learning topics.">
+  <title>CHC GenAI: Before &amp; after survey logic | ByteSize ProTip</title>
+  <link rel="icon" href="/brand-mark.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/chc-genai/logic.css">
+</head>
+<body>
+  <header class="site-head">
+    <div class="head-inner">
+      <a class="brand" href="/chc-genai/" aria-label="Open the CHC GenAI survey">
+        <img src="/brand-mark-animated.svg" alt="" width="47" height="38">
+        <span>ByteSize <b>ProTip</b></span>
+      </a>
+      <span class="head-note">Expert field notes / CHC GenAI</span>
+      <a class="head-link" href="/chc-genai/">Try the survey</a>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="intro">
+      <span class="eyebrow">HR briefing · Survey design</span>
+      <h1>How the survey decides <em>what to teach.</em></h1>
+      <p class="lead">The recommendation logic is simple. We can keep it while making the topic choices more useful for deciding what employees actually want to learn.</p>
+      <div class="formula" aria-label="Survey logic: step one plus step two suggests step three, which selects step four">
+        <span><b>1</b> Frequency</span><strong>+</strong><span><b>2</b> Experience</span><strong>→</strong><span><b>3</b> Suggested level</span><strong>→</strong><span><b>4</b> Topics</span>
+      </div>
+    </section>
+    <section class="sheet" aria-label="Before and after explanation">
+      <div class="sheet-marks" aria-hidden="true"></div>
+      <img class="paperclip" src="/motifs/paperclip.svg" alt="" width="72" height="76">
+      <div class="sheet-inner">
+        <div class="section-caption">Compare the two approaches</div>
+        <div class="tabs" role="tablist" aria-label="Compare survey versions">
+          <button type="button" class="tab" role="tab" id="tab-before" aria-controls="panel" aria-selected="true" data-version="before">Before <small>Existing survey</small></button>
+          <button type="button" class="tab" role="tab" id="tab-after" aria-controls="panel" aria-selected="false" data-version="after">After <small>Proposed for CHC</small></button>
+        </div>
+        <div id="panel" role="tabpanel" aria-labelledby="tab-before" tabindex="0">
+          <div class="summary-head">
+            <div>
+              <p id="version-eyebrow" class="eyebrow">Before · Current survey</p>
+              <h2 id="version-title">Mostly names of tools and tasks</h2>
+              <p id="version-desc" class="summary-desc">Useful for browsing AI features, but harder to decide which capabilities training should develop.</p>
+            </div>
+            <div class="version-stamp" id="version-stamp">24 topics</div>
+          </div>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">1 + 2</span><div><h3>Two answers suggest a level</h3><p>The recommendation is a nine-cell lookup, not an AI judgment.</p></div></div>
+            <div class="controls">
+              <label for="frequency">Step 1 · How often do you use AI?
+                <select id="frequency">
+                  <option value="new">Rarely or never</option>
+                  <option value="casual">Sometimes</option>
+                  <option value="daily">Most days</option>
+                  <option value="">Skipped this question</option>
+                </select>
+              </label>
+              <label for="capability">Step 2 · Most advanced use so far
+                <select id="capability">
+                  <option value="chat">Chat, everyday questions or none</option>
+                  <option value="files">Documents, reports and spreadsheets</option>
+                  <option value="agents">Coding tools or task agents</option>
+                </select>
+              </label>
+            </div>
+            <div class="matrix-scroll"><table class="matrix">
+              <caption>Step 1 × Step 2 → Step 3 recommended starting level</caption>
+              <thead><tr><th scope="col">How often ↓ / Used for →</th><th scope="col">Chat / none</th><th scope="col">Files / reports</th><th scope="col">Agents / coding</th></tr></thead>
+              <tbody id="matrix-body"></tbody>
+            </table></div>
+            <div class="recommendation" aria-live="polite">
+              <span>Suggested starting level</span><strong id="suggestion">Beginner</strong><small id="suggestion-note">The highlighted cell explains why.</small>
+            </div>
+            <p class="annotation"><b>Important:</b> Selecting multiple capabilities uses the highest (agents &gt; files &gt; chat). Skipping Step 1 defaults to Intermediate.</p>
+          </section>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">3 → 4</span><div><h3>The chosen level selects one topic list</h3><p>Someone can override the suggested level. Their chosen level determines the topics; no extra scoring.</p></div></div>
+            <div class="level-picker" role="group" aria-label="Preview topics for chosen level">
+              <button type="button" data-level="beginner" aria-pressed="false">Beginner</button>
+              <button type="button" data-level="intermediate" aria-pressed="false">Intermediate</button>
+              <button type="button" data-level="advanced" aria-pressed="false">Advanced</button>
+            </div>
+            <div class="chosen-line"><span id="choice-caption">Selected Step 3 level</span><strong id="chosen-level"></strong><button type="button" id="reset-level" class="text-button">Use recommendation</button></div>
+            <h4 id="topic-heading">Step 4 topics</h4>
+            <p class="topic-intro" id="topic-intro"></p>
+            <ol class="topics" id="topic-list"></ol>
+            <p class="annotation" id="topic-conclusion"></p>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section class="takeaway">
+      <div><span class="eyebrow">The design decision</span><h2>Keep the matrix. Improve what the answers tell us.</h2></div>
+      <p>We are not changing how a level is suggested. We are changing the topics from a collection of AI features into distinct decisions and capabilities: what to delegate, how to verify it, and when a person must remain in charge.</p>
+    </section>
+    <section class="handoff">
+      <h3>For recreating this in Formstack</h3>
+      <p>Use a lookup table for Steps 1–2. Show the suggested result in Step 3, allow staff to override it, then branch directly to that level's Step 4 topic list. The <b>After</b> tab shows the recommended CHC lists.</p>
+      <a class="cta" href="/chc-genai/">Open the CHC survey</a>
+      <a class="subtle-link" href="/">Compare with the original survey</a>
+    </section>
+  </main>
+  <footer class="footer"><span>ByteSize ProTip · Know what matters. Do what works.</span><span>Concept proposal · No survey responses shown</span></footer>
+  <script src="/chc-genai/topics.js"></script>
+  <script src="/chc-genai/logic.js"></script>
+</body>
+</html>
