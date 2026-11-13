@@ -25,8 +25,8 @@
   <main class="wrap">
     <section class="intro">
       <span class="eyebrow">HR briefing · Survey design</span>
-      <h1>How the survey decides <em>what to teach.</em></h1>
-      <p class="lead">The recommendation logic is simple. We can keep it while making the topic choices more useful for deciding what employees actually want to learn.</p>
+      <h1>Choose a course <em>without extra steps.</em></h1>
+      <p class="lead">The earlier flow recommended a level and asked staff to rate each topic. The new flow shows three course choices with their topics up front.</p>
       <div class="formula" aria-label="Survey logic: step one plus step two suggests step three, which selects step four">
         <span><b>1</b> Frequency</span><strong>+</strong><span><b>2</b> Experience</span><strong>→</strong><span><b>3</b> Suggested level</span><strong>→</strong><span><b>4</b> Topics</span>
       </div>
@@ -37,17 +37,17 @@
       <div class="sheet-inner">
         <div class="section-caption">Compare the two approaches</div>
         <div class="tabs" role="tablist" aria-label="Compare survey versions">
-          <button type="button" class="tab" role="tab" id="tab-before" aria-controls="panel" aria-selected="true" data-version="before">Before <small>Existing survey</small></button>
-          <button type="button" class="tab" role="tab" id="tab-after" aria-controls="panel" aria-selected="false" data-version="after">After <small>Proposed for CHC</small></button>
+          <button type="button" class="tab" role="tab" id="tab-before" aria-controls="before-flow" aria-selected="false" tabindex="-1" data-version="before">Before <small>Recommendation + topic ratings</small></button>
+          <button type="button" class="tab" role="tab" id="tab-after" aria-controls="after-flow" aria-selected="true" tabindex="0" data-version="after">After <small>Choose a course level</small></button>
         </div>
-        <div id="panel" role="tabpanel" aria-labelledby="tab-before" tabindex="0">
+        <div id="before-flow" role="tabpanel" aria-labelledby="tab-before" tabindex="0" hidden>
           <div class="summary-head">
             <div>
-              <p id="version-eyebrow" class="eyebrow">Before · Current survey</p>
-              <h2 id="version-title">Mostly names of tools and tasks</h2>
-              <p id="version-desc" class="summary-desc">Useful for browsing AI features, but harder to decide which capabilities training should develop.</p>
+              <p id="version-eyebrow" class="eyebrow">Before · Previous CHC flow</p>
+              <h2 id="version-title">Recommendations and topic-by-topic ratings</h2>
+              <p id="version-desc" class="summary-desc">Uses the decision-focused topics, but requires four steps and a level-scoring matrix.</p>
             </div>
-            <div class="version-stamp" id="version-stamp">24 topics</div>
+            <div class="version-stamp" id="version-stamp">20 topics</div>
           </div>
           <section class="logic-block">
             <div class="block-title"><span class="step-dot">1 + 2</span><div><h3>Two answers suggest a level</h3><p>The recommendation is a nine-cell lookup, not an AI judgment.</p></div></div>
@@ -92,15 +92,30 @@
             <p class="annotation" id="topic-conclusion"></p>
           </section>
         </div>
+        <section id="after-flow" role="tabpanel" aria-labelledby="tab-after" tabindex="0">
+          <div class="summary-head"><div><p class="eyebrow">After · Simplified CHC survey</p>
+            <h2>One question. Three clear choices.</h2>
+            <p class="summary-desc">See every topic within each level, then choose what fits. No skill test, matrix or 20 topic-rating cards.</p>
+          </div><div class="version-stamp">3 levels</div></div>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">1</span><div><h3>Choose your level</h3><p>Each option shows exactly what is included.</p></div></div>
+            <div id="after-levels" class="after-levels" role="group" aria-label="Choose a training level"></div>
+            <div id="after-choice" class="recommendation" aria-live="polite">No course selected yet.</div>
+          </section>
+          <section class="logic-block">
+            <div class="block-title"><span class="step-dot">2</span><div><h3>Register your interest</h3><p>Record the chosen level and contact details. Optional feedback can explain what staff want to achieve.</p></div></div>
+            <a class="cta" href="/chc-genai/">Try the simplified survey</a>
+          </section>
+        </section>
       </div>
     </section>
     <section class="takeaway">
-      <div><span class="eyebrow">The design decision</span><h2>Keep the matrix. Improve what the answers tell us.</h2></div>
-      <p>We are not changing how a level is suggested. We are changing the topics from a collection of AI features into distinct decisions and capabilities: what to delegate, how to verify it, and when a person must remain in charge.</p>
+      <div><span class="eyebrow">The design decision</span><h2>Show the topics. Let people choose.</h2></div>
+      <p>Both versions use the same decision-focused topics. The After version removes the unnecessary scoring and individual topic ratings.</p>
     </section>
     <section class="handoff">
       <h3>For recreating this in Formstack</h3>
-      <p>Use a lookup table for Steps 1–2. Show the suggested result in Step 3, allow staff to override it, then branch directly to that level's Step 4 topic list. The <b>After</b> tab shows the recommended CHC lists.</p>
+      <p>Create one multiple-choice question with three options: Beginner, Intermediate and Advanced. Show each level's topics in its description. Save the selected level, then collect registration details. No lookup matrix or topic-by-topic questions.</p>
       <a class="cta" href="/chc-genai/">Open the CHC survey</a>
       <a class="subtle-link" href="/">Compare with the original survey</a>
     </section>
