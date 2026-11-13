@@ -9,3 +9,7 @@ Expected origin: `https://bspt-chc-genai.<workers.dev subdomain>.workers.dev`. T
 **Limitations:** GitHub serves static source at runtime, cached 120 seconds. This is a temporary low-traffic architecture rather than a dedicated static asset deployment. If you later move back to a normal Git-linked Vercel deployment, remove the Vercel external rewrite before removing the Worker. All users' browser assets still originate from the Vercel custom domain.
 
 Never promote an unverified route, change the existing Cloudflare `training.bytesizeprotip.com` CNAME from DNS-only, or claim the CHC pages are published until the actual custom-domain paths return 200 and the interactive tabs work.
+
+## Production cutover verified 13 Nov 2026
+
+The Worker is live on `bytesizeprotip.workers.dev`. The original Vercel project promotes a single regex rewrite for `^/chc-genai(?:/(.*))?$`. Root survey and admin pages are unaffected. See [production deployment record](../DEPLOYMENT.md). The worker source, source assets, JS logic and checks remain in GitHub, not Vercel or OneDrive.

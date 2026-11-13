@@ -21,3 +21,4 @@ jobs:
       - run: node apps/ai-learning-discovery/scripts/verify.mjs
       - run: node --check apps/ai-learning-discovery/edge/worker.mjs
       - run: node apps/ai-learning-discovery/edge/verify.mjs
+      - run: node apps/ai-learning-discovery/scripts/verify-live.mjs
