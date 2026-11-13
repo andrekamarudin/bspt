@@ -1,0 +1,18 @@
+/* One visible, accessible course-level choice. Topics are descriptions, not a second survey. */
+.course-levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch;margin:24px 0 8px}
+.course-level{display:flex;flex-direction:column;gap:12px;text-align:left;border:2px solid #B9C8BC;border-radius:12px;background:#FFFCF5;color:#17372C;padding:20px;min-width:0;cursor:pointer;font:inherit;box-shadow:0 2px 0 #E8DED0;transition:border-color .15s,transform .15s,background .15s}
+.course-level:hover{border-color:#C34D26;transform:translateY(-2px)}
+.course-level.selected{border-color:#B94320;background:#FFF2D6;box-shadow:inset 0 0 0 2px #B94320}
+.course-level:focus-visible{outline:3px solid #B94320;outline-offset:3px}
+.course-level-heading{display:flex;align-items:flex-start;flex-wrap:wrap;justify-content:space-between;gap:8px}
+.course-level-heading strong{font-family:"Playfair Display",Georgia,serif;font-size:clamp(23px,2.6vw,29px);line-height:1.13}
+.level-check{font:700 12px "Source Sans 3",sans-serif;padding:5px 8px;background:#E6EDE7;border-radius:5px;color:#17372C}
+.selected .level-check{background:#082E24;color:white}
+.course-level-description{font-size:15px;line-height:1.5;color:#35554A;min-height:66px}
+.course-level-topic-title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:#85502A;padding-top:8px;border-top:1px solid #CECEC1}
+.course-level-topic-list{display:grid;gap:7px;align-content:start;flex:1}
+.course-level-topic{display:block;padding-left:15px;position:relative;font-size:14px;line-height:1.38;font-weight:600}
+.course-level-topic:before{content:"";position:absolute;left:1px;top:.53em;width:6px;height:6px;border-radius:50%;background:#A44C29}
+@media(max-width:960px){.course-levels{grid-template-columns:1fr;gap:12px}.course-level-description{min-height:0}.course-level-topic-list{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}}
+@media(max-width:500px){.course-level{padding:17px}.course-level-topic-list{grid-template-columns:1fr}.course-level-heading strong{font-size:26px}}
+@media(prefers-reduced-motion:reduce){.course-level{transition:none}.course-level:hover{transform:none}}
